@@ -1,0 +1,108 @@
+[data-theme="dark"] {
+    /* Backgrounds - Sépia foncé */
+    --color-bg-primary: #1C1610;
+    --color-bg-secondary: #2A2118;
+    --color-bg-tertiary: #3D3026;
+    --color-bg-hover: #4A3D31;
+    --color-bg-active: #5C4D3F;
+
+    /* Patterns désactivés */
+    --pattern-islamic-star: none;
+    --pattern-geometric: none;
+    --pattern-arabesque: none;
+
+    /* Text - Tons sable clair */
+    --color-text-primary: #F5EDE4;
+    --color-text-secondary: #DDD0BE;
+    --color-text-muted: #A89680;
+    --color-text-placeholder: #7A6B5A;
+    --color-text-inverse: #1C1610;
+
+    /* Borders - Sépia */
+    --color-border: #4A3D31;
+    --color-border-light: #5C4D3F;
+    --color-border-dark: #2A2118;
+
+    /* Primary - Or/Doré riche lumineux */
+    --color-primary: #C9A227;
+    --color-primary-hover: #A6851F;
+    --color-primary-light: #3A2F1A;
+    --color-primary-dark: #D4B445;
+
+    /* Success - Vert olive clair */
+    --color-success: #9ACD32;
+    --color-success-hover: #6B8E23;
+    --color-success-light: #2A3018;
+    --color-success-dark: #ADDF40;
+
+    /* Warning - Bronze doré lumineux */
+    --color-warning: #C9A05A;
+    --color-warning-hover: #A6854A;
+    --color-warning-light: #3A3020;
+    --color-warning-dark: #D4B87A;
+
+    /* Error - Terre cuite claire */
+    --color-error: #E9967A;
+    --color-error-hover: #CD5C5C;
+    --color-error-light: #3D2020;
+    --color-error-dark: #FFA07A;
+
+    /* Info - Turquoise lumineux */
+    --color-info: #40E0D0;
+    --color-info-hover: #20B2AA;
+    --color-info-light: #1A2D2B;
+    --color-info-dark: #7FFFD4;
+
+    /* Accent - Rose ancien */
+    --color-accent: #C08090;
+    --color-accent-hover: #8B4557;
+    --color-accent-light: #3D2028;
+    --color-accent-dark: #DDA0A8;
+
+    /* Card */
+    --color-card-bg: #2A2118;
+    --color-card-border: #4A3D31;
+    --color-card-shadow: rgba(0, 0, 0, 0.3);
+
+    /* Input - fond plus foncé */
+    --color-input-bg: #1A1510;
+    --color-input-border: #5C4D3F;
+    --color-input-focus: #DAA520;
+    --color-input-disabled: #2A2118;
+
+    /* Sidebar */
+    --color-sidebar-bg: #241C14;
+    --color-sidebar-border: #4A3D31;
+    --color-sidebar-item-hover: #3D3026;
+    --color-sidebar-item-active: #3D3020;
+    --color-sidebar-item-active-text: #DAA520;
+
+    /* Navbar */
+    --color-navbar-bg: #241C14;
+    --color-navbar-border: #4A3D31;
+
+    /* Modal */
+    --color-modal-backdrop: rgba(0, 0, 0, 0.7);
+    --color-modal-bg: #2A2118;
+
+    /* Table */
+    --color-table-header: #3D3026;
+    --color-table-row-hover: #3D3026;
+    --color-table-border: #4A3D31;
+
+    /* Status badges */
+    --color-badge-actif: #2A3018;
+    --color-badge-actif-text: #9ACD32;
+    --color-badge-inactif: #3D2020;
+    --color-badge-inactif-text: #E9967A;
+    --color-badge-pending: #3D2A18;
+    --color-badge-pending-text: #F4A460;
+    --color-badge-paid: #2A3018;
+    --color-badge-paid-text: #9ACD32;
+
+    /* Shadows - plus profondes pour le dark */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+}

@@ -1,0 +1,2617 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calendrier Ramadan - Horaires de prière et rappels spirituels">
+    <title>Calendrier Ramadan 2026 - Horaires de Prière</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Palette Sépia/Desert */
+            --sepia-light: #E8D4B8;
+            --sepia: #C4A77D;
+            --sepia-dark: #8B7355;
+            --sepia-darker: #5C4A3A;
+            --sepia-gradient: linear-gradient(135deg, #C4A77D 0%, #E8D4B8 50%, #C4A77D 100%);
+            --sepia-shine: linear-gradient(90deg, transparent, rgba(196,167,125,0.4), transparent);
+
+            /* Alias pour compatibilité */
+            --gold-light: var(--sepia-light);
+            --gold: var(--sepia);
+            --gold-dark: var(--sepia-dark);
+            --gold-gradient: var(--sepia-gradient);
+            --gold-shine: var(--sepia-shine);
+
+            --font-arabic: 'Amiri', serif;
+            --font-primary: 'Inter', -apple-system, sans-serif;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+
+            --green: #6B8E5D;
+            --green-light: #8BAF7A;
+            --blue: #7BA3C4;
+            --purple: #9B8AB8;
+            --red: #C47A6F;
+            --orange: #C49A6B;
+        }
+
+        /* ========== DARK THEME (default) ========== */
+        [data-theme="dark"] {
+            --bg-body: #1A1510;
+            --bg-card: #241F18;
+            --bg-card-hover: #2E271E;
+            --bg-accent: #352E24;
+
+            --text-primary: #F5F0E8;
+            --text-secondary: #A89F94;
+            --text-muted: #7A736A;
+
+            --shadow-sepia: 0 0 30px rgba(196, 167, 125, 0.3);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
+
+            --moon-shadow: 0 0 60px rgba(196, 167, 125, 0.5), 0 0 100px rgba(196, 167, 125, 0.3);
+            --moon-shadow-glow: 0 0 80px rgba(196, 167, 125, 0.7), 0 0 120px rgba(196, 167, 125, 0.4);
+            --pattern-opacity: 0.1;
+        }
+
+        /* ========== LIGHT THEME ========== */
+        [data-theme="light"] {
+            --bg-body: #FDF8F3;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #FAF5EF;
+            --bg-accent: #F5EDE3;
+
+            --text-primary: #2C241C;
+            --text-secondary: #6B5D4D;
+            --text-muted: #9A8B7A;
+
+            --shadow-sepia: 0 4px 20px rgba(139, 115, 85, 0.15);
+            --shadow-lg: 0 10px 40px rgba(139, 115, 85, 0.2);
+
+            --moon-shadow: 0 0 40px rgba(196, 167, 125, 0.4), 0 0 80px rgba(196, 167, 125, 0.2);
+            --moon-shadow-glow: 0 0 60px rgba(196, 167, 125, 0.5), 0 0 100px rgba(196, 167, 125, 0.3);
+            --pattern-opacity: 0.08;
+        }
+
+        /* Default to dark */
+        :root {
+            --bg-body: #1A1510;
+            --bg-card: #241F18;
+            --bg-card-hover: #2E271E;
+            --bg-accent: #352E24;
+            --text-primary: #F5F0E8;
+            --text-secondary: #A89F94;
+            --text-muted: #7A736A;
+            --shadow-sepia: 0 0 30px rgba(196, 167, 125, 0.3);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
+            --moon-shadow: 0 0 60px rgba(196, 167, 125, 0.5), 0 0 100px rgba(196, 167, 125, 0.3);
+            --moon-shadow-glow: 0 0 80px rgba(196, 167, 125, 0.7), 0 0 120px rgba(196, 167, 125, 0.4);
+            --pattern-opacity: 0.1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* ========== BACKGROUND PATTERN - Désactivé ========== */
+        .bg-pattern {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: var(--pattern-opacity);
+            transition: opacity 0.3s ease;
+            background-image: none;
+        }
+
+        /* ========== THEME TOGGLE ========== */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--sepia);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sepia);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(196, 167, 125, 0.5);
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            color: var(--sepia);
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover svg {
+            transform: rotate(15deg);
+        }
+
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon {
+            position: absolute;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-sun {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+
+        [data-theme="dark"] .theme-toggle .icon-moon {
+            opacity: 0;
+            transform: rotate(-90deg);
+        }
+
+        [data-theme="light"] .theme-toggle .icon-sun {
+            opacity: 0;
+            transform: rotate(90deg);
+        }
+
+        [data-theme="light"] .theme-toggle .icon-moon {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+
+        /* ========== FLOATING PARTICLES ========== */
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--sepia-dark);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+            opacity: 0.6;
+            transition: background-color 0.3s ease;
+        }
+
+        [data-theme="light"] .particle {
+            opacity: 0.4;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* ========== CONTAINER ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            text-align: center;
+            padding: 20px 15px 30px;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .header {
+                padding: 40px 20px 60px;
+            }
+        }
+
+        .bismillah {
+            font-family: var(--font-arabic);
+            font-size: clamp(1.2rem, 4vw, 2.5rem);
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: shimmer 3s infinite;
+        }
+
+        @media (min-width: 768px) {
+            .bismillah {
+                margin-bottom: 20px;
+            }
+        }
+
+        @keyframes shimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .moon-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+        }
+
+        @media (min-width: 768px) {
+            .moon-container {
+                width: 150px;
+                height: 150px;
+                margin: 0 auto 30px;
+            }
+        }
+
+        .moon-crescent {
+            position: absolute;
+            top: 0;
+            right: -5px;
+            width: 70px;
+            height: 80px;
+            background: var(--bg-body);
+            border-radius: 50%;
+            animation: crescentPulse 4s ease-in-out infinite;
+            transition: background-color 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .moon-crescent {
+                right: -10px;
+                width: 130px;
+                height: 150px;
+            }
+        }
+
+        .moon {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #E8D4B8 0%, #C4A77D 50%, #8B7355 100%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: var(--moon-shadow), inset -20px -10px 40px rgba(0,0,0,0.3);
+            animation: glow 4s ease-in-out infinite;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .moon::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 20%;
+            height: 20%;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            filter: blur(5px);
+        }
+
+        @keyframes crescentPulse {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-5px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: var(--moon-shadow), inset -20px -10px 40px rgba(0,0,0,0.3); }
+            50% { box-shadow: var(--moon-shadow-glow), inset -20px -10px 40px rgba(0,0,0,0.3); }
+        }
+
+        .stars {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--sepia);
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+            transition: background-color 0.3s ease;
+        }
+
+        [data-theme="light"] .star {
+            background: var(--sepia-dark);
+            opacity: 0.5;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        .title {
+            font-size: clamp(1.5rem, 6vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+        }
+
+        @media (min-width: 768px) {
+            .title {
+                margin-bottom: 10px;
+            }
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .subtitle {
+                font-size: 1.1rem;
+                margin-bottom: 20px;
+            }
+        }
+
+        .ramadan-day {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--sepia);
+            border-radius: var(--radius-xl);
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-sepia);
+        }
+
+        @media (min-width: 768px) {
+            .ramadan-day {
+                gap: 10px;
+                padding: 12px 24px;
+                font-size: 1.1rem;
+            }
+        }
+
+        .ramadan-day strong {
+            color: var(--sepia);
+            font-size: 1.3rem;
+        }
+
+        @media (min-width: 768px) {
+            .ramadan-day strong {
+                font-size: 1.5rem;
+            }
+        }
+
+        .back-to-today {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: var(--sepia);
+            color: #1A1510;
+            border: none;
+            border-radius: var(--radius-xl);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-to-today:hover {
+            background: var(--sepia-light);
+            transform: scale(1.05);
+        }
+
+        .back-to-today svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Hide decorative elements on mobile */
+        @media (max-width: 767px) {
+            .stars {
+                display: none;
+            }
+        }
+
+        /* ========== COUNTDOWN - MOBILE FIRST ========== */
+        .countdown-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .countdown-section::before {
+            content: 'HORAIRES DU JOUR';
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--sepia);
+            background: var(--bg-body);
+            padding: 0 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .countdown-section {
+                gap: 20px;
+                margin-bottom: 40px;
+            }
+
+            .countdown-section::before {
+                display: none;
+            }
+        }
+
+        .countdown-section.preparation::before {
+            content: 'COMPTE À REBOURS RAMADAN 2026';
+        }
+
+        .countdown-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 15px 10px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s ease, background-color 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .countdown-card {
+                border-radius: var(--radius-xl);
+                padding: 30px;
+            }
+        }
+
+        .countdown-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gold-gradient);
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .countdown-card.iftar {
+            border-color: var(--sepia);
+            box-shadow: 0 0 20px rgba(196, 167, 125, 0.4);
+        }
+
+        .countdown-card.suhoor {
+            border-color: var(--sepia-dark);
+            box-shadow: 0 0 20px rgba(139, 115, 85, 0.3);
+        }
+
+        .countdown-card.suhoor::before {
+            background: linear-gradient(135deg, var(--sepia-dark), #5C4A3A);
+        }
+
+        .countdown-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 8px;
+            background: var(--bg-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .countdown-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .countdown-icon {
+                width: 60px;
+                height: 60px;
+                margin: 0 auto 15px;
+            }
+
+            .countdown-icon svg {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        .countdown-card.iftar .countdown-icon {
+            background: linear-gradient(135deg, var(--sepia-dark), var(--sepia));
+        }
+
+        .countdown-card.suhoor .countdown-icon {
+            background: linear-gradient(135deg, #5C4A3A, var(--sepia-dark));
+        }
+
+        .countdown-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+            position: relative;
+            z-index: 1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (min-width: 768px) {
+            .countdown-label {
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+            }
+        }
+
+        .countdown-time {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+            line-height: 1;
+        }
+
+        @media (min-width: 768px) {
+            .countdown-time {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+        }
+
+        .countdown-card.iftar .countdown-time {
+            color: var(--sepia);
+        }
+
+        .countdown-card.suhoor .countdown-time {
+            color: var(--sepia-light);
+        }
+
+        .countdown-remaining {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (min-width: 768px) {
+            .countdown-remaining {
+                font-size: 1rem;
+            }
+        }
+
+        .countdown-remaining span {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* ========== PRAYER TIMES ========== */
+        .prayer-times {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 15px;
+            margin-bottom: 25px;
+            border: 1px solid var(--bg-accent);
+            box-shadow: var(--shadow-sepia);
+        }
+
+        [data-theme="light"] .prayer-times {
+            border: 1px solid var(--sepia-light);
+        }
+
+        @media (min-width: 768px) {
+            .prayer-times {
+                border-radius: var(--radius-xl);
+                padding: 30px;
+                margin-bottom: 40px;
+            }
+        }
+
+        .prayer-times-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .prayer-times-header {
+                margin-bottom: 25px;
+                gap: 15px;
+            }
+        }
+
+        .prayer-times-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prayer-times-title svg {
+            color: var(--sepia);
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .prayer-times-title {
+                font-size: 1.3rem;
+                gap: 10px;
+            }
+
+            .prayer-times-title svg {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        .location {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .location svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        @media (min-width: 768px) {
+            .location {
+                gap: 8px;
+                font-size: 0.9rem;
+            }
+
+            .location svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        .prayer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        @media (min-width: 500px) {
+            .prayer-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 10px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .prayer-grid {
+                gap: 15px;
+            }
+        }
+
+        .prayer-item {
+            background: var(--bg-accent);
+            border-radius: var(--radius-sm);
+            padding: 10px 5px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        @media (min-width: 768px) {
+            .prayer-item {
+                border-radius: var(--radius-md);
+                padding: 20px 15px;
+            }
+        }
+
+        .prayer-item:hover {
+            transform: translateY(-2px);
+            border-color: var(--sepia);
+        }
+
+        .prayer-item.active {
+            background: linear-gradient(135deg, rgba(196, 167, 125, 0.2), rgba(196, 167, 125, 0.05));
+            border-color: var(--sepia);
+            box-shadow: 0 0 15px rgba(196, 167, 125, 0.3);
+        }
+
+        .prayer-item.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gold-gradient);
+        }
+
+        @media (min-width: 768px) {
+            .prayer-item.active::before {
+                height: 3px;
+            }
+        }
+
+        .prayer-item.active .prayer-name {
+            color: var(--sepia);
+        }
+
+        .prayer-icon {
+            width: 28px;
+            height: 28px;
+            margin: 0 auto 5px;
+            background: var(--bg-card);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prayer-icon svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        @media (min-width: 768px) {
+            .prayer-icon {
+                width: 40px;
+                height: 40px;
+                margin: 0 auto 10px;
+            }
+
+            .prayer-icon svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        .prayer-item.active .prayer-icon {
+            background: var(--sepia);
+            color: #1A1510;
+        }
+
+        .prayer-name {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .prayer-name {
+                font-size: 0.85rem;
+                margin-bottom: 5px;
+            }
+        }
+
+        .prayer-name-ar {
+            font-family: var(--font-arabic);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .prayer-name-ar {
+                display: block;
+                font-size: 1rem;
+                margin-bottom: 8px;
+            }
+        }
+
+        .prayer-time {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        @media (min-width: 768px) {
+            .prayer-time {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* ========== DAILY REMINDER ========== */
+        .reminder-section {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-accent));
+            border-radius: var(--radius-lg);
+            padding: 20px 15px;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--sepia);
+        }
+
+        @media (min-width: 768px) {
+            .reminder-section {
+                border-radius: var(--radius-xl);
+                padding: 40px;
+                margin-bottom: 40px;
+            }
+        }
+
+        .reminder-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: var(--gold-shine);
+            animation: shine 4s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .reminder-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(196, 167, 125, 0.2);
+            border-radius: var(--radius-xl);
+            font-size: 0.8rem;
+            color: var(--sepia);
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .reminder-quote {
+            font-family: var(--font-arabic);
+            font-size: clamp(1rem, 3vw, 2rem);
+            color: var(--sepia-dark);
+            margin-bottom: 10px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        [data-theme="dark"] .reminder-quote {
+            color: var(--sepia-light);
+        }
+
+        @media (min-width: 768px) {
+            .reminder-quote {
+                margin-bottom: 15px;
+                line-height: 1.8;
+            }
+        }
+
+        .reminder-translation {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (min-width: 768px) {
+            .reminder-translation {
+                font-size: 1rem;
+                margin-bottom: 15px;
+            }
+        }
+
+        .reminder-source {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (min-width: 768px) {
+            .reminder-source {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ========== CALENDAR GRID ========== */
+        .calendar-section {
+            margin-bottom: 25px;
+        }
+
+        @media (min-width: 768px) {
+            .calendar-section {
+                margin-bottom: 40px;
+            }
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .calendar-header {
+                margin-bottom: 20px;
+            }
+        }
+
+        .calendar-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        @media (min-width: 768px) {
+            .calendar-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-nav button {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--bg-accent);
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-nav button:hover {
+            border-color: var(--sepia);
+            color: var(--sepia);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        @media (min-width: 768px) {
+            .calendar-grid {
+                gap: 8px;
+            }
+        }
+
+        .calendar-day-header {
+            padding: 5px;
+            text-align: center;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .calendar-day-header {
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .calendar-day {
+                border-radius: var(--radius-md);
+            }
+        }
+
+        .calendar-day:hover {
+            border-color: var(--sepia);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, var(--sepia-dark), var(--sepia));
+            color: #1A1510;
+        }
+
+        .calendar-day.today .day-number {
+            color: #1A1510;
+        }
+
+        .calendar-day.past {
+            opacity: 0.5;
+        }
+
+        .calendar-day.past::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.5rem;
+            color: var(--green);
+        }
+
+        .calendar-day.selected {
+            background: linear-gradient(135deg, var(--sepia), var(--sepia-dark));
+            color: #1A1510;
+            border-color: var(--sepia-light);
+            box-shadow: 0 0 15px rgba(196, 167, 125, 0.5);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.selected .day-number {
+            color: #1A1510;
+            font-weight: 700;
+        }
+
+        .calendar-day.selected .day-name {
+            color: rgba(26, 21, 16, 0.7);
+        }
+
+        [data-theme="light"] .calendar-day {
+            border: 1px solid var(--sepia-light);
+        }
+
+        @media (min-width: 768px) {
+            .calendar-day.past::after {
+                top: 5px;
+                right: 5px;
+                font-size: 0.7rem;
+            }
+        }
+
+        .day-number {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        @media (min-width: 768px) {
+            .day-number {
+                font-size: 1.2rem;
+            }
+        }
+
+        .day-name {
+            font-size: 0.5rem;
+            color: var(--text-muted);
+            margin-top: 1px;
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .day-name {
+                display: block;
+                font-size: 0.65rem;
+                margin-top: 2px;
+            }
+        }
+
+        /* ========== DAILY GOALS ========== */
+        .goals-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-sepia);
+        }
+
+        [data-theme="light"] .goals-section {
+            border: 1px solid var(--sepia-light);
+        }
+
+        @media (min-width: 768px) {
+            .goals-section {
+                border-radius: var(--radius-xl);
+                padding: 30px;
+                margin-bottom: 40px;
+            }
+        }
+
+        .goals-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .goals-header {
+                margin-bottom: 20px;
+            }
+        }
+
+        .goals-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .goals-title svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .goals-title {
+                font-size: 1.2rem;
+                gap: 10px;
+            }
+
+            .goals-title svg {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        .goals-progress {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        @media (min-width: 768px) {
+            .goals-progress {
+                font-size: 0.9rem;
+            }
+        }
+
+        .goals-progress span {
+            color: var(--sepia);
+            font-weight: 600;
+        }
+
+        .goals-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .goals-list {
+                gap: 12px;
+            }
+        }
+
+        .goal-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg-accent);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        @media (min-width: 768px) {
+            .goal-item {
+                gap: 15px;
+                padding: 15px;
+                border-radius: var(--radius-md);
+            }
+        }
+
+        .goal-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .goal-item.completed {
+            opacity: 0.7;
+        }
+
+        .goal-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--text-muted);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .goal-checkbox svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .goal-checkbox {
+                width: 24px;
+                height: 24px;
+            }
+
+            .goal-checkbox svg {
+                width: 14px;
+                height: 14px;
+            }
+        }
+
+        .goal-item.completed .goal-checkbox {
+            background: var(--sepia);
+            border-color: var(--sepia);
+            color: #1A1510;
+        }
+
+        .goal-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .goal-text h4 {
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (min-width: 768px) {
+            .goal-text h4 {
+                font-size: 0.95rem;
+                margin-bottom: 3px;
+                white-space: normal;
+            }
+        }
+
+        .goal-item.completed .goal-text h4 {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .goal-text p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .goal-text p {
+                display: block;
+                font-size: 0.8rem;
+            }
+        }
+
+        .goal-points {
+            padding: 3px 8px;
+            background: rgba(196, 167, 125, 0.2);
+            border-radius: var(--radius-xl);
+            font-size: 0.65rem;
+            color: var(--sepia);
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .goal-points {
+                padding: 4px 10px;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* ========== DUA SECTION ========== */
+        .dua-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-sepia);
+        }
+
+        [data-theme="light"] .dua-section {
+            border: 1px solid var(--sepia-light);
+        }
+
+        @media (min-width: 768px) {
+            .dua-section {
+                border-radius: var(--radius-xl);
+                padding: 30px;
+                margin-bottom: 40px;
+            }
+        }
+
+        .dua-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dua-title svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .dua-title {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+                gap: 10px;
+            }
+
+            .dua-title svg {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        .dua-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .dua-cards {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 15px;
+            }
+        }
+
+        .dua-card {
+            background: var(--bg-accent);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            border-left: 3px solid var(--sepia);
+            transition: all 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .dua-card {
+                border-radius: var(--radius-md);
+                padding: 20px;
+            }
+        }
+
+        .dua-card:hover {
+            transform: translateX(3px);
+            background: var(--bg-card-hover);
+        }
+
+        .dua-card-title {
+            font-size: 0.75rem;
+            color: var(--sepia);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .dua-card-title {
+                font-size: 0.85rem;
+                margin-bottom: 10px;
+            }
+        }
+
+        .dua-arabic {
+            font-family: var(--font-arabic);
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            line-height: 1.6;
+            text-align: right;
+        }
+
+        @media (min-width: 768px) {
+            .dua-arabic {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+                line-height: 1.8;
+            }
+        }
+
+        .dua-translation {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        @media (min-width: 768px) {
+            .dua-translation {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-logo {
+            font-family: var(--font-arabic);
+            font-size: 1.5rem;
+            color: var(--sepia);
+            margin-bottom: 10px;
+        }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+            transition: background-color 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--sepia-dark);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--sepia);
+        }
+
+        /* ========== SMOOTH TRANSITIONS FOR THEME SWITCH ========== */
+        .prayer-times,
+        .goals-section,
+        .dua-section,
+        .reminder-section,
+        .calendar-day,
+        .prayer-item,
+        .goal-item,
+        .dua-card,
+        .countdown-icon,
+        .ramadan-day {
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="theme-toggle" aria-label="Changer de thème">
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <div class="bg-pattern"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="stars" id="stars"></div>
+
+            <p class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+
+            <div class="moon-container">
+                <div class="moon">
+                    <div class="moon-crescent"></div>
+                </div>
+            </div>
+
+            <h1 class="title">Ramadan Mubarak</h1>
+            <p class="subtitle">رمضان كريم • Calendrier des horaires de prière</p>
+
+            <div class="ramadan-day">
+                <span>Jour</span>
+                <strong id="current-day">15</strong>
+                <span>/ 30</span>
+            </div>
+
+            <button class="back-to-today" id="back-to-today" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Aujourd'hui
+            </button>
+        </header>
+
+        <!-- Countdown Section -->
+        <section class="countdown-section">
+            <div class="countdown-card iftar">
+                <div class="countdown-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <p class="countdown-label">Iftar (Maghrib)</p>
+                <div class="countdown-time" id="iftar-time">19:45</div>
+                <p class="countdown-remaining">Dans <span id="iftar-countdown">2h 34min</span></p>
+            </div>
+
+            <div class="countdown-card suhoor">
+                <div class="countdown-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </div>
+                <p class="countdown-label">Suhoor (Fin)</p>
+                <div class="countdown-time" id="suhoor-time">05:12</div>
+                <p class="countdown-remaining">Dans <span id="suhoor-countdown">11h 58min</span></p>
+            </div>
+        </section>
+
+        <!-- Prayer Times -->
+        <section class="prayer-times">
+            <div class="prayer-times-header">
+                <h2 class="prayer-times-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Horaires de prière
+                </h2>
+                <div class="location">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span id="location-name">Paris, France</span>
+                </div>
+            </div>
+
+            <div class="prayer-grid">
+                <div class="prayer-item" data-prayer="fajr">
+                    <div class="prayer-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </div>
+                    <p class="prayer-name">Fajr</p>
+                    <p class="prayer-name-ar">الفجر</p>
+                    <p class="prayer-time" id="fajr-time">05:12</p>
+                </div>
+
+                <div class="prayer-item" data-prayer="sunrise">
+                    <div class="prayer-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/></svg>
+                    </div>
+                    <p class="prayer-name">Lever</p>
+                    <p class="prayer-name-ar">الشروق</p>
+                    <p class="prayer-time" id="sunrise-time">06:48</p>
+                </div>
+
+                <div class="prayer-item active" data-prayer="dhuhr">
+                    <div class="prayer-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    </div>
+                    <p class="prayer-name">Dhuhr</p>
+                    <p class="prayer-name-ar">الظهر</p>
+                    <p class="prayer-time" id="dhuhr-time">13:15</p>
+                </div>
+
+                <div class="prayer-item" data-prayer="asr">
+                    <div class="prayer-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    </div>
+                    <p class="prayer-name">Asr</p>
+                    <p class="prayer-name-ar">العصر</p>
+                    <p class="prayer-time" id="asr-time">16:42</p>
+                </div>
+
+                <div class="prayer-item" data-prayer="maghrib">
+                    <div class="prayer-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/></svg>
+                    </div>
+                    <p class="prayer-name">Maghrib</p>
+                    <p class="prayer-name-ar">المغرب</p>
+                    <p class="prayer-time" id="maghrib-time">19:45</p>
+                </div>
+
+                <div class="prayer-item" data-prayer="isha">
+                    <div class="prayer-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                    </div>
+                    <p class="prayer-name">Isha</p>
+                    <p class="prayer-name-ar">العشاء</p>
+                    <p class="prayer-time" id="isha-time">21:15</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Reminder -->
+        <section class="reminder-section">
+            <div class="reminder-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                Rappel du jour
+            </div>
+            <p class="reminder-quote" id="daily-quote">
+                شَهْرُ رَمَضَانَ الَّذِي أُنزِلَ فِيهِ الْقُرْآنُ هُدًى لِّلنَّاسِ
+            </p>
+            <p class="reminder-translation" id="daily-translation">
+                "Le mois de Ramadan au cours duquel le Coran a été descendu comme guide pour les gens"
+            </p>
+            <p class="reminder-source" id="daily-source">Sourate Al-Baqara, Verset 185</p>
+        </section>
+
+        <!-- Calendar Grid -->
+        <section class="calendar-section">
+            <div class="calendar-header">
+                <h2 class="calendar-title">Calendrier Ramadan 1447</h2>
+                <div class="calendar-nav">
+                    <button id="prev-week">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <button id="next-week">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendar-grid">
+                <!-- Generated by JS -->
+            </div>
+        </section>
+
+        <!-- Daily Goals -->
+        <section class="goals-section">
+            <div class="goals-header">
+                <h2 class="goals-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--sepia)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Objectifs du jour
+                </h2>
+                <p class="goals-progress"><span id="goals-completed">2</span>/5 complétés</p>
+            </div>
+            <div class="goals-list" id="goals-list">
+                <div class="goal-item completed" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Prière de Fajr à la mosquée</h4>
+                        <p>Commencer la journée avec la communauté</p>
+                    </div>
+                    <span class="goal-points">+10 pts</span>
+                </div>
+                <div class="goal-item completed" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Lire 1 Juz du Coran</h4>
+                        <p>Objectif: terminer le Coran ce mois</p>
+                    </div>
+                    <span class="goal-points">+20 pts</span>
+                </div>
+                <div class="goal-item" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Faire une Sadaqa</h4>
+                        <p>Un acte de charité, même petit</p>
+                    </div>
+                    <span class="goal-points">+15 pts</span>
+                </div>
+                <div class="goal-item" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Inviter quelqu'un à l'Iftar</h4>
+                        <p>Partager le repas de rupture</p>
+                    </div>
+                    <span class="goal-points">+25 pts</span>
+                </div>
+                <div class="goal-item" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Prière de Tarawih</h4>
+                        <p>Prière nocturne du Ramadan</p>
+                    </div>
+                    <span class="goal-points">+20 pts</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Duas Section -->
+        <section class="dua-section">
+            <h2 class="dua-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--sepia)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                Invocations essentielles
+            </h2>
+            <div class="dua-cards">
+                <div class="dua-card">
+                    <p class="dua-card-title">Dua pour rompre le jeûne</p>
+                    <p class="dua-arabic">ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ</p>
+                    <p class="dua-translation">"La soif est partie, les veines sont humides et la récompense est assurée si Allah le veut"</p>
+                </div>
+                <div class="dua-card">
+                    <p class="dua-card-title">Dua de Laylat al-Qadr</p>
+                    <p class="dua-arabic">اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي</p>
+                    <p class="dua-translation">"Ô Allah, Tu es Pardonneur, Tu aimes le pardon, alors pardonne-moi"</p>
+                </div>
+                <div class="dua-card">
+                    <p class="dua-card-title">Dua avant de manger</p>
+                    <p class="dua-arabic">بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ</p>
+                    <p class="dua-translation">"Au nom d'Allah et avec la bénédiction d'Allah"</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer-logo">رمضان مبارك</p>
+            <p>Que ce mois béni soit rempli de paix et de bénédictions</p>
+            <p style="margin-top: 10px; color: var(--sepia);">Gestion Mosquée © 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const CONFIG = {
+            // Paris par défaut
+            defaultLat: 48.8566,
+            defaultLng: 2.3522,
+            defaultCity: 'Paris, France',
+            // Méthode de calcul: 4 = Umm Al-Qura University, Makkah
+            method: 4,
+            // Timezone
+            timezone: 'Europe/Paris',
+            // Ramadan 1447/2026 - dates officielles estimées
+            // Le Ramadan 2026 devrait commencer aux alentours du 17-18 février 2026
+            ramadan2026Start: new Date(2026, 1, 17), // 17 février 2026 (mois 1 = février en JS)
+            ramadan2026End: new Date(2026, 2, 18),   // 18 mars 2026
+        };
+
+        // ========== STATE ==========
+        let prayerTimes = null;
+        let hijriDate = null;
+        let userLocation = { lat: CONFIG.defaultLat, lng: CONFIG.defaultLng, city: CONFIG.defaultCity };
+        let selectedDay = null; // Jour sélectionné dans le calendrier
+        let ramadanStartDate = CONFIG.ramadan2026Start; // Date de début du Ramadan 2026
+        let isBeforeRamadan = false; // Sommes-nous avant le Ramadan?
+        let daysUntilRamadan = 0; // Jours restants avant le Ramadan
+
+        // ========== PREPARATION TIPS ==========
+        const preparationTips = [
+            { day: -30, title: "30 jours avant", tip: "Commencez à rattraper vos jours de jeûne manqués de l'année dernière", icon: "📅" },
+            { day: -28, title: "4 semaines avant", tip: "Faites un bilan spirituel de l'année écoulée", icon: "🤲" },
+            { day: -21, title: "3 semaines avant", tip: "Commencez à réduire progressivement la caféine et le sucre", icon: "☕" },
+            { day: -14, title: "2 semaines avant", tip: "Pratiquez le jeûne des lundis et jeudis (Sunnah)", icon: "🌙" },
+            { day: -10, title: "10 jours avant", tip: "Planifiez vos repas Suhoor et Iftar pour le mois", icon: "🍽️" },
+            { day: -7, title: "1 semaine avant", tip: "Terminez vos tâches administratives et ménagères importantes", icon: "✅" },
+            { day: -5, title: "5 jours avant", tip: "Commencez à ajuster votre rythme de sommeil", icon: "😴" },
+            { day: -3, title: "3 jours avant", tip: "Préparez votre coin prière et votre Coran", icon: "📖" },
+            { day: -2, title: "2 jours avant", tip: "Faites vos courses pour les premiers jours du Ramadan", icon: "🛒" },
+            { day: -1, title: "Veille du Ramadan", tip: "Nuit de la vision du croissant - Préparez votre intention (Niyyah)", icon: "🌙✨" },
+        ];
+
+        const shabanFastingDays = [
+            { day: 13, name: "Ayyam al-Bid (13)", virtue: "Jeûne des jours blancs - grande récompense" },
+            { day: 14, name: "Ayyam al-Bid (14)", virtue: "Jeûne des jours blancs - grande récompense" },
+            { day: 15, name: "Ayyam al-Bid (15) - Nuit du 15 Sha'ban", virtue: "Nuit bénie - Laylat al-Bara'ah" },
+        ];
+
+        // ========== CHECK RAMADAN STATUS ==========
+        function checkRamadanStatus() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const ramadanStart = new Date(CONFIG.ramadan2026Start);
+            ramadanStart.setHours(0, 0, 0, 0);
+
+            const ramadanEnd = new Date(CONFIG.ramadan2026End);
+            ramadanEnd.setHours(0, 0, 0, 0);
+
+            if (today < ramadanStart) {
+                isBeforeRamadan = true;
+                daysUntilRamadan = Math.ceil((ramadanStart - today) / (1000 * 60 * 60 * 24));
+                showPreparationMode();
+            } else if (today >= ramadanStart && today <= ramadanEnd) {
+                isBeforeRamadan = false;
+                const dayOfRamadan = Math.ceil((today - ramadanStart) / (1000 * 60 * 60 * 24)) + 1;
+                document.getElementById('current-day').textContent = dayOfRamadan;
+                currentDay = dayOfRamadan;
+            } else {
+                // Après Ramadan
+                isBeforeRamadan = false;
+                document.querySelector('.title').textContent = 'Eid Mubarak';
+            }
+        }
+
+        function showPreparationMode() {
+            // Mettre à jour le header
+            document.querySelector('.title').textContent = 'Préparation Ramadan';
+            document.querySelector('.subtitle').innerHTML = `رمضان كريم • <span style="color: var(--sepia);">J-${daysUntilRamadan}</span> avant le Ramadan`;
+
+            // Mettre à jour le badge du jour
+            const ramadanDayBadge = document.querySelector('.ramadan-day');
+            ramadanDayBadge.innerHTML = `
+                <span>J -</span>
+                <strong id="current-day">${daysUntilRamadan}</strong>
+                <span>avant Ramadan</span>
+            `;
+
+            // Mettre à jour les cartes countdown
+            updatePreparationCountdown();
+
+            // Afficher les conseils de préparation
+            showPreparationTips();
+
+            // Mettre à jour le calendrier
+            generatePreparationCalendar();
+        }
+
+        function updatePreparationCountdown() {
+            const countdownSection = document.querySelector('.countdown-section');
+            countdownSection.classList.add('preparation');
+
+            const iftarCard = document.querySelector('.countdown-card.iftar');
+            const suhoorCard = document.querySelector('.countdown-card.suhoor');
+
+            // Calculer le temps exact restant
+            const now = new Date();
+            const ramadanStart = new Date(CONFIG.ramadan2026Start);
+            const diff = ramadanStart - now;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            iftarCard.innerHTML = `
+                <div class="countdown-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </div>
+                <p class="countdown-label">Début Ramadan 1447</p>
+                <div class="countdown-time" style="font-size: 1.2rem;">${formatDateLong(CONFIG.ramadan2026Start)}</div>
+                <p class="countdown-remaining">Dans <span id="iftar-countdown">${days}j ${hours}h ${minutes}min</span></p>
+            `;
+
+            suhoorCard.innerHTML = `
+                <div class="countdown-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <p class="countdown-label">Eid al-Fitr 1447</p>
+                <div class="countdown-time" style="font-size: 1.2rem;">${formatDateLong(CONFIG.ramadan2026End)}</div>
+                <p class="countdown-remaining">Durée: <span id="suhoor-countdown">30 jours</span></p>
+            `;
+
+            // Mettre à jour le compte à rebours chaque minute
+            setInterval(updatePreparationTimer, 60000);
+        }
+
+        function updatePreparationTimer() {
+            const now = new Date();
+            const ramadanStart = new Date(CONFIG.ramadan2026Start);
+            const diff = ramadanStart - now;
+
+            if (diff <= 0) {
+                // Ramadan a commencé, recharger la page
+                location.reload();
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            const countdownEl = document.getElementById('iftar-countdown');
+            if (countdownEl) {
+                countdownEl.textContent = `${days}j ${hours}h ${minutes}min`;
+            }
+        }
+
+        function formatDateLong(date) {
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return date.toLocaleDateString('fr-FR', options);
+        }
+
+        function formatDate(date) {
+            const options = { day: 'numeric', month: 'short' };
+            return date.toLocaleDateString('fr-FR', options);
+        }
+
+        function showPreparationTips() {
+            // Trouver le conseil le plus pertinent
+            const today = new Date();
+            const daysLeft = -daysUntilRamadan; // négatif pour matcher avec preparationTips
+
+            let currentTip = preparationTips[preparationTips.length - 1]; // Par défaut, le dernier
+            for (let i = 0; i < preparationTips.length; i++) {
+                if (daysLeft <= preparationTips[i].day) {
+                    currentTip = preparationTips[i];
+                    break;
+                }
+            }
+
+            // Mettre à jour la section reminder
+            const reminderSection = document.querySelector('.reminder-section');
+            reminderSection.innerHTML = `
+                <div class="reminder-badge">
+                    <span style="font-size: 1.2rem;">${currentTip.icon}</span>
+                    ${currentTip.title}
+                </div>
+                <p class="reminder-quote" style="font-family: var(--font-primary); font-size: 1.2rem;">
+                    ${currentTip.tip}
+                </p>
+                <p class="reminder-translation">
+                    Préparez-vous spirituellement et physiquement pour accueillir ce mois béni
+                </p>
+                <p class="reminder-source">Sha'ban - Mois de préparation</p>
+            `;
+
+            // Mettre à jour les objectifs pour la préparation
+            updatePreparationGoals();
+        }
+
+        function updatePreparationGoals() {
+            const goalsList = document.getElementById('goals-list');
+            const goalsTitle = document.querySelector('.goals-title');
+            goalsTitle.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--sepia)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Préparation Ramadan
+            `;
+
+            goalsList.innerHTML = `
+                <div class="goal-item" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Rattraper les jours de jeûne manqués</h4>
+                        <p>Compléter les jours de l'année dernière avant Ramadan</p>
+                    </div>
+                    <span class="goal-points">Obligatoire</span>
+                </div>
+                <div class="goal-item" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Jeûner les lundis et jeudis</h4>
+                        <p>Sunnah du Prophète ﷺ - Préparation progressive</p>
+                    </div>
+                    <span class="goal-points">Sunnah</span>
+                </div>
+                <div class="goal-item" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Lire le Coran quotidiennement</h4>
+                        <p>Reprendre l'habitude de lecture</p>
+                    </div>
+                    <span class="goal-points">Recommandé</span>
+                </div>
+                <div class="goal-item" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Calculer et payer la Zakat</h4>
+                        <p>Préparer sa Zakat al-Mal pour Ramadan</p>
+                    </div>
+                    <span class="goal-points">Obligatoire</span>
+                </div>
+                <div class="goal-item" onclick="toggleGoal(this)">
+                    <div class="goal-checkbox">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="goal-text">
+                        <h4>Planifier les repas du mois</h4>
+                        <p>Préparer un menu équilibré Suhoor/Iftar</p>
+                    </div>
+                    <span class="goal-points">Pratique</span>
+                </div>
+            `;
+
+            document.getElementById('goals-completed').textContent = '0';
+
+            // Mettre à jour les Duas pour la préparation
+            updatePreparationDuas();
+        }
+
+        function updatePreparationDuas() {
+            const duaSection = document.querySelector('.dua-section');
+            duaSection.innerHTML = `
+                <h2 class="dua-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--sepia)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    Invocations de Sha'ban
+                </h2>
+                <div class="dua-cards">
+                    <div class="dua-card">
+                        <p class="dua-card-title">Dua pour atteindre Ramadan</p>
+                        <p class="dua-arabic">اللَّهُمَّ بَارِكْ لَنَا فِي رَجَب وَشَعْبَانَ وَبَلِّغْنَا رَمَضَانَ</p>
+                        <p class="dua-translation">"Ô Allah, bénis-nous en Rajab et Sha'ban et fais-nous atteindre Ramadan"</p>
+                    </div>
+                    <div class="dua-card">
+                        <p class="dua-card-title">Dua pour la préparation spirituelle</p>
+                        <p class="dua-arabic">اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ</p>
+                        <p class="dua-translation">"Ô Allah, aide-moi à T'invoquer, à Te remercier et à T'adorer de la meilleure manière"</p>
+                    </div>
+                    <div class="dua-card">
+                        <p class="dua-card-title">Dua de repentance</p>
+                        <p class="dua-arabic">رَبَّنَا ظَلَمْنَا أَنفُسَنَا وَإِن لَّمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ</p>
+                        <p class="dua-translation">"Notre Seigneur, nous nous sommes fait du tort à nous-mêmes. Si Tu ne nous pardonnes pas et ne nous fais pas miséricorde, nous serons certes parmi les perdants"</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generatePreparationCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            calendarGrid.innerHTML = '';
+
+            // Titre du calendrier
+            document.querySelector('.calendar-title').textContent = 'Compte à rebours Ramadan 2026';
+
+            const daysOfWeek = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+            daysOfWeek.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Afficher les 30 derniers jours avant Ramadan
+            const startDate = new Date(CONFIG.ramadan2026Start);
+            startDate.setDate(startDate.getDate() - 30);
+
+            // Ajouter des cellules vides pour aligner avec le jour de la semaine
+            const firstDayOfWeek = startDate.getDay();
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day-header';
+                calendarGrid.appendChild(empty);
+            }
+
+            for (let i = 0; i < 35; i++) { // ~5 semaines
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + i);
+
+                if (currentDate > CONFIG.ramadan2026End) break;
+
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+
+                const isToday = currentDate.getTime() === today.getTime();
+                const isPast = currentDate < today;
+                const isRamadan = currentDate >= CONFIG.ramadan2026Start && currentDate <= CONFIG.ramadan2026End;
+                const daysUntil = Math.ceil((CONFIG.ramadan2026Start - currentDate) / (1000 * 60 * 60 * 24));
+
+                if (isToday) dayEl.classList.add('today');
+                if (isPast && !isRamadan) dayEl.classList.add('past');
+                if (isRamadan) {
+                    dayEl.classList.add('ramadan-day-cell');
+                    dayEl.style.background = 'linear-gradient(135deg, rgba(196, 167, 125, 0.3), rgba(196, 167, 125, 0.1))';
+                    dayEl.style.borderColor = 'var(--sepia)';
+                }
+
+                const dayNum = currentDate.getDate();
+                const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+                let label = '';
+                if (isRamadan) {
+                    const ramadanDay = Math.ceil((currentDate - CONFIG.ramadan2026Start) / (1000 * 60 * 60 * 24)) + 1;
+                    label = `R${ramadanDay}`;
+                } else if (daysUntil > 0 && daysUntil <= 30) {
+                    label = `J-${daysUntil}`;
+                }
+
+                dayEl.innerHTML = `
+                    <span class="day-number">${dayNum}</span>
+                    <span class="day-name" style="display: block; font-size: 0.5rem;">${label || monthNames[currentDate.getMonth()]}</span>
+                `;
+
+                // Clic pour voir les horaires de ce jour
+                dayEl.addEventListener('click', () => {
+                    if (isRamadan) {
+                        const ramadanDay = Math.ceil((currentDate - CONFIG.ramadan2026Start) / (1000 * 60 * 60 * 24)) + 1;
+                        fetchPrayerTimesForRamadanDay(ramadanDay);
+                    } else {
+                        fetchPrayerTimes(userLocation.lat, userLocation.lng, currentDate);
+                        showDayInfo(currentDate, daysUntil);
+                    }
+                });
+
+                calendarGrid.appendChild(dayEl);
+            }
+        }
+
+        function showDayInfo(date, daysUntil) {
+            const subtitle = document.querySelector('.subtitle');
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            const formattedDate = date.toLocaleDateString('fr-FR', options);
+
+            if (daysUntil > 0) {
+                subtitle.innerHTML = `رمضان كريم • <span style="color: var(--sepia);">${formattedDate} (J-${daysUntil})</span>`;
+            } else {
+                subtitle.innerHTML = `رمضان كريم • <span style="color: var(--sepia);">${formattedDate}</span>`;
+            }
+
+            // Afficher le bouton retour
+            document.getElementById('back-to-today').style.display = 'inline-flex';
+        }
+
+        // ========== API ALADHAN ==========
+        async function fetchPrayerTimes(lat, lng, date = null) {
+            const targetDate = date || new Date();
+            const dateStr = `${String(targetDate.getDate()).padStart(2, '0')}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${targetDate.getFullYear()}`;
+
+            const url = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=${CONFIG.method}&timezonestring=${CONFIG.timezone}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.code === 200) {
+                    prayerTimes = data.data.timings;
+                    hijriDate = data.data.date.hijri;
+
+                    // Sauvegarder la date de début du Ramadan au premier chargement
+                    if (!ramadanStartDate && hijriDate.month.number === 9) {
+                        const dayOfRamadan = parseInt(hijriDate.day);
+                        ramadanStartDate = new Date(targetDate);
+                        ramadanStartDate.setDate(ramadanStartDate.getDate() - dayOfRamadan + 1);
+                    }
+
+                    updatePrayerTimesUI();
+                    updateHijriDateUI();
+                    updateCountdown();
+                    highlightCurrentPrayer();
+
+                    // Mettre à jour l'affichage de la date sélectionnée
+                    if (date) {
+                        updateSelectedDateDisplay(targetDate);
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur API Aladhan:', error);
+            }
+        }
+
+        // ========== FETCH POUR UN JOUR SPÉCIFIQUE DU RAMADAN ==========
+        function fetchPrayerTimesForRamadanDay(ramadanDay) {
+            if (!ramadanStartDate) {
+                // Si on n'a pas encore la date de début, on calcule approximativement
+                const today = new Date();
+                const currentRamadanDay = parseInt(document.getElementById('current-day').textContent) || 15;
+                ramadanStartDate = new Date(today);
+                ramadanStartDate.setDate(ramadanStartDate.getDate() - currentRamadanDay + 1);
+            }
+
+            const targetDate = new Date(ramadanStartDate);
+            targetDate.setDate(targetDate.getDate() + ramadanDay - 1);
+
+            selectedDay = ramadanDay;
+            fetchPrayerTimes(userLocation.lat, userLocation.lng, targetDate);
+
+            // Mettre à jour la sélection visuelle
+            updateCalendarSelection(ramadanDay);
+        }
+
+        function updateSelectedDateDisplay(date) {
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const formattedDate = date.toLocaleDateString('fr-FR', options);
+
+            // Mettre à jour le sous-titre avec la date sélectionnée
+            const subtitle = document.querySelector('.subtitle');
+            if (subtitle && selectedDay) {
+                subtitle.innerHTML = `رمضان كريم • <span style="color: var(--sepia);">${formattedDate}</span>`;
+            }
+        }
+
+        function updateCalendarSelection(ramadanDay) {
+            // Retirer la sélection précédente
+            document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            // Ajouter la sélection au jour cliqué
+            const calendarDays = document.querySelectorAll('.calendar-day');
+            calendarDays.forEach(day => {
+                const dayNum = parseInt(day.querySelector('.day-number')?.textContent);
+                if (dayNum === ramadanDay) {
+                    day.classList.add('selected');
+                }
+            });
+
+            // Afficher/masquer le bouton "Aujourd'hui"
+            const backBtn = document.getElementById('back-to-today');
+            if (ramadanDay !== currentDay) {
+                backBtn.style.display = 'inline-flex';
+            } else {
+                backBtn.style.display = 'none';
+            }
+        }
+
+        function backToToday() {
+            selectedDay = null;
+            fetchPrayerTimes(userLocation.lat, userLocation.lng);
+
+            // Retirer la sélection
+            document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            // Masquer le bouton
+            document.getElementById('back-to-today').style.display = 'none';
+
+            // Réinitialiser le sous-titre selon le mode
+            if (isBeforeRamadan) {
+                document.querySelector('.subtitle').innerHTML = `رمضان كريم • <span style="color: var(--sepia);">J-${daysUntilRamadan}</span> avant le Ramadan`;
+            } else {
+                document.querySelector('.subtitle').innerHTML = 'رمضان كريم • Calendrier des horaires de prière';
+            }
+        }
+
+        // ========== GEOLOCATION ==========
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        userLocation.lat = position.coords.latitude;
+                        userLocation.lng = position.coords.longitude;
+
+                        // Reverse geocoding pour le nom de la ville
+                        try {
+                            const geoUrl = `https://nominatim.openstreetmap.org/reverse?lat=${userLocation.lat}&lon=${userLocation.lng}&format=json`;
+                            const geoResponse = await fetch(geoUrl);
+                            const geoData = await geoResponse.json();
+                            userLocation.city = geoData.address?.city || geoData.address?.town || geoData.address?.village || CONFIG.defaultCity;
+                            document.getElementById('location-name').textContent = `${userLocation.city}`;
+                        } catch (e) {
+                            console.log('Reverse geocoding failed');
+                        }
+
+                        fetchPrayerTimes(userLocation.lat, userLocation.lng);
+                    },
+                    (error) => {
+                        console.log('Geolocation refusée, utilisation de Paris');
+                        fetchPrayerTimes(CONFIG.defaultLat, CONFIG.defaultLng);
+                    }
+                );
+            } else {
+                fetchPrayerTimes(CONFIG.defaultLat, CONFIG.defaultLng);
+            }
+        }
+
+        // ========== UPDATE UI ==========
+        function updatePrayerTimesUI() {
+            if (!prayerTimes) return;
+
+            // Mettre à jour les horaires de prière (avec vérification d'existence)
+            const fajrEl = document.getElementById('fajr-time');
+            const sunriseEl = document.getElementById('sunrise-time');
+            const dhuhrEl = document.getElementById('dhuhr-time');
+            const asrEl = document.getElementById('asr-time');
+            const maghribEl = document.getElementById('maghrib-time');
+            const ishaEl = document.getElementById('isha-time');
+
+            if (fajrEl) fajrEl.textContent = prayerTimes.Fajr;
+            if (sunriseEl) sunriseEl.textContent = prayerTimes.Sunrise;
+            if (dhuhrEl) dhuhrEl.textContent = prayerTimes.Dhuhr;
+            if (asrEl) asrEl.textContent = prayerTimes.Asr;
+            if (maghribEl) maghribEl.textContent = prayerTimes.Maghrib;
+            if (ishaEl) ishaEl.textContent = prayerTimes.Isha;
+
+            // Iftar = Maghrib, Suhoor = Imsak (ou Fajr - 10min)
+            // Ces éléments n'existent pas en mode préparation
+            const iftarEl = document.getElementById('iftar-time');
+            const suhoorEl = document.getElementById('suhoor-time');
+            if (iftarEl) iftarEl.textContent = prayerTimes.Maghrib;
+            if (suhoorEl) suhoorEl.textContent = prayerTimes.Imsak || prayerTimes.Fajr;
+        }
+
+        function updateHijriDateUI() {
+            if (!hijriDate || isBeforeRamadan) return;
+
+            // Afficher le jour du Ramadan si c'est Ramadan (mois 9)
+            if (hijriDate.month.number === 9) {
+                const ramadanDay = parseInt(hijriDate.day);
+                const currentDayEl = document.getElementById('current-day');
+                if (currentDayEl) currentDayEl.textContent = ramadanDay;
+
+                // Régénérer le calendrier si c'est le premier chargement (pas de jour sélectionné)
+                if (!selectedDay && currentDay !== ramadanDay) {
+                    generateCalendar(ramadanDay);
+                }
+            }
+
+            // Si on a sélectionné un jour spécifique, mettre à jour l'affichage du jour
+            if (selectedDay) {
+                const currentDayEl = document.getElementById('current-day');
+                if (currentDayEl) currentDayEl.textContent = selectedDay;
+            }
+        }
+
+        // ========== COUNTDOWN ==========
+        function parseTime(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            const date = new Date();
+            date.setHours(hours, minutes, 0, 0);
+            return date;
+        }
+
+        function updateCountdown() {
+            if (!prayerTimes || isBeforeRamadan) return;
+
+            const now = new Date();
+
+            // Iftar (Maghrib)
+            let iftarTime = parseTime(prayerTimes.Maghrib);
+            let iftarDiff = iftarTime - now;
+
+            if (iftarDiff < 0) {
+                // Iftar passé, afficher pour demain
+                iftarDiff += 24 * 60 * 60 * 1000;
+            }
+
+            const iftarHours = Math.floor(iftarDiff / (1000 * 60 * 60));
+            const iftarMins = Math.floor((iftarDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const iftarCountdownEl = document.getElementById('iftar-countdown');
+            if (iftarCountdownEl) iftarCountdownEl.textContent = `${iftarHours}h ${iftarMins}min`;
+
+            // Suhoor (Imsak ou Fajr)
+            const suhoorTimeStr = prayerTimes.Imsak || prayerTimes.Fajr;
+            let suhoorTime = parseTime(suhoorTimeStr);
+
+            // Si l'heure actuelle est après Fajr, Suhoor est demain
+            if (now > suhoorTime) {
+                suhoorTime.setDate(suhoorTime.getDate() + 1);
+            }
+
+            let suhoorDiff = suhoorTime - now;
+            const suhoorHours = Math.floor(suhoorDiff / (1000 * 60 * 60));
+            const suhoorMins = Math.floor((suhoorDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const suhoorCountdownEl = document.getElementById('suhoor-countdown');
+            if (suhoorCountdownEl) suhoorCountdownEl.textContent = `${suhoorHours}h ${suhoorMins}min`;
+        }
+
+        // ========== HIGHLIGHT CURRENT PRAYER ==========
+        function highlightCurrentPrayer() {
+            if (!prayerTimes || isBeforeRamadan) return;
+
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+            const prayers = [
+                { name: 'fajr', time: prayerTimes.Fajr },
+                { name: 'sunrise', time: prayerTimes.Sunrise },
+                { name: 'dhuhr', time: prayerTimes.Dhuhr },
+                { name: 'asr', time: prayerTimes.Asr },
+                { name: 'maghrib', time: prayerTimes.Maghrib },
+                { name: 'isha', time: prayerTimes.Isha }
+            ].map(p => {
+                const [h, m] = p.time.split(':').map(Number);
+                return { name: p.name, minutes: h * 60 + m };
+            });
+
+            document.querySelectorAll('.prayer-item').forEach(el => el.classList.remove('active'));
+
+            let currentPrayer = prayers[prayers.length - 1]; // Default to Isha
+            for (let i = 0; i < prayers.length; i++) {
+                if (currentMinutes >= prayers[i].minutes) {
+                    currentPrayer = prayers[i];
+                }
+            }
+
+            document.querySelector(`[data-prayer="${currentPrayer.name}"]`)?.classList.add('active');
+        }
+
+        // ========== GENERATE STARS ==========
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 20; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 2 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // ========== GENERATE PARTICLES ==========
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // ========== GENERATE CALENDAR ==========
+        const calendarGrid = document.getElementById('calendar-grid');
+        const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+        let currentDay = 15; // Sera mis à jour par l'API
+
+        function generateCalendar(todayRamadanDay) {
+            calendarGrid.innerHTML = '';
+            currentDay = todayRamadanDay;
+
+            days.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+
+            for (let i = 1; i <= 30; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                if (i < currentDay) dayEl.classList.add('past');
+                if (i === currentDay) dayEl.classList.add('today');
+
+                dayEl.innerHTML = `
+                    <span class="day-number">${i}</span>
+                    <span class="day-name">Ramadan</span>
+                `;
+
+                // Ajouter le handler de clic pour mettre à jour les horaires
+                dayEl.addEventListener('click', () => {
+                    fetchPrayerTimesForRamadanDay(i);
+                });
+
+                calendarGrid.appendChild(dayEl);
+            }
+        }
+
+        // Générer le calendrier initial seulement si on n'est pas en mode préparation
+        // (le mode préparation génère son propre calendrier)
+        if (!isBeforeRamadan) {
+            generateCalendar(currentDay);
+        }
+
+        // ========== GOALS ==========
+        function toggleGoal(element) {
+            element.classList.toggle('completed');
+            updateGoalsCount();
+        }
+
+        function updateGoalsCount() {
+            const completed = document.querySelectorAll('.goal-item.completed').length;
+            document.getElementById('goals-completed').textContent = completed;
+        }
+
+        // ========== DAILY QUOTES ==========
+        const quotes = [
+            {
+                arabic: "شَهْرُ رَمَضَانَ الَّذِي أُنزِلَ فِيهِ الْقُرْآنُ هُدًى لِّلنَّاسِ",
+                translation: "Le mois de Ramadan au cours duquel le Coran a été descendu comme guide pour les gens",
+                source: "Sourate Al-Baqara, Verset 185"
+            },
+            {
+                arabic: "وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ",
+                translation: "Et quand Mes serviteurs t'interrogent sur Moi... alors Je suis tout proche",
+                source: "Sourate Al-Baqara, Verset 186"
+            },
+            {
+                arabic: "إِنَّا أَنزَلْنَاهُ فِي لَيْلَةِ الْقَدْرِ",
+                translation: "Nous l'avons certes fait descendre pendant la nuit d'Al-Qadr",
+                source: "Sourate Al-Qadr, Verset 1"
+            }
+        ];
+
+        function rotateQuote() {
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('daily-quote').textContent = randomQuote.arabic;
+            document.getElementById('daily-translation').textContent = `"${randomQuote.translation}"`;
+            document.getElementById('daily-source').textContent = randomQuote.source;
+        }
+
+        // ========== THEME TOGGLE ==========
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('ramadan-theme') || 'dark';
+        body.setAttribute('data-theme', savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('ramadan-theme', newTheme);
+        });
+
+        // ========== BACK TO TODAY BUTTON ==========
+        document.getElementById('back-to-today').addEventListener('click', backToToday);
+
+        // ========== INIT ==========
+        // Vérifier d'abord si on est avant, pendant ou après le Ramadan
+        checkRamadanStatus();
+
+        // Récupérer la position et les horaires
+        getUserLocation();
+
+        // Rafraîchir les countdowns chaque minute
+        setInterval(() => {
+            if (!isBeforeRamadan) {
+                updateCountdown();
+                highlightCurrentPrayer();
+            }
+        }, 60000);
+    </script>
+</body>
+</html>

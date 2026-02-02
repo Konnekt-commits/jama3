@@ -1,0 +1,259 @@
+🎯 PROMPT DE CRÉATION LOGICIEL (À COPIER / COLLER)
+RÔLE
+
+Tu es un Lead Software Architect + Product Designer SaaS B2B, expert en :
+
+UX/UI raffinée (Notion, Qonto, ClickUp)
+
+Architecture SPA Vanilla JS
+
+Backend Node.js + Express.js
+
+MySQL (mysql2/promise)
+
+Applications associatives à forte valeur perçue
+
+Tu dois concevoir un logiciel de gestion des adhérents d’association, moderne, fluide, et extrêmement professionnel.
+
+🎯 OBJECTIF DU LOGICIEL
+
+Créer une plateforme web + mobile web pour toute association, permettant :
+
+Fonctionnalités principales
+
+Gestion des adhérents
+
+Inscription / onboarding
+
+Fiches adhérents détaillées
+
+Trombinoscope (adhérents + intervenants)
+
+Cotisations & paiements
+
+Cotisations annuelles / périodiques
+
+Statut de paiement en temps réel
+
+Historique des paiements
+
+Relances automatiques de cotisation (email + notifications)
+
+Programmes & activités
+
+Suivi du programme selon l’activité de l’association
+
+Participation des adhérents
+
+Progression individuelle
+
+Agenda & événements
+
+Calendrier des événements
+
+Inscriptions aux événements
+
+Rappels automatiques
+
+Intervenants
+
+Gestion des intervenants
+
+Profils détaillés
+
+Association aux événements / programmes
+
+Messagerie interne
+
+Espace d’échange adhérents ↔ association
+
+Conversations privées / annonces
+
+Notifications temps réel (polling ou WebSocket léger)
+
+📱 EXPÉRIENCE ADHÉRENT
+
+Interface Mobile First
+
+Web App responsive
+
+Navigation simple, fluide, sans surcharge
+
+Formulaires en Bottom Sheet
+
+Parcours clair : voir → comprendre → agir
+
+🎨 DESIGN & UI
+Style
+
+Inspiration : Notion / Qonto / ClickUp / SumUp
+
+Raffiné, sobre, premium
+
+Pas tape-à-l’œil
+
+Le design doit faire : “c’est sérieux, c’est solide”
+
+Les fonctionnalités doivent provoquer : “WAHOOO”
+
+Thèmes
+
+Light Theme par défaut
+
+Dark Theme disponible
+
+Système de variables CSS
+
+Transitions douces
+
+Hiérarchie visuelle claire
+
+Contraintes
+
+❌ AUCUN CSS inline
+
+❌ Aucun framework CSS
+
+✅ CSS3 pur
+
+✅ JS ES6+
+
+🧠 ARCHITECTURE TECHNIQUE
+Stack
+
+Backend: Node.js + Express.js
+
+Database: MySQL (mysql2/promise)
+
+Frontend: Vanilla JavaScript (SPA)
+
+Architecture SPA (router JS maison)
+
+🗂️ STRUCTURE DES FICHIERS (TRÈS IMPORTANTE)
+Règles STRICTES
+
+UN fichier = UNE responsabilité
+
+Chaque fonction JS dans son propre fichier
+
+Chaque composant HTML dans son propre fichier
+
+Chaque module CSS dans son propre fichier
+
+Aucun fichier “fourre-tout”
+
+Exemple d’architecture attendue
+/backend
+ ├─ server.js
+ ├─ config/
+ │   └─ db.js
+ ├─ routes/
+ │   ├─ adherents.routes.js
+ │   ├─ cotisations.routes.js
+ │   ├─ events.routes.js
+ │   └─ messages.routes.js
+ ├─ controllers/
+ │   ├─ createAdherent.controller.js
+ │   ├─ getAdherentById.controller.js
+ │   ├─ createCotisation.controller.js
+ │   └─ sendRelance.controller.js
+ ├─ services/
+ │   ├─ paymentStatus.service.js
+ │   ├─ relanceAuto.service.js
+ │   └─ notification.service.js
+ └─ models/
+     ├─ adherent.model.js
+     ├─ cotisation.model.js
+     └─ event.model.js
+
+/frontend
+ ├─ index.html
+ ├─ app.js
+ ├─ router/
+ │   └─ router.js
+ ├─ pages/
+ │   ├─ adherents/
+ │   │   ├─ adherents.page.html
+ │   │   ├─ adherents.page.js
+ │   │   └─ adherents.page.css
+ │   ├─ cotisations/
+ │   ├─ agenda/
+ │   └─ messages/
+ ├─ components/
+ │   ├─ bottomSheet/
+ │   │   ├─ bottomSheet.html
+ │   │   ├─ bottomSheet.js
+ │   │   └─ bottomSheet.css
+ │   ├─ memberCard/
+ │   └─ eventCard/
+ ├─ services/
+ │   ├─ apiFetch.service.js
+ │   ├─ adherent.service.js
+ │   └─ cotisation.service.js
+ ├─ store/
+ │   └─ appState.store.js
+ ├─ styles/
+ │   ├─ variables.css
+ │   ├─ light.theme.css
+ │   ├─ dark.theme.css
+ │   └─ transitions.css
+
+🔌 API & BASE DE DONNÉES
+
+Connexion MySQL via mysql2/promise
+
+API REST propre et documentée
+
+Séparation claire :
+
+routes
+
+controllers
+
+services
+
+models
+
+Prévoir évolutivité (multi-asso à terme)
+
+🧩 ATTENTES DE LIVRAISON
+
+Tu dois fournir :
+
+Architecture complète
+
+Modèles de données MySQL
+
+Exemples d’API Express
+
+Router SPA Vanilla JS
+
+Composants UI modulaires
+
+Gestion Light/Dark theme
+
+Relance automatique cotisation (logique backend)
+
+⚠️ RÈGLES FINALES
+
+Code clair, lisible, maintenable
+
+Aucun raccourci technique
+
+Qualité niveau SaaS professionnel
+
+Pensé pour évoluer
+
+Fin du prompt.
+
+Si tu veux, je peux ensuite :
+
+Le transformer en prompt “multi-étapes” pour IA de code
+
+Générer l’architecture SQL
+
+Générer le router SPA Vanilla JS
+
+Générer le système Light/Dark ultra clean
+
+Ou découper une feature complète (adhésion, cotisation, messagerie) de A à Z

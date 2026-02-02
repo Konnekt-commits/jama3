@@ -1,0 +1,293 @@
+/* Theme transition */
+html,
+body {
+    transition: background-color var(--transition-normal),
+                color var(--transition-normal);
+}
+
+/* General element transitions */
+.transition-all {
+    transition: all var(--transition-normal);
+}
+
+.transition-colors {
+    transition: background-color var(--transition-normal),
+                border-color var(--transition-normal),
+                color var(--transition-normal),
+                fill var(--transition-normal),
+                stroke var(--transition-normal);
+}
+
+.transition-opacity {
+    transition: opacity var(--transition-normal);
+}
+
+.transition-transform {
+    transition: transform var(--transition-normal);
+}
+
+/* Page transitions */
+.page-enter {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--transition-normal),
+                transform var(--transition-normal);
+}
+
+.page-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.page-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity var(--transition-fast),
+                transform var(--transition-fast);
+}
+
+/* Fade animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.fade-in {
+    animation: fadeIn var(--transition-normal) ease forwards;
+}
+
+.fade-out {
+    animation: fadeOut var(--transition-fast) ease forwards;
+}
+
+/* Slide animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-in-up {
+    animation: slideInUp var(--transition-normal) ease forwards;
+}
+
+.slide-in-down {
+    animation: slideInDown var(--transition-normal) ease forwards;
+}
+
+.slide-in-left {
+    animation: slideInLeft var(--transition-normal) ease forwards;
+}
+
+.slide-in-right {
+    animation: slideInRight var(--transition-normal) ease forwards;
+}
+
+/* Scale animations */
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes scaleOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+.scale-in {
+    animation: scaleIn var(--transition-normal) ease forwards;
+}
+
+.scale-out {
+    animation: scaleOut var(--transition-fast) ease forwards;
+}
+
+/* Bottom sheet animation */
+@keyframes slideUpSheet {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDownSheet {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(100%);
+    }
+}
+
+.sheet-enter {
+    animation: slideUpSheet var(--transition-normal) ease forwards;
+}
+
+.sheet-exit {
+    animation: slideDownSheet var(--transition-normal) ease forwards;
+}
+
+/* Toast animation */
+@keyframes toastEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-100%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toastExit {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-100%) scale(0.9);
+    }
+}
+
+.toast-enter {
+    animation: toastEnter var(--transition-normal) ease forwards;
+}
+
+.toast-exit {
+    animation: toastExit var(--transition-fast) ease forwards;
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--color-bg-tertiary) 25%,
+        var(--color-bg-secondary) 50%,
+        var(--color-bg-tertiary) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-md);
+}
+
+/* Pulse animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Spin animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Bounce animation */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.bounce {
+    animation: bounce 1s ease infinite;
+}

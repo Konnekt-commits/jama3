@@ -1,0 +1,71 @@
+# ================================
+# Cloud Build Configuration
+# Déploiement automatique sur Cloud Run
+# ================================
+
+steps:
+  # Étape 1: Construire l'image Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/association-app:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/association-app:latest'
+      - '.'
+
+  # Étape 2: Pousser l'image vers Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/association-app:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/association-app:latest'
+
+  # Étape 3: Déployer sur Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'association-app'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/association-app:$COMMIT_SHA'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'NODE_ENV=production'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '10'
+      - '--memory'
+      - '512Mi'
+      - '--cpu'
+      - '1'
+      - '--timeout'
+      - '300'
+
+# Variables de substitution
+substitutions:
+  _REGION: europe-west1
+
+# Options
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+# Images à conserver
+images:
+  - 'gcr.io/$PROJECT_ID/association-app:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/association-app:latest'
+
+# Tags
+tags:
+  - 'association-app'
+  - 'cloud-run'

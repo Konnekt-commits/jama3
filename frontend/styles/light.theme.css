@@ -1,0 +1,108 @@
+[data-theme="light"] {
+    /* Backgrounds - Sable désert / Camel */
+    --color-bg-primary: #F8F1E8;
+    --color-bg-secondary: #EFE6DA;
+    --color-bg-tertiary: #E5D9C9;
+    --color-bg-hover: #DED0BC;
+    --color-bg-active: #D4C4AD;
+
+    /* Patterns désactivés */
+    --pattern-islamic-star: none;
+    --pattern-geometric: none;
+    --pattern-arabesque: none;
+
+    /* Text - Tons chauds désert */
+    --color-text-primary: #3A2D1E;
+    --color-text-secondary: #5A4735;
+    --color-text-muted: #8A7050;
+    --color-text-placeholder: #A5906D;
+    --color-text-inverse: #F8F1E8;
+
+    /* Borders - Sable désert */
+    --color-border: #D4C4AD;
+    --color-border-light: #E5D9C9;
+    --color-border-dark: #BBA98E;
+
+    /* Primary - Or/Doré camel (couleur principale mosquée) */
+    --color-primary: #8B6914;
+    --color-primary-hover: #6E5310;
+    --color-primary-light: #EBDCC5;
+    --color-primary-dark: #52400C;
+
+    /* Success - Vert olive */
+    --color-success: #6B8E23;
+    --color-success-hover: #556B2F;
+    --color-success-light: #E8F0D8;
+    --color-success-dark: #4A6318;
+
+    /* Warning - Camel chaud */
+    --color-warning: #9A7340;
+    --color-warning-hover: #7D5C33;
+    --color-warning-light: #EFE2D0;
+    --color-warning-dark: #5E4525;
+
+    /* Error - Terre cuite */
+    --color-error: #CD5C5C;
+    --color-error-hover: #B84A4A;
+    --color-error-light: #F5E0E0;
+    --color-error-dark: #8B3A3A;
+
+    /* Info - Bleu turquoise (zellige) */
+    --color-info: #20B2AA;
+    --color-info-hover: #1A9690;
+    --color-info-light: #D4F1EF;
+    --color-info-dark: #147A75;
+
+    /* Accent - Bordeaux/Prune */
+    --color-accent: #8B4557;
+    --color-accent-hover: #723848;
+    --color-accent-light: #F0E0E4;
+    --color-accent-dark: #5C2E3A;
+
+    /* Card */
+    --color-card-bg: #FBF7F1;
+    --color-card-border: #D4C4AD;
+    --color-card-shadow: rgba(90, 70, 45, 0.1);
+
+    /* Input - fond plus foncé */
+    --color-input-bg: #E8DFD2;
+    --color-input-border: #BBA98E;
+    --color-input-focus: #996515;
+    --color-input-disabled: #D4C9B8;
+
+    /* Sidebar */
+    --color-sidebar-bg: #F5EDE2;
+    --color-sidebar-border: #D4C4AD;
+    --color-sidebar-item-hover: #E5D9C9;
+    --color-sidebar-item-active: #EBDCC5;
+    --color-sidebar-item-active-text: #996515;
+
+    /* Navbar */
+    --color-navbar-bg: #F5EDE2;
+    --color-navbar-border: #D4C4AD;
+
+    /* Modal */
+    --color-modal-backdrop: rgba(90, 70, 45, 0.5);
+    --color-modal-bg: #FBF7F1;
+
+    /* Table */
+    --color-table-header: #EFE6DA;
+    --color-table-row-hover: #EFE6DA;
+    --color-table-border: #D4C4AD;
+
+    /* Status badges - tons désert */
+    --color-badge-actif: #E2ECD0;
+    --color-badge-actif-text: #4A6318;
+    --color-badge-inactif: #F0DEDE;
+    --color-badge-inactif-text: #8B3A3A;
+    --color-badge-pending: #EFE2D0;
+    --color-badge-pending-text: #7D5C33;
+    --color-badge-paid: #E2ECD0;
+    --color-badge-paid-text: #4A6318;
+
+    /* Shadows - tons chauds */
+    --shadow-sm: 0 1px 2px 0 rgba(61, 46, 31, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(61, 46, 31, 0.1), 0 2px 4px -1px rgba(61, 46, 31, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(61, 46, 31, 0.1), 0 4px 6px -2px rgba(61, 46, 31, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(61, 46, 31, 0.1), 0 10px 10px -5px rgba(61, 46, 31, 0.04);
+}
