@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken');
 const UserModel = require('../../models/user.model');
+const AssociationModel = require('../../models/association.model');
 
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, association_slug } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({
@@ -12,19 +13,52 @@ const login = async (req, res) => {
             });
         }
 
-        const user = await UserModel.findByEmail(email);
+        // Chercher les utilisateurs avec cet email
+        const users = await UserModel.findByEmailWithAssociation(email);
 
-        if (!user) {
+        if (!users || users.length === 0) {
             return res.status(401).json({
                 success: false,
                 message: 'Identifiants incorrects'
             });
         }
 
+        // Si plusieurs associations et pas de slug fourni
+        if (users.length > 1 && !association_slug) {
+            // Retourner la liste des associations pour que l'utilisateur choisisse
+            return res.json({
+                success: true,
+                requireAssociationSelection: true,
+                associations: users.map(u => ({
+                    slug: u.association_slug,
+                    name: u.association_name
+                }))
+            });
+        }
+
+        // Trouver le bon utilisateur (par slug ou le seul disponible)
+        let user = users[0];
+        if (association_slug) {
+            user = users.find(u => u.association_slug === association_slug);
+            if (!user) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Association non trouvée'
+                });
+            }
+        }
+
         if (!user.is_active) {
             return res.status(403).json({
                 success: false,
                 message: 'Compte désactivé'
+            });
+        }
+
+        if (!user.association_active) {
+            return res.status(403).json({
+                success: false,
+                message: 'Association désactivée'
             });
         }
 
@@ -40,7 +74,12 @@ const login = async (req, res) => {
         await UserModel.updateLastLogin(user.id);
 
         const token = jwt.sign(
-            { userId: user.id, role: user.role },
+            {
+                userId: user.id,
+                associationId: user.association_id,
+                role: user.role,
+                isOwner: user.is_owner || false
+            },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
         );
@@ -55,7 +94,13 @@ const login = async (req, res) => {
                     role: user.role,
                     first_name: user.first_name,
                     last_name: user.last_name,
-                    avatar_url: user.avatar_url
+                    avatar_url: user.avatar_url,
+                    is_owner: user.is_owner
+                },
+                association: {
+                    id: user.association_id,
+                    name: user.association_name,
+                    slug: user.association_slug
                 }
             }
         });
@@ -68,68 +113,36 @@ const login = async (req, res) => {
     }
 };
 
+// Register n'est plus disponible en direct - utiliser l'onboarding ou les invitations
 const register = async (req, res) => {
-    try {
-        const { email, password, first_name, last_name, role } = req.body;
-
-        if (!email || !password || !first_name || !last_name) {
-            return res.status(400).json({
-                success: false,
-                message: 'Tous les champs sont requis'
-            });
-        }
-
-        const existingUser = await UserModel.findByEmail(email);
-
-        if (existingUser) {
-            return res.status(409).json({
-                success: false,
-                message: 'Cet email est déjà utilisé'
-            });
-        }
-
-        const userId = await UserModel.create({
-            email,
-            password,
-            first_name,
-            last_name,
-            role: role || 'gestionnaire'
-        });
-
-        const token = jwt.sign(
-            { userId, role: role || 'gestionnaire' },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-        );
-
-        res.status(201).json({
-            success: true,
-            data: {
-                token,
-                user: {
-                    id: userId,
-                    email,
-                    role: role || 'gestionnaire',
-                    first_name,
-                    last_name
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Register error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Erreur serveur'
-        });
-    }
+    return res.status(400).json({
+        success: false,
+        message: 'Inscription directe non disponible. Créez une association ou utilisez une invitation.'
+    });
 };
 
 const me = async (req, res) => {
     try {
+        const association = await AssociationModel.findById(req.user.associationId);
+
         res.json({
             success: true,
             data: {
-                user: req.user
+                user: {
+                    id: req.user.id,
+                    email: req.user.email,
+                    role: req.user.role,
+                    first_name: req.user.first_name,
+                    last_name: req.user.last_name,
+                    avatar_url: req.user.avatar_url,
+                    is_owner: req.user.is_owner
+                },
+                association: association ? {
+                    id: association.id,
+                    name: association.name,
+                    slug: association.slug,
+                    logo_url: association.logo_url
+                } : null
             }
         });
     } catch (error) {
@@ -149,7 +162,7 @@ const updateProfile = async (req, res) => {
             first_name,
             last_name,
             avatar_url
-        });
+        }, req.user.associationId);
 
         if (!updated) {
             return res.status(400).json({
@@ -184,7 +197,16 @@ const changePassword = async (req, res) => {
             });
         }
 
-        const user = await UserModel.findByEmail(req.user.email);
+        const users = await UserModel.findByEmail(req.user.email);
+        const user = users.find(u => u.id === req.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Utilisateur non trouvé'
+            });
+        }
+
         const isValidPassword = await UserModel.verifyPassword(user, current_password);
 
         if (!isValidPassword) {
@@ -194,7 +216,7 @@ const changePassword = async (req, res) => {
             });
         }
 
-        await UserModel.updatePassword(req.user.id, new_password);
+        await UserModel.updatePassword(req.user.id, new_password, req.user.associationId);
 
         res.json({
             success: true,

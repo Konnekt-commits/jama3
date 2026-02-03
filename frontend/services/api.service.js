@@ -72,10 +72,23 @@ class ApiService {
         return this.request(endpoint, { method: 'DELETE' });
     }
 
-    async login(email, password) {
-        const response = await this.post('/auth/login', { email, password });
+    // ========== AUTHENTICATION ==========
+
+    async login(email, password, associationSlug = null) {
+        const payload = { email, password };
+        if (associationSlug) {
+            payload.association_slug = associationSlug;
+        }
+
+        const response = await this.post('/auth/login', payload);
+
+        // Handle multi-association selection
+        if (response.requireAssociationSelection) {
+            return response;
+        }
+
         if (response.success) {
-            appState.setAuth(response.data.user, response.data.token);
+            appState.setAuth(response.data.user, response.data.token, response.data.association);
         }
         return response;
     }
@@ -83,7 +96,7 @@ class ApiService {
     async register(userData) {
         const response = await this.post('/auth/register', userData);
         if (response.success) {
-            appState.setAuth(response.data.user, response.data.token);
+            appState.setAuth(response.data.user, response.data.token, response.data.association);
         }
         return response;
     }
@@ -93,8 +106,40 @@ class ApiService {
     }
 
     async getMe() {
-        return this.get('/auth/me');
+        const response = await this.get('/auth/me');
+        if (response.success && response.data.association) {
+            appState.set('association', response.data.association);
+        }
+        return response;
     }
+
+    // ========== ASSOCIATIONS ==========
+
+    async createAssociation(data) {
+        const response = await this.post('/associations', data);
+        if (response.success) {
+            appState.setAuth(response.data.user, response.data.token, response.data.association);
+        }
+        return response;
+    }
+
+    async getAssociation() {
+        return this.get('/associations/current');
+    }
+
+    async updateAssociation(data) {
+        return this.put('/associations/current', data);
+    }
+
+    async getAssociationStats() {
+        return this.get('/associations/stats');
+    }
+
+    async checkSlugAvailability(slug) {
+        return this.get(`/associations/check-slug/${slug}`);
+    }
+
+    // ========== ADHERENTS ==========
 
     async getAdherents(params = {}) {
         return this.get('/adherents', params);
@@ -119,6 +164,8 @@ class ApiService {
     async getAdherentStats() {
         return this.get('/adherents/stats');
     }
+
+    // ========== COTISATIONS ==========
 
     async getCotisations(params = {}) {
         return this.get('/cotisations', params);
@@ -147,6 +194,8 @@ class ApiService {
     async getOverdueCotisations() {
         return this.get('/cotisations/overdue');
     }
+
+    // ========== EVENTS ==========
 
     async getEvents(params = {}) {
         return this.get('/events', params);
@@ -180,6 +229,8 @@ class ApiService {
         return this.post(`/events/${eventId}/participants`, { adherent_id: adherentId });
     }
 
+    // ========== INTERVENANTS ==========
+
     async getIntervenants(params = {}) {
         return this.get('/intervenants', params);
     }
@@ -199,6 +250,8 @@ class ApiService {
     async deleteIntervenant(id) {
         return this.delete(`/intervenants/${id}`);
     }
+
+    // ========== MESSAGES ==========
 
     async getMessages(params = {}) {
         return this.get('/messages', params);

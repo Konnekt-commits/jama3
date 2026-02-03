@@ -32,7 +32,14 @@ const authMiddleware = async (req, res, next) => {
             });
         }
 
-        req.user = user;
+        // Injecter les données utilisateur et association depuis le token
+        req.user = {
+            ...user,
+            associationId: decoded.associationId || user.association_id,
+            role: decoded.role || user.role,
+            isOwner: decoded.isOwner || user.is_owner || false
+        };
+
         next();
     } catch (error) {
         if (error.name === 'JsonWebTokenError') {
@@ -74,6 +81,24 @@ const requireRole = (...roles) => {
     };
 };
 
+const requireOwner = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({
+            success: false,
+            message: 'Non authentifié'
+        });
+    }
+
+    if (!req.user.isOwner && req.user.role !== 'super_admin') {
+        return res.status(403).json({
+            success: false,
+            message: 'Accès réservé au propriétaire de l\'association'
+        });
+    }
+
+    next();
+};
+
 const optionalAuth = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
@@ -83,7 +108,12 @@ const optionalAuth = async (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             const user = await UserModel.findById(decoded.userId);
             if (user && user.is_active) {
-                req.user = user;
+                req.user = {
+                    ...user,
+                    associationId: decoded.associationId || user.association_id,
+                    role: decoded.role || user.role,
+                    isOwner: decoded.isOwner || user.is_owner || false
+                };
             }
         }
 
@@ -93,4 +123,4 @@ const optionalAuth = async (req, res, next) => {
     }
 };
 
-module.exports = { authMiddleware, requireRole, optionalAuth };
+module.exports = { authMiddleware, requireRole, requireOwner, optionalAuth };

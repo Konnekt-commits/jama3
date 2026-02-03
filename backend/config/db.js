@@ -26,4 +26,6 @@ const testConnection = async () => {
     }
 };
 
-module.exports = { pool, testConnection };
+// Export pool directement pour compatibilité avec les modèles
+module.exports = pool;
+module.exports.testConnection = testConnection;

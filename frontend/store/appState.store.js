@@ -2,6 +2,7 @@ class AppState {
     constructor() {
         this.state = {
             user: null,
+            association: null,
             isAuthenticated: false,
             theme: 'light',
             sidebarCollapsed: false,
@@ -31,11 +32,16 @@ class AppState {
 
         const savedToken = localStorage.getItem('token');
         const savedUser = localStorage.getItem('user');
+        const savedAssociation = localStorage.getItem('association');
 
         if (savedToken && savedUser) {
             try {
                 this.set('user', JSON.parse(savedUser));
                 this.set('isAuthenticated', true);
+
+                if (savedAssociation) {
+                    this.set('association', JSON.parse(savedAssociation));
+                }
             } catch (e) {
                 this.clearAuth();
             }
@@ -67,18 +73,29 @@ class AppState {
         this.notify(key, value, oldValue);
     }
 
-    setAuth(user, token) {
+    setAuth(user, token, association = null) {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         this.set('user', user);
         this.set('isAuthenticated', true);
+
+        if (association) {
+            localStorage.setItem('association', JSON.stringify(association));
+            this.set('association', association);
+        }
     }
 
     clearAuth() {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('association');
         this.set('user', null);
+        this.set('association', null);
         this.set('isAuthenticated', false);
+    }
+
+    getAssociation() {
+        return this.state.association;
     }
 
     toggleTheme() {

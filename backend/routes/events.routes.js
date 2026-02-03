@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const eventsController = require('../controllers/events/events.controller');
 const { authMiddleware } = require('../middleware/auth.middleware');
+const tenantMiddleware = require('../middleware/tenant.middleware');
 
+// Auth + Tenant middleware pour toutes les routes
 router.use(authMiddleware);
+router.use(tenantMiddleware);
 
 router.get('/', eventsController.getAll);
 router.get('/upcoming', eventsController.getUpcoming);

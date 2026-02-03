@@ -207,7 +207,7 @@ export async function renderLoginPage() {
                 </div>
 
                 <div class="login-footer">
-                    ${i18n.t('login.noAccount')} <a href="/register" data-link>${i18n.t('login.register')}</a>
+                    ${i18n.t('login.noAccount')} <a href="/onboarding" data-link>${i18n.t('login.register')}</a>
                 </div>
             </div>
         </div>

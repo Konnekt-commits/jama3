@@ -1,9 +1,9 @@
-const { pool } = require('../config/db');
+const pool = require('../config/db');
 
 class IntervenantModel {
-    static async findAll(filters = {}) {
-        let query = 'SELECT * FROM intervenants WHERE 1=1';
-        const params = [];
+    static async findAll(associationId, filters = {}) {
+        let query = 'SELECT * FROM intervenants WHERE association_id = ?';
+        const params = [associationId];
 
         if (filters.status) {
             query += ' AND status = ?';
@@ -27,30 +27,31 @@ class IntervenantModel {
         return rows;
     }
 
-    static async findById(id) {
+    static async findById(id, associationId) {
         const [rows] = await pool.execute(
-            'SELECT * FROM intervenants WHERE id = ?',
-            [id]
+            'SELECT * FROM intervenants WHERE id = ? AND association_id = ?',
+            [id, associationId]
         );
         return rows[0];
     }
 
-    static async findByUserId(userId) {
+    static async findByUserId(userId, associationId) {
         const [rows] = await pool.execute(
-            'SELECT * FROM intervenants WHERE user_id = ?',
-            [userId]
+            'SELECT * FROM intervenants WHERE user_id = ? AND association_id = ?',
+            [userId, associationId]
         );
         return rows[0];
     }
 
-    static async create(data) {
+    static async create(associationId, data) {
         const [result] = await pool.execute(
             `INSERT INTO intervenants (
-                user_id, first_name, last_name, email, phone,
+                association_id, user_id, first_name, last_name, email, phone,
                 speciality, bio, photo_url, hourly_rate, contract_type,
                 status, availability
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
+                associationId,
                 data.user_id || null,
                 data.first_name,
                 data.last_name,
@@ -69,7 +70,7 @@ class IntervenantModel {
         return result.insertId;
     }
 
-    static async update(id, data) {
+    static async update(id, associationId, data) {
         const fields = [];
         const values = [];
 
@@ -94,29 +95,29 @@ class IntervenantModel {
             return false;
         }
 
-        values.push(id);
+        values.push(id, associationId);
         const [result] = await pool.execute(
-            `UPDATE intervenants SET ${fields.join(', ')} WHERE id = ?`,
+            `UPDATE intervenants SET ${fields.join(', ')} WHERE id = ? AND association_id = ?`,
             values
         );
 
         return result.affectedRows > 0;
     }
 
-    static async delete(id) {
+    static async delete(id, associationId) {
         const [result] = await pool.execute(
-            'DELETE FROM intervenants WHERE id = ?',
-            [id]
+            'DELETE FROM intervenants WHERE id = ? AND association_id = ?',
+            [id, associationId]
         );
         return result.affectedRows > 0;
     }
 
-    static async getEvents(intervenantId, filters = {}) {
+    static async getEvents(intervenantId, associationId, filters = {}) {
         let query = `
             SELECT * FROM events
-            WHERE intervenant_id = ?
+            WHERE intervenant_id = ? AND association_id = ?
         `;
-        const params = [intervenantId];
+        const params = [intervenantId, associationId];
 
         if (filters.upcoming) {
             query += ' AND start_datetime >= NOW()';
@@ -133,21 +134,21 @@ class IntervenantModel {
         return rows;
     }
 
-    static async getStats(intervenantId) {
+    static async getStats(intervenantId, associationId) {
         const [rows] = await pool.execute(`
             SELECT
                 COUNT(*) as total_events,
                 SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_events,
                 SUM(current_participants) as total_participants
             FROM events
-            WHERE intervenant_id = ?
-        `, [intervenantId]);
+            WHERE intervenant_id = ? AND association_id = ?
+        `, [intervenantId, associationId]);
         return rows[0];
     }
 
-    static async count(filters = {}) {
-        let query = 'SELECT COUNT(*) as total FROM intervenants WHERE 1=1';
-        const params = [];
+    static async count(associationId, filters = {}) {
+        let query = 'SELECT COUNT(*) as total FROM intervenants WHERE association_id = ?';
+        const params = [associationId];
 
         if (filters.status) {
             query += ' AND status = ?';

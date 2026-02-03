@@ -3,7 +3,8 @@
 const translations = {
     fr: {
         // General
-        appName: 'Gestion Mosquée',
+        appName: 'jama3',
+        appSubtitle: 'جامع',
         loading: 'Chargement...',
         save: 'Enregistrer',
         cancel: 'Annuler',
@@ -27,8 +28,8 @@ const translations = {
 
         // Login
         login: {
-            title: 'Gestion Mosquée',
-            subtitle: 'Connectez-vous pour accéder au tableau de bord',
+            title: 'jama3',
+            subtitle: 'Connectez-vous pour accéder à votre espace',
             email: 'Email',
             password: 'Mot de passe',
             submit: 'Se connecter',
@@ -114,12 +115,38 @@ const translations = {
             deleted: 'Supprimé avec succès',
             error: 'Une erreur est survenue',
             sessionExpired: 'Session expirée'
+        },
+
+        // Onboarding
+        onboarding: {
+            title: 'Créer votre association',
+            subtitle: 'Commencez à gérer votre association en quelques clics',
+            associationInfo: 'Informations de l\'association',
+            associationName: 'Nom de l\'association',
+            associationNamePlaceholder: 'Ex: Association Sportive',
+            associationEmail: 'Email de l\'association',
+            phone: 'Téléphone',
+            city: 'Ville',
+            adminAccount: 'Compte administrateur',
+            firstName: 'Prénom',
+            firstNamePlaceholder: 'Votre prénom',
+            lastName: 'Nom',
+            lastNamePlaceholder: 'Votre nom',
+            email: 'Email',
+            password: 'Mot de passe',
+            createAssociation: 'Créer mon association',
+            creating: 'Création en cours...',
+            alreadyHaveAccount: 'Déjà un compte ?',
+            login: 'Se connecter',
+            success: 'Association créée avec succès !',
+            error: 'Erreur lors de la création'
         }
     },
 
     ar: {
         // General
-        appName: 'إدارة المسجد',
+        appName: 'جامع',
+        appSubtitle: 'jama3',
         loading: 'جاري التحميل...',
         save: 'حفظ',
         cancel: 'إلغاء',
@@ -143,8 +170,8 @@ const translations = {
 
         // Login
         login: {
-            title: 'إدارة المسجد',
-            subtitle: 'سجّل دخولك للوصول إلى لوحة التحكم',
+            title: 'جامع',
+            subtitle: 'سجّل دخولك للوصول إلى حسابك',
             email: 'البريد الإلكتروني',
             password: 'كلمة المرور',
             submit: 'تسجيل الدخول',
@@ -230,6 +257,31 @@ const translations = {
             deleted: 'تم الحذف بنجاح',
             error: 'حدث خطأ',
             sessionExpired: 'انتهت الجلسة'
+        },
+
+        // Onboarding
+        onboarding: {
+            title: 'إنشاء جمعيتك',
+            subtitle: 'ابدأ في إدارة جمعيتك بنقرات قليلة',
+            associationInfo: 'معلومات الجمعية',
+            associationName: 'اسم الجمعية',
+            associationNamePlaceholder: 'مثال: جمعية رياضية',
+            associationEmail: 'بريد الجمعية',
+            phone: 'الهاتف',
+            city: 'المدينة',
+            adminAccount: 'حساب المسؤول',
+            firstName: 'الاسم الأول',
+            firstNamePlaceholder: 'اسمك الأول',
+            lastName: 'اسم العائلة',
+            lastNamePlaceholder: 'اسم عائلتك',
+            email: 'البريد الإلكتروني',
+            password: 'كلمة المرور',
+            createAssociation: 'إنشاء جمعيتي',
+            creating: 'جاري الإنشاء...',
+            alreadyHaveAccount: 'لديك حساب؟',
+            login: 'تسجيل الدخول',
+            success: 'تم إنشاء الجمعية بنجاح!',
+            error: 'خطأ أثناء الإنشاء'
         }
     }
 };

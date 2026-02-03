@@ -9,8 +9,8 @@ const getAll = async (req, res) => {
             offset: req.query.offset
         };
 
-        const adherents = await AdherentModel.findAll(filters);
-        const total = await AdherentModel.count({ status: filters.status });
+        const adherents = await AdherentModel.findAll(req.associationId, filters);
+        const total = await AdherentModel.count(req.associationId, { status: filters.status });
 
         res.json({
             success: true,
@@ -32,7 +32,7 @@ const getAll = async (req, res) => {
 
 const getById = async (req, res) => {
     try {
-        const adherent = await AdherentModel.findById(req.params.id);
+        const adherent = await AdherentModel.findById(req.params.id, req.associationId);
 
         if (!adherent) {
             return res.status(404).json({
@@ -65,8 +65,8 @@ const create = async (req, res) => {
             });
         }
 
-        const result = await AdherentModel.create(req.body);
-        const adherent = await AdherentModel.findById(result.id);
+        const result = await AdherentModel.create(req.associationId, req.body);
+        const adherent = await AdherentModel.findById(result.id, req.associationId);
 
         res.status(201).json({
             success: true,
@@ -83,7 +83,7 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
     try {
-        const adherent = await AdherentModel.findById(req.params.id);
+        const adherent = await AdherentModel.findById(req.params.id, req.associationId);
 
         if (!adherent) {
             return res.status(404).json({
@@ -92,7 +92,7 @@ const update = async (req, res) => {
             });
         }
 
-        const updated = await AdherentModel.update(req.params.id, req.body);
+        const updated = await AdherentModel.update(req.params.id, req.associationId, req.body);
 
         if (!updated) {
             return res.status(400).json({
@@ -101,7 +101,7 @@ const update = async (req, res) => {
             });
         }
 
-        const updatedAdherent = await AdherentModel.findById(req.params.id);
+        const updatedAdherent = await AdherentModel.findById(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -118,7 +118,7 @@ const update = async (req, res) => {
 
 const remove = async (req, res) => {
     try {
-        const adherent = await AdherentModel.findById(req.params.id);
+        const adherent = await AdherentModel.findById(req.params.id, req.associationId);
 
         if (!adherent) {
             return res.status(404).json({
@@ -127,7 +127,7 @@ const remove = async (req, res) => {
             });
         }
 
-        await AdherentModel.delete(req.params.id);
+        await AdherentModel.delete(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -144,7 +144,7 @@ const remove = async (req, res) => {
 
 const archive = async (req, res) => {
     try {
-        const adherent = await AdherentModel.findById(req.params.id);
+        const adherent = await AdherentModel.findById(req.params.id, req.associationId);
 
         if (!adherent) {
             return res.status(404).json({
@@ -153,7 +153,7 @@ const archive = async (req, res) => {
             });
         }
 
-        await AdherentModel.archive(req.params.id);
+        await AdherentModel.archive(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -170,7 +170,7 @@ const archive = async (req, res) => {
 
 const getStats = async (req, res) => {
     try {
-        const stats = await AdherentModel.getStats();
+        const stats = await AdherentModel.getStats(req.associationId);
 
         res.json({
             success: true,
@@ -187,7 +187,7 @@ const getStats = async (req, res) => {
 
 const getActivities = async (req, res) => {
     try {
-        const adherent = await AdherentModel.findById(req.params.id);
+        const adherent = await AdherentModel.findById(req.params.id, req.associationId);
 
         if (!adherent) {
             return res.status(404).json({
@@ -196,7 +196,7 @@ const getActivities = async (req, res) => {
             });
         }
 
-        const activities = await AdherentModel.getActivities(req.params.id);
+        const activities = await AdherentModel.getActivities(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -213,7 +213,7 @@ const getActivities = async (req, res) => {
 
 const addActivity = async (req, res) => {
     try {
-        const adherent = await AdherentModel.findById(req.params.id);
+        const adherent = await AdherentModel.findById(req.params.id, req.associationId);
 
         if (!adherent) {
             return res.status(404).json({
@@ -231,7 +231,7 @@ const addActivity = async (req, res) => {
             });
         }
 
-        const activityId = await AdherentModel.addActivity(req.params.id, req.body);
+        const activityId = await AdherentModel.addActivity(req.associationId, req.params.id, req.body);
 
         res.status(201).json({
             success: true,

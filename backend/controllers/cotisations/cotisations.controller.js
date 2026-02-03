@@ -11,7 +11,7 @@ const getAll = async (req, res) => {
             offset: req.query.offset
         };
 
-        const cotisations = await CotisationModel.findAll(filters);
+        const cotisations = await CotisationModel.findAll(req.associationId, filters);
 
         res.json({
             success: true,
@@ -28,7 +28,7 @@ const getAll = async (req, res) => {
 
 const getById = async (req, res) => {
     try {
-        const cotisation = await CotisationModel.findById(req.params.id);
+        const cotisation = await CotisationModel.findById(req.params.id, req.associationId);
 
         if (!cotisation) {
             return res.status(404).json({
@@ -61,8 +61,8 @@ const create = async (req, res) => {
             });
         }
 
-        const result = await CotisationModel.create(req.body);
-        const cotisation = await CotisationModel.findById(result.id);
+        const result = await CotisationModel.create(req.associationId, req.body);
+        const cotisation = await CotisationModel.findById(result.id, req.associationId);
 
         res.status(201).json({
             success: true,
@@ -79,7 +79,7 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
     try {
-        const cotisation = await CotisationModel.findById(req.params.id);
+        const cotisation = await CotisationModel.findById(req.params.id, req.associationId);
 
         if (!cotisation) {
             return res.status(404).json({
@@ -88,7 +88,7 @@ const update = async (req, res) => {
             });
         }
 
-        const updated = await CotisationModel.update(req.params.id, req.body);
+        const updated = await CotisationModel.update(req.params.id, req.associationId, req.body);
 
         if (!updated) {
             return res.status(400).json({
@@ -97,7 +97,7 @@ const update = async (req, res) => {
             });
         }
 
-        const updatedCotisation = await CotisationModel.findById(req.params.id);
+        const updatedCotisation = await CotisationModel.findById(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -114,7 +114,7 @@ const update = async (req, res) => {
 
 const remove = async (req, res) => {
     try {
-        const cotisation = await CotisationModel.findById(req.params.id);
+        const cotisation = await CotisationModel.findById(req.params.id, req.associationId);
 
         if (!cotisation) {
             return res.status(404).json({
@@ -123,7 +123,7 @@ const remove = async (req, res) => {
             });
         }
 
-        await CotisationModel.delete(req.params.id);
+        await CotisationModel.delete(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -149,7 +149,7 @@ const registerPayment = async (req, res) => {
             });
         }
 
-        const result = await CotisationModel.registerPayment(req.params.id, amount, method);
+        const result = await CotisationModel.registerPayment(req.params.id, req.associationId, amount, method);
 
         if (!result) {
             return res.status(404).json({
@@ -158,7 +158,7 @@ const registerPayment = async (req, res) => {
             });
         }
 
-        const cotisation = await CotisationModel.findById(req.params.id);
+        const cotisation = await CotisationModel.findById(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -175,7 +175,7 @@ const registerPayment = async (req, res) => {
 
 const getStats = async (req, res) => {
     try {
-        const stats = await CotisationModel.getStats(req.query.season);
+        const stats = await CotisationModel.getStats(req.associationId, req.query.season);
 
         res.json({
             success: true,
@@ -192,7 +192,7 @@ const getStats = async (req, res) => {
 
 const getOverdue = async (req, res) => {
     try {
-        const cotisations = await CotisationModel.getOverdue();
+        const cotisations = await CotisationModel.getOverdue(req.associationId);
 
         res.json({
             success: true,
@@ -209,7 +209,7 @@ const getOverdue = async (req, res) => {
 
 const getRelances = async (req, res) => {
     try {
-        const cotisation = await CotisationModel.findById(req.params.id);
+        const cotisation = await CotisationModel.findById(req.params.id, req.associationId);
 
         if (!cotisation) {
             return res.status(404).json({
@@ -218,7 +218,7 @@ const getRelances = async (req, res) => {
             });
         }
 
-        const relances = await CotisationModel.getRelances(req.params.id);
+        const relances = await CotisationModel.getRelances(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -235,7 +235,7 @@ const getRelances = async (req, res) => {
 
 const addRelance = async (req, res) => {
     try {
-        const cotisation = await CotisationModel.findById(req.params.id);
+        const cotisation = await CotisationModel.findById(req.params.id, req.associationId);
 
         if (!cotisation) {
             return res.status(404).json({
@@ -247,6 +247,7 @@ const addRelance = async (req, res) => {
         const { type, content } = req.body;
 
         const relanceId = await CotisationModel.addRelance(
+            req.associationId,
             req.params.id,
             type || 'email',
             content

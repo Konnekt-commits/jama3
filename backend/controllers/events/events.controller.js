@@ -13,7 +13,7 @@ const getAll = async (req, res) => {
             offset: req.query.offset
         };
 
-        const events = await EventModel.findAll(filters);
+        const events = await EventModel.findAll(req.associationId, filters);
 
         res.json({
             success: true,
@@ -30,7 +30,7 @@ const getAll = async (req, res) => {
 
 const getById = async (req, res) => {
     try {
-        const event = await EventModel.findById(req.params.id);
+        const event = await EventModel.findById(req.params.id, req.associationId);
 
         if (!event) {
             return res.status(404).json({
@@ -63,8 +63,8 @@ const create = async (req, res) => {
             });
         }
 
-        const eventId = await EventModel.create(req.body);
-        const event = await EventModel.findById(eventId);
+        const eventId = await EventModel.create(req.associationId, req.body);
+        const event = await EventModel.findById(eventId, req.associationId);
 
         res.status(201).json({
             success: true,
@@ -81,7 +81,7 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
     try {
-        const event = await EventModel.findById(req.params.id);
+        const event = await EventModel.findById(req.params.id, req.associationId);
 
         if (!event) {
             return res.status(404).json({
@@ -90,7 +90,7 @@ const update = async (req, res) => {
             });
         }
 
-        const updated = await EventModel.update(req.params.id, req.body);
+        const updated = await EventModel.update(req.params.id, req.associationId, req.body);
 
         if (!updated) {
             return res.status(400).json({
@@ -99,7 +99,7 @@ const update = async (req, res) => {
             });
         }
 
-        const updatedEvent = await EventModel.findById(req.params.id);
+        const updatedEvent = await EventModel.findById(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -116,7 +116,7 @@ const update = async (req, res) => {
 
 const remove = async (req, res) => {
     try {
-        const event = await EventModel.findById(req.params.id);
+        const event = await EventModel.findById(req.params.id, req.associationId);
 
         if (!event) {
             return res.status(404).json({
@@ -125,7 +125,7 @@ const remove = async (req, res) => {
             });
         }
 
-        await EventModel.delete(req.params.id);
+        await EventModel.delete(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -142,7 +142,7 @@ const remove = async (req, res) => {
 
 const cancel = async (req, res) => {
     try {
-        const event = await EventModel.findById(req.params.id);
+        const event = await EventModel.findById(req.params.id, req.associationId);
 
         if (!event) {
             return res.status(404).json({
@@ -151,7 +151,7 @@ const cancel = async (req, res) => {
             });
         }
 
-        await EventModel.cancel(req.params.id);
+        await EventModel.cancel(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -168,7 +168,7 @@ const cancel = async (req, res) => {
 
 const getParticipants = async (req, res) => {
     try {
-        const event = await EventModel.findById(req.params.id);
+        const event = await EventModel.findById(req.params.id, req.associationId);
 
         if (!event) {
             return res.status(404).json({
@@ -177,7 +177,7 @@ const getParticipants = async (req, res) => {
             });
         }
 
-        const participants = await EventModel.getParticipants(req.params.id);
+        const participants = await EventModel.getParticipants(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -203,7 +203,7 @@ const addParticipant = async (req, res) => {
             });
         }
 
-        const result = await EventModel.addParticipant(req.params.id, adherent_id);
+        const result = await EventModel.addParticipant(req.associationId, req.params.id, adherent_id);
 
         if (result.error) {
             return res.status(400).json({
@@ -228,6 +228,7 @@ const addParticipant = async (req, res) => {
 const removeParticipant = async (req, res) => {
     try {
         const removed = await EventModel.removeParticipant(
+            req.associationId,
             req.params.id,
             req.params.adherentId
         );
@@ -264,6 +265,7 @@ const updateAttendance = async (req, res) => {
         }
 
         const updated = await EventModel.updateAttendance(
+            req.associationId,
             req.params.id,
             req.params.adherentId,
             status
@@ -292,7 +294,7 @@ const updateAttendance = async (req, res) => {
 const getUpcoming = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 5;
-        const events = await EventModel.getUpcoming(limit);
+        const events = await EventModel.getUpcoming(req.associationId, limit);
 
         res.json({
             success: true,
@@ -318,7 +320,7 @@ const getByDateRange = async (req, res) => {
             });
         }
 
-        const events = await EventModel.getByDateRange(start_date, end_date);
+        const events = await EventModel.getByDateRange(req.associationId, start_date, end_date);
 
         res.json({
             success: true,
@@ -335,7 +337,7 @@ const getByDateRange = async (req, res) => {
 
 const getStats = async (req, res) => {
     try {
-        const stats = await EventModel.getStats();
+        const stats = await EventModel.getStats(req.associationId);
 
         res.json({
             success: true,

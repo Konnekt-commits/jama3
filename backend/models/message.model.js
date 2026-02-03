@@ -1,16 +1,16 @@
-const { pool } = require('../config/db');
+const pool = require('../config/db');
 
 class MessageModel {
-    static async findAll(filters = {}) {
+    static async findAll(associationId, filters = {}) {
         let query = `
             SELECT m.*,
                    u.first_name as sender_first_name,
                    u.last_name as sender_last_name
             FROM messages m
             JOIN users u ON m.sender_id = u.id
-            WHERE 1=1
+            WHERE m.association_id = ?
         `;
-        const params = [];
+        const params = [associationId];
 
         if (filters.recipient_type) {
             query += ' AND m.recipient_type = ?';
@@ -47,30 +47,31 @@ class MessageModel {
         return rows;
     }
 
-    static async findById(id) {
+    static async findById(id, associationId) {
         const [rows] = await pool.execute(
             `SELECT m.*,
                     u.first_name as sender_first_name,
                     u.last_name as sender_last_name
              FROM messages m
              JOIN users u ON m.sender_id = u.id
-             WHERE m.id = ?`,
-            [id]
+             WHERE m.id = ? AND m.association_id = ?`,
+            [id, associationId]
         );
         return rows[0];
     }
 
-    static async findByRecipient(recipientType, recipientId, unreadOnly = false) {
+    static async findByRecipient(associationId, recipientType, recipientId, unreadOnly = false) {
         let query = `
             SELECT m.*,
                    u.first_name as sender_first_name,
                    u.last_name as sender_last_name
             FROM messages m
             JOIN users u ON m.sender_id = u.id
-            WHERE (m.recipient_type = ? AND m.recipient_id = ?)
-               OR m.recipient_type = 'all'
+            WHERE m.association_id = ?
+              AND ((m.recipient_type = ? AND m.recipient_id = ?)
+                   OR m.recipient_type = 'all')
         `;
-        const params = [recipientType, recipientId];
+        const params = [associationId, recipientType, recipientId];
 
         if (unreadOnly) {
             query += ' AND m.is_read = FALSE';
@@ -82,13 +83,14 @@ class MessageModel {
         return rows;
     }
 
-    static async create(data) {
+    static async create(associationId, data) {
         const [result] = await pool.execute(
             `INSERT INTO messages (
-                sender_id, recipient_type, recipient_id, subject,
+                association_id, sender_id, recipient_type, recipient_id, subject,
                 content, message_type, channel
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [
+                associationId,
                 data.sender_id,
                 data.recipient_type,
                 data.recipient_id || null,
@@ -102,56 +104,63 @@ class MessageModel {
         return result.insertId;
     }
 
-    static async markAsRead(id) {
+    static async markAsRead(id, associationId) {
         const [result] = await pool.execute(
-            `UPDATE messages SET is_read = TRUE, read_at = NOW() WHERE id = ?`,
-            [id]
+            `UPDATE messages SET is_read = TRUE, read_at = NOW() WHERE id = ? AND association_id = ?`,
+            [id, associationId]
         );
         return result.affectedRows > 0;
     }
 
-    static async markAllAsRead(recipientType, recipientId) {
+    static async markAllAsRead(associationId, recipientType, recipientId) {
         const [result] = await pool.execute(
             `UPDATE messages
              SET is_read = TRUE, read_at = NOW()
-             WHERE recipient_type = ? AND recipient_id = ? AND is_read = FALSE`,
-            [recipientType, recipientId]
+             WHERE association_id = ? AND recipient_type = ? AND recipient_id = ? AND is_read = FALSE`,
+            [associationId, recipientType, recipientId]
         );
         return result.affectedRows;
     }
 
-    static async delete(id) {
+    static async delete(id, associationId) {
         const [result] = await pool.execute(
-            'DELETE FROM messages WHERE id = ?',
-            [id]
+            'DELETE FROM messages WHERE id = ? AND association_id = ?',
+            [id, associationId]
         );
         return result.affectedRows > 0;
     }
 
-    static async getUnreadCount(recipientType, recipientId) {
+    static async getUnreadCount(associationId, recipientType, recipientId) {
         const [rows] = await pool.execute(
             `SELECT COUNT(*) as count FROM messages
-             WHERE ((recipient_type = ? AND recipient_id = ?) OR recipient_type = 'all')
+             WHERE association_id = ?
+             AND ((recipient_type = ? AND recipient_id = ?) OR recipient_type = 'all')
              AND is_read = FALSE`,
-            [recipientType, recipientId]
+            [associationId, recipientType, recipientId]
         );
         return rows[0].count;
     }
 
-    static async sendToGroup(senderId, groupType, data) {
+    static async sendToGroup(associationId, senderId, groupType, data) {
         let recipients = [];
 
         switch (groupType) {
             case 'all_adherents':
-                const [adherents] = await pool.execute('SELECT id FROM adherents WHERE status = "actif"');
+                const [adherents] = await pool.execute(
+                    'SELECT id FROM adherents WHERE association_id = ? AND status = "actif"',
+                    [associationId]
+                );
                 recipients = adherents.map(a => ({ type: 'adherent', id: a.id }));
                 break;
             case 'all_intervenants':
-                const [intervenants] = await pool.execute('SELECT id FROM intervenants WHERE status = "actif"');
+                const [intervenants] = await pool.execute(
+                    'SELECT id FROM intervenants WHERE association_id = ? AND status = "actif"',
+                    [associationId]
+                );
                 recipients = intervenants.map(i => ({ type: 'intervenant', id: i.id }));
                 break;
             case 'all':
-                return this.create({
+                return this.create(associationId, {
                     sender_id: senderId,
                     recipient_type: 'all',
                     ...data
@@ -160,7 +169,7 @@ class MessageModel {
 
         const results = [];
         for (const recipient of recipients) {
-            const id = await this.create({
+            const id = await this.create(associationId, {
                 sender_id: senderId,
                 recipient_type: recipient.type,
                 recipient_id: recipient.id,
@@ -172,7 +181,7 @@ class MessageModel {
         return results;
     }
 
-    static async getStats() {
+    static async getStats(associationId) {
         const [rows] = await pool.execute(`
             SELECT
                 COUNT(*) as total,
@@ -180,7 +189,8 @@ class MessageModel {
                 SUM(CASE WHEN message_type = 'alert' THEN 1 ELSE 0 END) as alerts,
                 SUM(CASE WHEN message_type = 'reminder' THEN 1 ELSE 0 END) as reminders
             FROM messages
-        `);
+            WHERE association_id = ?
+        `, [associationId]);
         return rows[0];
     }
 }

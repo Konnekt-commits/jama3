@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const cotisationsController = require('../controllers/cotisations/cotisations.controller');
 const { authMiddleware } = require('../middleware/auth.middleware');
+const tenantMiddleware = require('../middleware/tenant.middleware');
 
+// Auth + Tenant middleware pour toutes les routes
 router.use(authMiddleware);
+router.use(tenantMiddleware);
 
 router.get('/', cotisationsController.getAll);
 router.get('/stats', cotisationsController.getStats);

@@ -11,7 +11,7 @@ const getAll = async (req, res) => {
             offset: req.query.offset
         };
 
-        const messages = await MessageModel.findAll(filters);
+        const messages = await MessageModel.findAll(req.associationId, filters);
 
         res.json({
             success: true,
@@ -28,7 +28,7 @@ const getAll = async (req, res) => {
 
 const getById = async (req, res) => {
     try {
-        const message = await MessageModel.findById(req.params.id);
+        const message = await MessageModel.findById(req.params.id, req.associationId);
 
         if (!message) {
             return res.status(404).json({
@@ -53,7 +53,7 @@ const getById = async (req, res) => {
 const getMyMessages = async (req, res) => {
     try {
         const unreadOnly = req.query.unread === 'true';
-        const messages = await MessageModel.findByRecipient('user', req.user.id, unreadOnly);
+        const messages = await MessageModel.findByRecipient(req.associationId, 'user', req.user.id, unreadOnly);
 
         res.json({
             success: true,
@@ -79,12 +79,12 @@ const create = async (req, res) => {
             });
         }
 
-        const messageId = await MessageModel.create({
+        const messageId = await MessageModel.create(req.associationId, {
             sender_id: req.user.id,
             ...req.body
         });
 
-        const message = await MessageModel.findById(messageId);
+        const message = await MessageModel.findById(messageId, req.associationId);
 
         res.status(201).json({
             success: true,
@@ -118,7 +118,7 @@ const sendToGroup = async (req, res) => {
             });
         }
 
-        const results = await MessageModel.sendToGroup(req.user.id, group_type, {
+        const results = await MessageModel.sendToGroup(req.associationId, req.user.id, group_type, {
             subject,
             content,
             message_type,
@@ -142,7 +142,7 @@ const sendToGroup = async (req, res) => {
 
 const markAsRead = async (req, res) => {
     try {
-        const marked = await MessageModel.markAsRead(req.params.id);
+        const marked = await MessageModel.markAsRead(req.params.id, req.associationId);
 
         if (!marked) {
             return res.status(404).json({
@@ -166,7 +166,7 @@ const markAsRead = async (req, res) => {
 
 const markAllAsRead = async (req, res) => {
     try {
-        const count = await MessageModel.markAllAsRead('user', req.user.id);
+        const count = await MessageModel.markAllAsRead(req.associationId, 'user', req.user.id);
 
         res.json({
             success: true,
@@ -183,7 +183,7 @@ const markAllAsRead = async (req, res) => {
 
 const remove = async (req, res) => {
     try {
-        const message = await MessageModel.findById(req.params.id);
+        const message = await MessageModel.findById(req.params.id, req.associationId);
 
         if (!message) {
             return res.status(404).json({
@@ -192,7 +192,7 @@ const remove = async (req, res) => {
             });
         }
 
-        await MessageModel.delete(req.params.id);
+        await MessageModel.delete(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -209,7 +209,7 @@ const remove = async (req, res) => {
 
 const getUnreadCount = async (req, res) => {
     try {
-        const count = await MessageModel.getUnreadCount('user', req.user.id);
+        const count = await MessageModel.getUnreadCount(req.associationId, 'user', req.user.id);
 
         res.json({
             success: true,
@@ -226,7 +226,7 @@ const getUnreadCount = async (req, res) => {
 
 const getStats = async (req, res) => {
     try {
-        const stats = await MessageModel.getStats();
+        const stats = await MessageModel.getStats(req.associationId);
 
         res.json({
             success: true,

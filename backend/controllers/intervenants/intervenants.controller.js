@@ -8,7 +8,7 @@ const getAll = async (req, res) => {
             search: req.query.search
         };
 
-        const intervenants = await IntervenantModel.findAll(filters);
+        const intervenants = await IntervenantModel.findAll(req.associationId, filters);
 
         res.json({
             success: true,
@@ -25,7 +25,7 @@ const getAll = async (req, res) => {
 
 const getById = async (req, res) => {
     try {
-        const intervenant = await IntervenantModel.findById(req.params.id);
+        const intervenant = await IntervenantModel.findById(req.params.id, req.associationId);
 
         if (!intervenant) {
             return res.status(404).json({
@@ -58,8 +58,8 @@ const create = async (req, res) => {
             });
         }
 
-        const intervenantId = await IntervenantModel.create(req.body);
-        const intervenant = await IntervenantModel.findById(intervenantId);
+        const intervenantId = await IntervenantModel.create(req.associationId, req.body);
+        const intervenant = await IntervenantModel.findById(intervenantId, req.associationId);
 
         res.status(201).json({
             success: true,
@@ -76,7 +76,7 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
     try {
-        const intervenant = await IntervenantModel.findById(req.params.id);
+        const intervenant = await IntervenantModel.findById(req.params.id, req.associationId);
 
         if (!intervenant) {
             return res.status(404).json({
@@ -85,7 +85,7 @@ const update = async (req, res) => {
             });
         }
 
-        const updated = await IntervenantModel.update(req.params.id, req.body);
+        const updated = await IntervenantModel.update(req.params.id, req.associationId, req.body);
 
         if (!updated) {
             return res.status(400).json({
@@ -94,7 +94,7 @@ const update = async (req, res) => {
             });
         }
 
-        const updatedIntervenant = await IntervenantModel.findById(req.params.id);
+        const updatedIntervenant = await IntervenantModel.findById(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -111,7 +111,7 @@ const update = async (req, res) => {
 
 const remove = async (req, res) => {
     try {
-        const intervenant = await IntervenantModel.findById(req.params.id);
+        const intervenant = await IntervenantModel.findById(req.params.id, req.associationId);
 
         if (!intervenant) {
             return res.status(404).json({
@@ -120,7 +120,7 @@ const remove = async (req, res) => {
             });
         }
 
-        await IntervenantModel.delete(req.params.id);
+        await IntervenantModel.delete(req.params.id, req.associationId);
 
         res.json({
             success: true,
@@ -137,7 +137,7 @@ const remove = async (req, res) => {
 
 const getEvents = async (req, res) => {
     try {
-        const intervenant = await IntervenantModel.findById(req.params.id);
+        const intervenant = await IntervenantModel.findById(req.params.id, req.associationId);
 
         if (!intervenant) {
             return res.status(404).json({
@@ -151,7 +151,7 @@ const getEvents = async (req, res) => {
             status: req.query.status
         };
 
-        const events = await IntervenantModel.getEvents(req.params.id, filters);
+        const events = await IntervenantModel.getEvents(req.params.id, req.associationId, filters);
 
         res.json({
             success: true,
@@ -168,7 +168,7 @@ const getEvents = async (req, res) => {
 
 const getStats = async (req, res) => {
     try {
-        const intervenant = await IntervenantModel.findById(req.params.id);
+        const intervenant = await IntervenantModel.findById(req.params.id, req.associationId);
 
         if (!intervenant) {
             return res.status(404).json({
@@ -177,7 +177,7 @@ const getStats = async (req, res) => {
             });
         }
 
-        const stats = await IntervenantModel.getStats(req.params.id);
+        const stats = await IntervenantModel.getStats(req.params.id, req.associationId);
 
         res.json({
             success: true,

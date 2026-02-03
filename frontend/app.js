@@ -6,6 +6,8 @@ import { renderNavbar } from './components/navbar/navbar.js';
 import { renderMobileNav } from './components/navbar/mobileNav.js';
 
 import { renderLoginPage, hideLoginUI } from './pages/login/login.js';
+import { renderOnboardingPage } from './pages/onboarding/onboarding.js';
+import { renderMembrePage } from './pages/membre/membre.js';
 import { renderDashboardPage } from './pages/dashboard/dashboard.js';
 import { renderAdherentsPage } from './pages/adherents/adherents.js';
 import { renderCotisationsPage } from './pages/cotisations/cotisations.js';
@@ -13,10 +15,18 @@ import { renderAgendaPage } from './pages/agenda/agenda.js';
 import { renderIntervenantsPage } from './pages/intervenants/intervenants.js';
 import { renderMessagesPage } from './pages/messages/messages.js';
 
-const publicRoutes = ['/login', '/register'];
+const publicRoutes = ['/login', '/register', '/onboarding'];
+const membreRoutes = ['/membre'];
 
+// Routes publiques
 router.addRoute('/login', renderLoginPage);
+router.addRoute('/onboarding', renderOnboardingPage);
+router.addRoute('/register', renderOnboardingPage); // Rediriger register vers onboarding
 
+// Route membre (vue simplifiée mobile)
+router.addRoute('/membre', renderMembrePage, { requiresAuth: true });
+
+// Routes protégées (admin/gestionnaire)
 router.addRoute('/', renderDashboardPage, { requiresAuth: true });
 router.addRoute('/adherents', renderAdherentsPage, { requiresAuth: true });
 router.addRoute('/adherents/:id', renderAdherentsPage, { requiresAuth: true });
@@ -47,7 +57,7 @@ router.setBeforeEach(async (to, from) => {
         return false;
     }
 
-    if (path === '/login' && isAuthenticated) {
+    if ((path === '/login' || path === '/onboarding') && isAuthenticated) {
         router.navigate('/', true);
         return false;
     }
@@ -58,8 +68,9 @@ router.setBeforeEach(async (to, from) => {
 router.setAfterEach((to, from) => {
     const path = window.location.pathname;
     const isPublicRoute = publicRoutes.includes(path);
+    const isMembreRoute = membreRoutes.includes(path);
 
-    if (!isPublicRoute && authService.isAuthenticated()) {
+    if (!isPublicRoute && !isMembreRoute && authService.isAuthenticated()) {
         hideLoginUI();
         renderSidebar();
         renderMobileNav();
@@ -69,7 +80,7 @@ router.setAfterEach((to, from) => {
 });
 
 async function initApp() {
-    console.log('Application Gestion Association - Initialisation');
+    console.log('jama3 - Application de gestion d\'association');
 
     const theme = appState.get('theme');
     document.documentElement.setAttribute('data-theme', theme);

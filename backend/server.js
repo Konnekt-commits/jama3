@@ -9,6 +9,7 @@ const PaymentStatusService = require('./services/paymentStatus.service');
 const RelanceAutoService = require('./services/relanceAuto.service');
 
 const authRoutes = require('./routes/auth.routes');
+const associationsRoutes = require('./routes/associations.routes');
 const adherentsRoutes = require('./routes/adherents.routes');
 const cotisationsRoutes = require('./routes/cotisations.routes');
 const eventsRoutes = require('./routes/events.routes');
@@ -41,6 +42,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/associations', associationsRoutes);
 app.use('/api/adherents', adherentsRoutes);
 app.use('/api/cotisations', cotisationsRoutes);
 app.use('/api/events', eventsRoutes);

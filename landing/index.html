@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gestion Mosquée - Solution complète pour gérer votre association, adhérents, cotisations et événements">
+    <meta name="description" content="SAFA - Solution transparente pour gérer votre association, adhérents, cotisations et événements en toute clarté">
     <meta name="theme-color" content="#8B6914">
-    <title>Gestion Mosquée - Logiciel de gestion pour associations</title>
+    <title>SAFA - Gestion transparente pour associations et mosquées</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -125,11 +125,23 @@
             width: 40px;
             height: 40px;
             background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-full);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+        }
+
+        .logo-text {
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .logo-arabic {
+            font-family: var(--font-arabic);
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-left: -4px;
         }
 
         .nav-links {
@@ -878,9 +890,14 @@
         <div class="navbar-container">
             <a href="#" class="logo">
                 <div class="logo-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" opacity="0.3"/>
+                        <circle cx="12" cy="12" r="6"/>
+                        <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    </svg>
                 </div>
-                Gestion Mosquée
+                <span class="logo-text">SAFA</span>
+                <span class="logo-arabic">صفاء</span>
             </a>
             <ul class="nav-links">
                 <li><a href="#features">Fonctionnalités</a></li>
@@ -900,11 +917,11 @@
             <div class="hero-content">
                 <p class="hero-arabic">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
                 <span class="hero-badge">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    Solution complète de gestion
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.5"/><circle cx="12" cy="12" r="4"/></svg>
+                    Transparence & Clarté
                 </span>
-                <h1>Gérez votre <span>association</span> en toute simplicité</h1>
-                <p>Une plateforme moderne et intuitive pour gérer vos adhérents, cotisations, événements et communications. Conçue spécialement pour les mosquées et associations cultuelles.</p>
+                <h1>Gérez votre <span>association</span> en toute transparence</h1>
+                <p>SAFA (صفاء - Pureté) : une plateforme moderne et transparente pour gérer vos adhérents, cotisations et événements. La clarté au service de votre communauté.</p>
                 <div class="hero-buttons">
                     <a href="#demo" class="btn btn-primary btn-lg">
                         Démarrer gratuitement
@@ -1066,7 +1083,7 @@
                     <div class="phone-mockup">
                         <div class="phone-screen">
                             <div class="phone-header">
-                                <h3>Gestion Mosquée</h3>
+                                <h3>SAFA صفاء</h3>
                             </div>
                             <div class="phone-content">
                                 <div class="mockup-stats" style="margin-bottom: 12px;">
@@ -1199,12 +1216,17 @@
             <div class="footer-grid">
                 <div class="footer-brand">
                     <div class="footer-logo">
-                        <div class="logo-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                        <div class="logo-icon" style="border-radius: 50%;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" opacity="0.3"/>
+                                <circle cx="12" cy="12" r="6"/>
+                                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                            </svg>
                         </div>
-                        Gestion Mosquée
+                        <span style="font-weight: 800; letter-spacing: 2px;">SAFA</span>
+                        <span style="font-family: var(--font-arabic); opacity: 0.7; margin-left: 4px;">صفاء</span>
                     </div>
-                    <p class="footer-description">Solution complète de gestion pour les mosquées et associations cultuelles.</p>
+                    <p class="footer-description">Pureté et transparence dans la gestion de votre association. Une solution claire pour votre communauté.</p>
                 </div>
                 <div>
                     <h4 class="footer-title">Produit</h4>
@@ -1233,7 +1255,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p class="footer-copyright">© 2024 Gestion Mosquée. Tous droits réservés.</p>
+                <p class="footer-copyright">© 2026 SAFA - صفاء. Tous droits réservés.</p>
                 <div class="footer-social">
                     <a href="#" aria-label="Facebook">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>

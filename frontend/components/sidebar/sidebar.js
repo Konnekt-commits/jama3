@@ -20,7 +20,7 @@ const icons = {
     chevronLeft: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`,
     chevronRight: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
     logout: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
-    mosque: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-1.5 2-3 3.5-3 6 0 1.5.5 2.5 1.5 3.5L12 14l1.5-1.5c1-1 1.5-2 1.5-3.5 0-2.5-1.5-4-3-6z"/><path d="M12 14v7"/><path d="M5 21h14"/><path d="M5 21v-4c0-1 .5-2 1.5-2.5"/><path d="M19 21v-4c0-1-.5-2-1.5-2.5"/><circle cx="12" cy="6" r="1"/></svg>`
+    jama3: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>`
 };
 
 export function renderSidebar() {
@@ -86,6 +86,13 @@ export function renderSidebar() {
 
             .sidebar.collapsed .sidebar-logo span {
                 display: none;
+            }
+
+            .sidebar-logo .logo-subtitle {
+                font-size: var(--font-sm);
+                opacity: 0.6;
+                font-weight: normal;
+                margin-left: -4px;
             }
 
             .sidebar-toggle {
@@ -204,8 +211,9 @@ export function renderSidebar() {
 
         <div class="sidebar-header">
             <div class="sidebar-logo">
-                ${icons.mosque}
+                ${icons.jama3}
                 <span>${i18n.t('appName')}</span>
+                <span class="logo-subtitle">${i18n.t('appSubtitle')}</span>
             </div>
             <button class="sidebar-toggle" id="sidebar-toggle" title="${i18n.t('sidebar.collapse')}">
                 ${icons.chevronRight}
