@@ -1,6 +1,6 @@
 # ================================
 # Cloud Build - jama3
-# Déploiement sur Cloud Run
+# Auto-deploy on git push
 # ================================
 
 steps:
@@ -9,9 +9,9 @@ steps:
     args:
       - 'build'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:$COMMIT_SHA'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:$COMMIT_SHA'
       - '-t'
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:latest'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:latest'
       - '.'
 
   # Push to Artifact Registry
@@ -19,7 +19,7 @@ steps:
     args:
       - 'push'
       - '--all-tags'
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app'
 
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -29,9 +29,9 @@ steps:
       - 'deploy'
       - 'jama3'
       - '--image'
-      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:$COMMIT_SHA'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:$COMMIT_SHA'
       - '--region'
-      - '${_REGION}'
+      - 'europe-west1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
@@ -43,30 +43,17 @@ steps:
       - '0'
       - '--max-instances'
       - '10'
-      - '--timeout'
-      - '300'
-      - '--set-env-vars'
-      - 'NODE_ENV=production,JWT_SECRET=${_JWT_SECRET}'
       - '--add-cloudsql-instances'
-      - '${_CLOUD_SQL_CONNECTION}'
+      - 'crm-kanban-b2b:europe-west1:lead-manager-db'
       - '--set-env-vars'
-      - 'DB_HOST=/cloudsql/${_CLOUD_SQL_CONNECTION},DB_USER=${_DB_USER},DB_PASSWORD=${_DB_PASSWORD},DB_NAME=${_DB_NAME}'
-
-substitutions:
-  _REGION: europe-west1
-  _JWT_SECRET: ''
-  _CLOUD_SQL_CONNECTION: ''
-  _DB_USER: ''
-  _DB_PASSWORD: ''
-  _DB_NAME: jama3_db
+      - 'NODE_ENV=production,DB_HOST=/cloudsql/crm-kanban-b2b:europe-west1:lead-manager-db,DB_USER=jama3_user,DB_PASSWORD=Jama3User2026!,DB_NAME=jama3_db,JWT_SECRET=jama3-secret-key-2026'
 
 options:
   logging: CLOUD_LOGGING_ONLY
 
 images:
-  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:$COMMIT_SHA'
-  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:latest'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:$COMMIT_SHA'
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/jama3/jama3-app:latest'
 
 tags:
   - 'jama3'
-  - 'cloud-run'
