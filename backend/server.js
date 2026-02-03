@@ -15,6 +15,7 @@ const cotisationsRoutes = require('./routes/cotisations.routes');
 const eventsRoutes = require('./routes/events.routes');
 const intervenantsRoutes = require('./routes/intervenants.routes');
 const messagesRoutes = require('./routes/messages.routes');
+const migrateRoutes = require('./routes/migrate.routes');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -48,6 +49,7 @@ app.use('/api/cotisations', cotisationsRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/intervenants', intervenantsRoutes);
 app.use('/api/messages', messagesRoutes);
+app.use('/api/migrate', migrateRoutes);
 
 // ========== SERVIR LES FICHIERS STATIQUES ==========
 // En production (Cloud Run), servir le frontend
