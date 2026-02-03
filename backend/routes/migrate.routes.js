@@ -259,4 +259,27 @@ router.get('/seed', async (req, res) => {
     }
 });
 
+// GET /api/migrate/debug - Lister les utilisateurs et associations (temporaire)
+router.get('/debug', async (req, res) => {
+    try {
+        const [users] = await pool.execute('SELECT id, association_id, email, role, first_name, last_name, is_active, is_owner FROM users');
+        const [associations] = await pool.execute('SELECT id, name, slug, is_active FROM associations');
+
+        res.json({
+            success: true,
+            data: {
+                users,
+                associations
+            }
+        });
+    } catch (error) {
+        console.error('Debug error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur debug',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;
