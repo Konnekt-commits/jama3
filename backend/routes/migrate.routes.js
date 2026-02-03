@@ -259,6 +259,47 @@ router.get('/seed', async (req, res) => {
     }
 });
 
+// GET /api/migrate/create-user - Créer un utilisateur spécifique (temporaire)
+router.get('/create-user', async (req, res) => {
+    const bcrypt = require('bcryptjs');
+
+    try {
+        // Créer l'association
+        const [assocResult] = await pool.execute(`
+            INSERT INTO associations (name, slug, email, city)
+            VALUES ('Association Rachid', 'association-rachid', 'r.gountiti@gmail.com', 'Paris')
+            ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)
+        `);
+
+        const associationId = assocResult.insertId || 2;
+
+        // Créer l'utilisateur
+        const hashedPassword = await bcrypt.hash('Altair01', 10);
+        await pool.execute(`
+            INSERT INTO users (association_id, email, password, role, first_name, last_name, is_owner)
+            VALUES (?, 'r.gountiti@gmail.com', ?, 'admin', 'Rachid', 'Gountiti', TRUE)
+            ON DUPLICATE KEY UPDATE password = ?
+        `, [associationId, hashedPassword, hashedPassword]);
+
+        res.json({
+            success: true,
+            message: 'Utilisateur créé',
+            data: {
+                email: 'r.gountiti@gmail.com',
+                password: 'Altair01',
+                association_id: associationId
+            }
+        });
+    } catch (error) {
+        console.error('Create user error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur création utilisateur',
+            error: error.message
+        });
+    }
+});
+
 // GET /api/migrate/debug - Lister les utilisateurs et associations (temporaire)
 router.get('/debug', async (req, res) => {
     try {
