@@ -1,18 +1,29 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
+const dbHost = process.env.DB_HOST || 'localhost';
+
+// Configuration pour Cloud SQL (socket Unix) ou local (TCP)
+const poolConfig = {
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'association_db',
-    port: process.env.DB_PORT || 3306,
+    database: process.env.DB_NAME || 'jama3_db',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
     enableKeepAlive: true,
     keepAliveInitialDelay: 0
-});
+};
+
+// Si DB_HOST commence par /cloudsql/, utiliser socketPath
+if (dbHost.startsWith('/cloudsql/')) {
+    poolConfig.socketPath = dbHost;
+} else {
+    poolConfig.host = dbHost;
+    poolConfig.port = process.env.DB_PORT || 3306;
+}
+
+const pool = mysql.createPool(poolConfig);
 
 const testConnection = async () => {
     try {
@@ -26,6 +37,5 @@ const testConnection = async () => {
     }
 };
 
-// Export pool directement pour compatibilité avec les modèles
 module.exports = pool;
 module.exports.testConnection = testConnection;
