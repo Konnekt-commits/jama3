@@ -2046,7 +2046,7 @@
             updateProgress();
         }
 
-        function completeSignup() {
+        async function completeSignup() {
             if (!validateStep(4)) return;
 
             // Show loading state
@@ -2054,18 +2054,51 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="loading"></span> Création en cours...';
 
-            // Simulate API call
-            setTimeout(() => {
-                currentStep = 5;
-                showStep(5);
-                // Hide progress for success screen
-                document.querySelector('.onboarding-progress').style.display = 'none';
-            }, 1500);
+            // Collect all form data
+            const data = {
+                association_name: document.getElementById('signup-asso').value,
+                email: document.getElementById('signup-email').value,
+                phone: document.getElementById('signup-phone').value || null,
+                city: document.getElementById('signup-city').value,
+                owner_first_name: document.getElementById('signup-firstname').value,
+                owner_last_name: document.getElementById('signup-lastname').value,
+                owner_email: document.getElementById('signup-email').value,
+                owner_password: document.getElementById('signup-password').value
+            };
+
+            try {
+                const response = await fetch('/api/associations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Store token and user data
+                    localStorage.setItem('token', result.data.token);
+                    localStorage.setItem('user', JSON.stringify(result.data.user));
+                    localStorage.setItem('association', JSON.stringify(result.data.association));
+
+                    currentStep = 5;
+                    showStep(5);
+                    document.querySelector('.onboarding-progress').style.display = 'none';
+                } else {
+                    throw new Error(result.message || 'Erreur lors de la création');
+                }
+            } catch (error) {
+                alert('Erreur: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Créer mon compte <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            }
         }
 
         function goToApp() {
-            // Redirect to app
-            window.location.href = '../frontend/index.html';
+            // Redirect to app dashboard
+            window.location.href = '/app#/dashboard';
         }
 
         // Add shake animation
