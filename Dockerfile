@@ -1,13 +1,12 @@
 # ================================
+# jama3 - Gestion d'association
 # Dockerfile pour Cloud Run
-# Application Gestion Association
 # ================================
 
 FROM node:20-alpine
 
-# Métadonnées
-LABEL maintainer="Association"
-LABEL description="API Gestion Association avec Frontend"
+LABEL maintainer="jama3"
+LABEL description="jama3 - Application de gestion d'association"
 
 # Variables d'environnement
 ENV NODE_ENV=production

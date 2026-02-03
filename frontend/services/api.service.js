@@ -2,7 +2,10 @@ import appState from '../store/appState.store.js';
 
 class ApiService {
     constructor() {
-        this.baseUrl = 'http://localhost:3000/api';
+        // En production, utiliser une URL relative
+        this.baseUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3000/api'
+            : '/api';
     }
 
     getHeaders() {
