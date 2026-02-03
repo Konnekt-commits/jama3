@@ -40,8 +40,10 @@ export async function renderAgendaPage() {
             .agenda-nav-btn {
                 width: 36px;
                 height: 36px;
-                border-radius: var(--radius-md);
-                border: 1px solid var(--color-border);
+                border-radius: 50%;
+                border: none;
+                background: rgba(139, 105, 20, 0.1);
+                color: #8B6914;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -49,7 +51,20 @@ export async function renderAgendaPage() {
             }
 
             .agenda-nav-btn:hover {
-                background-color: var(--color-bg-hover);
+                background: rgba(139, 105, 20, 0.2);
+            }
+
+            .agenda-nav-btn:active {
+                transform: scale(0.95);
+            }
+
+            [data-theme="dark"] .agenda-nav-btn {
+                background: rgba(201, 162, 39, 0.15);
+                color: #C9A227;
+            }
+
+            [data-theme="dark"] .agenda-nav-btn:hover {
+                background: rgba(201, 162, 39, 0.25);
             }
 
             .agenda-title {
@@ -58,47 +73,85 @@ export async function renderAgendaPage() {
                 text-transform: capitalize;
             }
 
+            #today-btn {
+                background: rgba(139, 105, 20, 0.1);
+                color: #8B6914;
+                border: none;
+                border-radius: 100px;
+                padding: 8px 16px;
+                font-weight: 500;
+            }
+
+            #today-btn:hover {
+                background: rgba(139, 105, 20, 0.2);
+            }
+
+            [data-theme="dark"] #today-btn {
+                background: rgba(201, 162, 39, 0.15);
+                color: #C9A227;
+            }
+
+            [data-theme="dark"] #today-btn:hover {
+                background: rgba(201, 162, 39, 0.25);
+            }
+
             .agenda-views {
                 display: flex;
-                gap: var(--spacing-xs);
-                background-color: var(--color-bg-secondary);
-                padding: var(--spacing-xs);
-                border-radius: var(--radius-md);
+                gap: 6px;
+                background-color: rgba(139, 105, 20, 0.08);
+                padding: 6px;
+                border-radius: 100px;
             }
 
             .view-btn {
-                padding: var(--spacing-sm) var(--spacing-md);
+                padding: 10px 18px;
                 font-size: var(--font-sm);
-                border-radius: var(--radius-sm);
+                border-radius: 100px;
                 transition: all var(--transition-fast);
+                color: #8B6914;
+                font-weight: 500;
             }
 
             .view-btn.active {
-                background-color: var(--color-card-bg);
-                box-shadow: var(--shadow-sm);
+                background: linear-gradient(135deg, #8B6914, #6B5210);
+                color: white;
+                box-shadow: none;
+            }
+
+            [data-theme="dark"] .agenda-views {
+                background-color: rgba(201, 162, 39, 0.1);
+            }
+
+            [data-theme="dark"] .view-btn {
+                color: #C9A227;
+            }
+
+            [data-theme="dark"] .view-btn.active {
+                background: linear-gradient(135deg, #C9A227, #8B6914);
+                color: #1a1a1a;
             }
 
             .calendar-grid {
                 display: grid;
                 grid-template-columns: repeat(7, 1fr);
                 gap: 1px;
-                background-color: var(--color-border);
-                border: 1px solid var(--color-border);
-                border-radius: var(--radius-lg);
+                background-color: rgba(139, 105, 20, 0.15);
+                border: none;
+                border-radius: 20px;
                 overflow: hidden;
             }
 
             .calendar-header {
-                background-color: var(--color-bg-secondary);
+                background: linear-gradient(180deg, #F5F0E6 0%, #EDE6D6 100%);
                 padding: var(--spacing-sm);
                 text-align: center;
                 font-size: var(--font-sm);
-                font-weight: var(--font-medium);
-                color: var(--color-text-muted);
+                font-weight: 600;
+                color: #8B6914;
             }
 
             .calendar-day {
-                background-color: var(--color-card-bg);
+                background: linear-gradient(180deg, #FAFAFA 0%, #F5F2EC 100%);
                 min-height: 100px;
                 padding: var(--spacing-xs);
                 cursor: pointer;
@@ -106,37 +159,75 @@ export async function renderAgendaPage() {
             }
 
             .calendar-day:hover {
-                background-color: var(--color-bg-hover);
+                background: linear-gradient(180deg, #F5F0E6 0%, #EDE6D6 100%);
             }
 
             .calendar-day.other-month {
-                background-color: var(--color-bg-secondary);
-                color: var(--color-text-muted);
+                background: #F0EDE6;
+                color: #999;
             }
 
             .calendar-day.today {
-                background-color: var(--color-primary-light);
+                background: linear-gradient(180deg, #F5F0E6 0%, #EDE6D6 100%);
             }
 
             .calendar-day-number {
                 font-size: var(--font-sm);
-                font-weight: var(--font-medium);
+                font-weight: 600;
                 margin-bottom: var(--spacing-xs);
+                color: #1a1a1a;
             }
 
             .calendar-day.today .calendar-day-number {
-                color: var(--color-primary);
+                color: #8B6914;
+                font-weight: 700;
+            }
+
+            /* Dark theme calendar */
+            [data-theme="dark"] .calendar-grid {
+                background-color: rgba(201, 162, 39, 0.15);
+            }
+
+            [data-theme="dark"] .calendar-header {
+                background: linear-gradient(180deg, #2a2520 0%, #1f1b17 100%);
+                color: #C9A227;
+            }
+
+            [data-theme="dark"] .calendar-day {
+                background: linear-gradient(180deg, #1a1a1a 0%, #1f1b17 100%);
+            }
+
+            [data-theme="dark"] .calendar-day:hover {
+                background: linear-gradient(180deg, #2a2520 0%, #252220 100%);
+            }
+
+            [data-theme="dark"] .calendar-day.other-month {
+                background: #1a1815;
+                color: #666;
+            }
+
+            [data-theme="dark"] .calendar-day.today {
+                background: linear-gradient(180deg, #2a2520 0%, #252220 100%);
+            }
+
+            [data-theme="dark"] .calendar-day-number {
+                color: #fff;
+            }
+
+            [data-theme="dark"] .calendar-day.today .calendar-day-number {
+                color: #C9A227;
             }
 
             .calendar-event {
                 font-size: var(--font-xs);
-                padding: 2px var(--spacing-xs);
-                border-radius: var(--radius-sm);
-                margin-bottom: 2px;
+                padding: 4px 8px;
+                border-radius: 6px;
+                margin-bottom: 3px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 color: white;
+                font-weight: 500;
             }
 
             .events-list {
@@ -159,13 +250,18 @@ export async function renderAgendaPage() {
             .events-day-date {
                 width: 48px;
                 height: 48px;
-                background-color: var(--color-primary-light);
-                color: var(--color-primary);
-                border-radius: var(--radius-md);
+                background: linear-gradient(145deg, #8B6914, #6B5210);
+                color: white;
+                border-radius: 12px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
+            }
+
+            [data-theme="dark"] .events-day-date {
+                background: linear-gradient(145deg, #C9A227, #8B6914);
+                color: #1a1a1a;
             }
 
             .events-day-date-num {
@@ -189,10 +285,10 @@ export async function renderAgendaPage() {
                 right: var(--spacing-lg);
                 width: 56px;
                 height: 56px;
-                border-radius: var(--radius-full);
-                background-color: var(--color-primary);
+                border-radius: 50%;
+                background: linear-gradient(135deg, #8B6914, #6B5210);
                 color: white;
-                box-shadow: var(--shadow-lg);
+                box-shadow: 0 4px 24px rgba(139, 105, 20, 0.3);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -201,8 +297,17 @@ export async function renderAgendaPage() {
             }
 
             .add-btn:hover {
-                background-color: var(--color-primary-hover);
+                background: linear-gradient(135deg, #9B7924, #7B6220);
                 transform: scale(1.05);
+            }
+
+            .add-btn:active {
+                transform: scale(0.95);
+            }
+
+            [data-theme="dark"] .add-btn {
+                background: linear-gradient(135deg, #C9A227, #8B6914);
+                box-shadow: 0 4px 24px rgba(201, 162, 39, 0.3);
             }
 
             @media (min-width: 1024px) {
@@ -225,9 +330,13 @@ export async function renderAgendaPage() {
                     display: block;
                     width: 6px;
                     height: 6px;
-                    background-color: var(--color-primary);
-                    border-radius: var(--radius-full);
+                    background-color: #8B6914;
+                    border-radius: 50%;
                     margin: var(--spacing-xs) auto 0;
+                }
+
+                [data-theme="dark"] .calendar-day.has-events::after {
+                    background-color: #C9A227;
                 }
             }
         </style>
