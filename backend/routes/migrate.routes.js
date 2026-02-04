@@ -427,6 +427,245 @@ router.get('/add-tokens-table', async (req, res) => {
     }
 });
 
+// GET /api/migrate/seed-school - Créer des données de démo École Arabe
+router.get('/seed-school', async (req, res) => {
+    try {
+        // Récupérer l'association de test (Mosquée Test Paris)
+        const [assocs] = await pool.execute('SELECT id FROM associations WHERE slug = ? LIMIT 1', ['mosquee-test-paris']);
+        let associationId = assocs[0]?.id;
+
+        if (!associationId) {
+            // Créer l'association si elle n'existe pas
+            const [result] = await pool.execute(`
+                INSERT INTO associations (name, slug, email, city)
+                VALUES ('Mosquée Test Paris', 'mosquee-test-paris', 'contact@mosquee-test.fr', 'Paris')
+            `);
+            associationId = result.insertId;
+        }
+
+        // Récupérer les adhérents existants pour les lier comme parents
+        const [adherents] = await pool.execute(
+            'SELECT id, first_name, last_name FROM adherents WHERE association_id = ? LIMIT 10',
+            [associationId]
+        );
+
+        // Créer quelques intervenants/enseignants s'il n'en existe pas
+        const [existingTeachers] = await pool.execute(
+            'SELECT id FROM intervenants WHERE association_id = ?',
+            [associationId]
+        );
+
+        let teacherIds = existingTeachers.map(t => t.id);
+
+        if (teacherIds.length === 0) {
+            const teachers = [
+                ['Sheikh', 'Ahmed', 'sheikh.ahmed@test.com', 'Coran'],
+                ['Ustadh', 'Karim', 'ustadh.karim@test.com', 'Arabe'],
+                ['Imam', 'Youssef', 'imam.youssef@test.com', 'Fiqh']
+            ];
+
+            for (const [first, last, email, specialty] of teachers) {
+                const [result] = await pool.execute(`
+                    INSERT INTO intervenants (association_id, first_name, last_name, email, specialty, is_active)
+                    VALUES (?, ?, ?, ?, ?, TRUE)
+                `, [associationId, first, last, email, specialty]);
+                teacherIds.push(result.insertId);
+            }
+        }
+
+        // Créer des classes
+        const classesData = [
+            { name: 'Coran - Niveau 1 (Débutants)', subject: 'coran', level: 'debutant', schedule: { jour: 'Samedi', heure_debut: '10:00', heure_fin: '12:00' }, room: 'Salle 1', max: 15 },
+            { name: 'Coran - Niveau 2 (Intermédiaire)', subject: 'coran', level: 'intermediaire', schedule: { jour: 'Samedi', heure_debut: '14:00', heure_fin: '16:00' }, room: 'Salle 1', max: 12 },
+            { name: 'Coran - Niveau 3 (Avancé)', subject: 'coran', level: 'avance', schedule: { jour: 'Dimanche', heure_debut: '10:00', heure_fin: '12:00' }, room: 'Salle 1', max: 10 },
+            { name: 'Arabe - Alphabet & Lecture', subject: 'arabe', level: 'debutant', schedule: { jour: 'Mercredi', heure_debut: '14:00', heure_fin: '16:00' }, room: 'Salle 2', max: 20 },
+            { name: 'Arabe - Grammaire', subject: 'arabe', level: 'intermediaire', schedule: { jour: 'Samedi', heure_debut: '10:00', heure_fin: '12:00' }, room: 'Salle 2', max: 15 },
+            { name: 'Fiqh - Les bases', subject: 'fiqh', level: 'debutant', schedule: { jour: 'Dimanche', heure_debut: '14:00', heure_fin: '15:30' }, room: 'Salle 3', max: 25 },
+            { name: 'Sira du Prophète ﷺ', subject: 'sira', level: 'debutant', schedule: { jour: 'Dimanche', heure_debut: '16:00', heure_fin: '17:30' }, room: 'Salle 3', max: 30 }
+        ];
+
+        const classIds = [];
+        for (let i = 0; i < classesData.length; i++) {
+            const c = classesData[i];
+            const teacherId = teacherIds[i % teacherIds.length];
+            const [existing] = await pool.execute(
+                'SELECT id FROM school_classes WHERE association_id = ? AND name = ?',
+                [associationId, c.name]
+            );
+
+            if (existing.length === 0) {
+                const [result] = await pool.execute(`
+                    INSERT INTO school_classes (association_id, name, subject, level, teacher_id, max_capacity, schedule, room, academic_year, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, '2024-2025', 'active')
+                `, [associationId, c.name, c.subject, c.level, teacherId, c.max, JSON.stringify(c.schedule), c.room]);
+                classIds.push(result.insertId);
+            } else {
+                classIds.push(existing[0].id);
+            }
+        }
+
+        // Créer des élèves
+        const studentsData = [
+            { first: 'Adam', last: 'Benali', birth: '2015-03-15', gender: 'M', level: 'debutant' },
+            { first: 'Yasmine', last: 'Kaddouri', birth: '2014-07-22', gender: 'F', level: 'debutant' },
+            { first: 'Mohammed', last: 'El Amrani', birth: '2013-11-08', gender: 'M', level: 'intermediaire' },
+            { first: 'Fatima', last: 'Bouaziz', birth: '2012-05-30', gender: 'F', level: 'intermediaire' },
+            { first: 'Youssef', last: 'Tazi', birth: '2016-01-18', gender: 'M', level: 'debutant' },
+            { first: 'Aicha', last: 'Mansouri', birth: '2011-09-25', gender: 'F', level: 'avance' },
+            { first: 'Ibrahim', last: 'Fassi', birth: '2014-12-03', gender: 'M', level: 'intermediaire' },
+            { first: 'Khadija', last: 'Alaoui', birth: '2015-06-14', gender: 'F', level: 'debutant' },
+            { first: 'Omar', last: 'Benjelloun', birth: '2013-02-28', gender: 'M', level: 'intermediaire' },
+            { first: 'Meryem', last: 'Chraibi', birth: '2012-08-17', gender: 'F', level: 'avance' },
+            { first: 'Hamza', last: 'Kettani', birth: '2016-04-09', gender: 'M', level: 'debutant' },
+            { first: 'Sara', last: 'Bennani', birth: '2014-10-21', gender: 'F', level: 'debutant' },
+            { first: 'Anas', last: 'Idrissi', birth: '2011-07-06', gender: 'M', level: 'avance' },
+            { first: 'Nour', last: 'Slimani', birth: '2015-11-30', gender: 'F', level: 'debutant' },
+            { first: 'Bilal', last: 'Ouazzani', birth: '2013-09-12', gender: 'M', level: 'intermediaire' }
+        ];
+
+        const studentIds = [];
+        const year = new Date().getFullYear();
+
+        for (let i = 0; i < studentsData.length; i++) {
+            const s = studentsData[i];
+            const studentNumber = `ELV-${year}-${(i + 1).toString().padStart(3, '0')}`;
+            const parentId = adherents[i % adherents.length]?.id || null;
+
+            const [existing] = await pool.execute(
+                'SELECT id FROM students WHERE association_id = ? AND student_number = ?',
+                [associationId, studentNumber]
+            );
+
+            if (existing.length === 0) {
+                const [result] = await pool.execute(`
+                    INSERT INTO students (association_id, student_number, first_name, last_name, birth_date, gender, parent_id, parent_relation, level, enrollment_date, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'pere', ?, CURDATE(), 'actif')
+                `, [associationId, studentNumber, s.first, s.last, s.birth, s.gender, parentId, s.level]);
+                studentIds.push(result.insertId);
+            } else {
+                studentIds.push(existing[0].id);
+            }
+        }
+
+        // Inscrire les élèves aux classes
+        for (const studentId of studentIds) {
+            // Chaque élève inscrit à 2-3 classes aléatoires
+            const numClasses = 2 + Math.floor(Math.random() * 2);
+            const shuffled = [...classIds].sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < numClasses && i < shuffled.length; i++) {
+                await pool.execute(`
+                    INSERT INTO class_enrollments (association_id, student_id, class_id, enrollment_date, status)
+                    VALUES (?, ?, ?, CURDATE(), 'active')
+                    ON DUPLICATE KEY UPDATE status = 'active'
+                `, [associationId, studentId, shuffled[i]]);
+            }
+        }
+
+        // Créer des présences pour les 4 dernières semaines
+        const today = new Date();
+        for (let week = 0; week < 4; week++) {
+            for (const classId of classIds) {
+                const sessionDate = new Date(today);
+                sessionDate.setDate(sessionDate.getDate() - (week * 7));
+                const dateStr = sessionDate.toISOString().split('T')[0];
+
+                // Récupérer les élèves de cette classe
+                const [enrolled] = await pool.execute(
+                    'SELECT student_id FROM class_enrollments WHERE class_id = ? AND status = "active"',
+                    [classId]
+                );
+
+                for (const { student_id } of enrolled) {
+                    const rand = Math.random();
+                    let status = 'present';
+                    if (rand < 0.1) status = 'absent';
+                    else if (rand < 0.15) status = 'excuse';
+                    else if (rand < 0.2) status = 'retard';
+
+                    await pool.execute(`
+                        INSERT INTO school_attendance (association_id, class_id, student_id, session_date, status)
+                        VALUES (?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE status = VALUES(status)
+                    `, [associationId, classId, student_id, dateStr, status]);
+                }
+            }
+        }
+
+        // Créer des frais de scolarité
+        const months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier'];
+        let feeCounter = 1;
+
+        for (const studentId of studentIds) {
+            for (const month of months) {
+                const feeNumber = `SCO-2024${months.indexOf(month) + 9}-${feeCounter.toString().padStart(4, '0')}`;
+                const isPaid = Math.random() > 0.3;
+                const isPartial = !isPaid && Math.random() > 0.5;
+
+                const amount = 50;
+                const paidAmount = isPaid ? amount : (isPartial ? 25 : 0);
+                const status = isPaid ? 'paid' : (isPartial ? 'partial' : (Math.random() > 0.5 ? 'pending' : 'overdue'));
+
+                await pool.execute(`
+                    INSERT INTO school_fees (association_id, student_id, fee_number, academic_year, period, period_label, amount, paid_amount, payment_status, due_date, payment_method)
+                    VALUES (?, ?, ?, '2024-2025', 'mensuel', ?, ?, ?, ?, DATE_SUB(CURDATE(), INTERVAL ? MONTH), ?)
+                    ON DUPLICATE KEY UPDATE payment_status = VALUES(payment_status)
+                `, [
+                    associationId, studentId, feeNumber, `${month} 2024`, amount, paidAmount, status,
+                    months.length - months.indexOf(month),
+                    isPaid ? 'cash' : null
+                ]);
+
+                feeCounter++;
+            }
+        }
+
+        // Créer quelques évaluations
+        const evalTypes = ['controle', 'oral', 'memorisation'];
+        const subjects = ['Sourate Al-Fatiha', 'Sourate Al-Ikhlas', 'Sourate An-Nas', 'Alphabet arabe', 'Vocabulaire', 'Ablutions'];
+
+        for (const studentId of studentIds) {
+            const numEvals = 2 + Math.floor(Math.random() * 3);
+
+            for (let i = 0; i < numEvals; i++) {
+                const classId = classIds[Math.floor(Math.random() * classIds.length)];
+                const evalDate = new Date();
+                evalDate.setDate(evalDate.getDate() - Math.floor(Math.random() * 60));
+                const dateStr = evalDate.toISOString().split('T')[0];
+
+                const score = 10 + Math.floor(Math.random() * 11); // 10-20
+                const type = evalTypes[Math.floor(Math.random() * evalTypes.length)];
+                const subject = subjects[Math.floor(Math.random() * subjects.length)];
+                const teacherId = teacherIds[Math.floor(Math.random() * teacherIds.length)];
+
+                await pool.execute(`
+                    INSERT INTO school_evaluations (association_id, student_id, class_id, evaluation_date, type, subject_detail, score, max_score, evaluated_by)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 20, ?)
+                `, [associationId, studentId, classId, dateStr, type, subject, score, teacherId]);
+            }
+        }
+
+        res.json({
+            success: true,
+            message: 'Données de démo École Arabe créées',
+            data: {
+                association_id: associationId,
+                classes_created: classIds.length,
+                students_created: studentIds.length,
+                teachers: teacherIds.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Seed school error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur création données école',
+            error: error.message
+        });
+    }
+});
+
 // GET /api/migrate/school-tables - Créer les tables École Arabe
 router.get('/school-tables', async (req, res) => {
     const results = [];
