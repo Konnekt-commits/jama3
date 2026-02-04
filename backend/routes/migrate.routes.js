@@ -337,12 +337,14 @@ router.get('/debug', async (req, res) => {
     try {
         const [users] = await pool.execute('SELECT id, association_id, email, role, first_name, last_name, is_active, is_owner FROM users');
         const [associations] = await pool.execute('SELECT id, name, slug, is_active FROM associations');
+        const [adherents] = await pool.execute('SELECT id, association_id, first_name, last_name, email, phone, status FROM adherents');
 
         res.json({
             success: true,
             data: {
                 users,
-                associations
+                associations,
+                adherents
             }
         });
     } catch (error) {
