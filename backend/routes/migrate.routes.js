@@ -978,6 +978,390 @@ router.get('/school-tables', async (req, res) => {
     }
 });
 
+// GET /api/migrate/seed-all-for-association/:assocId - Créer TOUTES les données de démo pour une association spécifique
+router.get('/seed-all-for-association/:assocId', async (req, res) => {
+    const associationId = parseInt(req.params.assocId);
+    const results = [];
+
+    try {
+        // ========== CRÉER DES ADHÉRENTS ==========
+        const adherentsData = [
+            ['Mohamed', 'Ali', 'mohamed.ali@test.com', '0612345678'],
+            ['Fatima', 'Hassan', 'fatima.hassan@test.com', '0623456789'],
+            ['Ahmed', 'Benali', 'ahmed.benali@test.com', '0634567890'],
+            ['Khadija', 'Mansouri', 'khadija.mansouri@test.com', '0645678901'],
+            ['Youssef', 'Tazi', 'youssef.tazi@test.com', '0656789012'],
+            ['Aicha', 'Kaddouri', 'aicha.kaddouri@test.com', '0667890123'],
+            ['Omar', 'Fassi', 'omar.fassi@test.com', '0678901234'],
+            ['Meryem', 'Alaoui', 'meryem.alaoui@test.com', '0689012345']
+        ];
+
+        let adherentCount = 0;
+        for (const [first, last, email, phone] of adherentsData) {
+            const [existing] = await pool.execute(
+                'SELECT id FROM adherents WHERE association_id = ? AND email = ?',
+                [associationId, email]
+            );
+            if (existing.length === 0) {
+                const memberNumber = 'ADH-' + new Date().getFullYear() + '-' + String(adherentCount + 1).padStart(3, '0');
+                await pool.execute(
+                    'INSERT INTO adherents (association_id, member_number, first_name, last_name, email, phone, status, membership_start) VALUES (?, ?, ?, ?, ?, ?, "actif", CURDATE())',
+                    [associationId, memberNumber, first, last, email, phone]
+                );
+                adherentCount++;
+            }
+        }
+        results.push('✓ ' + adherentCount + ' adhérents créés');
+
+        // Récupérer les adhérents
+        const [adherents] = await pool.execute(
+            'SELECT id, first_name, last_name FROM adherents WHERE association_id = ?',
+            [associationId]
+        );
+
+        // ========== CRÉER DES ENSEIGNANTS (intervenants) ==========
+        const teachersData = [
+            ['Sheikh', 'Ahmed', 'sheikh.ahmed@school.com', 'Coran'],
+            ['Ustadh', 'Karim', 'ustadh.karim@school.com', 'Arabe'],
+            ['Imam', 'Youssef', 'imam.youssef@school.com', 'Fiqh']
+        ];
+
+        let teacherCount = 0;
+        for (const [first, last, email, specialty] of teachersData) {
+            const [existing] = await pool.execute(
+                'SELECT id FROM intervenants WHERE association_id = ? AND email = ?',
+                [associationId, email]
+            );
+            if (existing.length === 0) {
+                await pool.execute(
+                    'INSERT INTO intervenants (association_id, first_name, last_name, email, specialty, is_active) VALUES (?, ?, ?, ?, ?, TRUE)',
+                    [associationId, first, last, email, specialty]
+                );
+                teacherCount++;
+            }
+        }
+        results.push('✓ ' + teacherCount + ' enseignants créés');
+
+        const [teachers] = await pool.execute(
+            'SELECT id FROM intervenants WHERE association_id = ?',
+            [associationId]
+        );
+
+        // ========== CRÉER DES CLASSES ==========
+        const classesData = [
+            { name: 'Coran - Niveau 1 (Débutants)', subject: 'coran', level: 'debutant', schedule: { jour: 'Samedi', heure_debut: '10:00', heure_fin: '12:00' }, room: 'Salle 1', max: 15 },
+            { name: 'Coran - Niveau 2 (Intermédiaire)', subject: 'coran', level: 'intermediaire', schedule: { jour: 'Samedi', heure_debut: '14:00', heure_fin: '16:00' }, room: 'Salle 1', max: 12 },
+            { name: 'Coran - Niveau 3 (Avancé)', subject: 'coran', level: 'avance', schedule: { jour: 'Dimanche', heure_debut: '10:00', heure_fin: '12:00' }, room: 'Salle 1', max: 10 },
+            { name: 'Arabe - Alphabet & Lecture', subject: 'arabe', level: 'debutant', schedule: { jour: 'Mercredi', heure_debut: '14:00', heure_fin: '16:00' }, room: 'Salle 2', max: 20 },
+            { name: 'Arabe - Grammaire', subject: 'arabe', level: 'intermediaire', schedule: { jour: 'Samedi', heure_debut: '10:00', heure_fin: '12:00' }, room: 'Salle 2', max: 15 },
+            { name: 'Fiqh - Les bases', subject: 'fiqh', level: 'debutant', schedule: { jour: 'Dimanche', heure_debut: '14:00', heure_fin: '15:30' }, room: 'Salle 3', max: 25 },
+            { name: 'Sira du Prophète ﷺ', subject: 'sira', level: 'debutant', schedule: { jour: 'Dimanche', heure_debut: '16:00', heure_fin: '17:30' }, room: 'Salle 3', max: 30 }
+        ];
+
+        const classIds = [];
+        for (let i = 0; i < classesData.length; i++) {
+            const c = classesData[i];
+            const teacherId = teachers[i % teachers.length]?.id;
+            const [existing] = await pool.execute(
+                'SELECT id FROM school_classes WHERE association_id = ? AND name = ?',
+                [associationId, c.name]
+            );
+            if (existing.length === 0) {
+                const [result] = await pool.execute(
+                    'INSERT INTO school_classes (association_id, name, subject, level, teacher_id, max_capacity, schedule, room, academic_year, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, "2024-2025", "active")',
+                    [associationId, c.name, c.subject, c.level, teacherId, c.max, JSON.stringify(c.schedule), c.room]
+                );
+                classIds.push(result.insertId);
+            } else {
+                classIds.push(existing[0].id);
+            }
+        }
+        results.push('✓ ' + classIds.length + ' classes créées');
+
+        // ========== CRÉER DES ÉLÈVES ==========
+        const studentsData = [
+            { first: 'Adam', last: 'Benali', birth: '2015-03-15', gender: 'M', level: 'debutant' },
+            { first: 'Yasmine', last: 'Kaddouri', birth: '2014-07-22', gender: 'F', level: 'debutant' },
+            { first: 'Mohammed', last: 'El Amrani', birth: '2013-11-08', gender: 'M', level: 'intermediaire' },
+            { first: 'Fatima', last: 'Bouaziz', birth: '2012-05-30', gender: 'F', level: 'intermediaire' },
+            { first: 'Youssef', last: 'Tazi', birth: '2016-01-18', gender: 'M', level: 'debutant' },
+            { first: 'Aicha', last: 'Mansouri', birth: '2011-09-25', gender: 'F', level: 'avance' },
+            { first: 'Ibrahim', last: 'Fassi', birth: '2014-12-03', gender: 'M', level: 'intermediaire' },
+            { first: 'Khadija', last: 'Alaoui', birth: '2015-06-14', gender: 'F', level: 'debutant' },
+            { first: 'Omar', last: 'Benjelloun', birth: '2013-02-28', gender: 'M', level: 'intermediaire' },
+            { first: 'Meryem', last: 'Chraibi', birth: '2012-08-17', gender: 'F', level: 'avance' },
+            { first: 'Hamza', last: 'Kettani', birth: '2016-04-09', gender: 'M', level: 'debutant' },
+            { first: 'Sara', last: 'Bennani', birth: '2014-10-21', gender: 'F', level: 'debutant' },
+            { first: 'Anas', last: 'Idrissi', birth: '2011-07-06', gender: 'M', level: 'avance' },
+            { first: 'Nour', last: 'Slimani', birth: '2015-11-30', gender: 'F', level: 'debutant' },
+            { first: 'Bilal', last: 'Ouazzani', birth: '2013-09-12', gender: 'M', level: 'intermediaire' }
+        ];
+
+        const studentIds = [];
+        const year = new Date().getFullYear();
+        for (let i = 0; i < studentsData.length; i++) {
+            const s = studentsData[i];
+            const studentNumber = 'ELV-' + year + '-' + String(i + 1).padStart(3, '0');
+            const parentId = adherents[i % adherents.length]?.id || null;
+
+            const [existing] = await pool.execute(
+                'SELECT id FROM students WHERE association_id = ? AND student_number = ?',
+                [associationId, studentNumber]
+            );
+            if (existing.length === 0) {
+                const [result] = await pool.execute(
+                    'INSERT INTO students (association_id, student_number, first_name, last_name, birth_date, gender, parent_id, parent_relation, level, enrollment_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, "pere", ?, CURDATE(), "actif")',
+                    [associationId, studentNumber, s.first, s.last, s.birth, s.gender, parentId, s.level]
+                );
+                studentIds.push(result.insertId);
+            } else {
+                studentIds.push(existing[0].id);
+            }
+        }
+        results.push('✓ ' + studentIds.length + ' élèves créés');
+
+        // ========== INSCRIPTIONS AUX CLASSES ==========
+        let enrollmentCount = 0;
+        for (const studentId of studentIds) {
+            const numClasses = 2 + Math.floor(Math.random() * 2);
+            const shuffled = [...classIds].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < numClasses && i < shuffled.length; i++) {
+                try {
+                    await pool.execute(
+                        'INSERT INTO class_enrollments (association_id, student_id, class_id, enrollment_date, status) VALUES (?, ?, ?, CURDATE(), "active") ON DUPLICATE KEY UPDATE status = "active"',
+                        [associationId, studentId, shuffled[i]]
+                    );
+                    enrollmentCount++;
+                } catch (e) {}
+            }
+        }
+        results.push('✓ ' + enrollmentCount + ' inscriptions aux classes');
+
+        // ========== PRÉSENCES (4 dernières semaines) ==========
+        let attendanceCount = 0;
+        const today = new Date();
+        for (let week = 0; week < 4; week++) {
+            for (const classId of classIds) {
+                const sessionDate = new Date(today);
+                sessionDate.setDate(sessionDate.getDate() - (week * 7));
+                const dateStr = sessionDate.toISOString().split('T')[0];
+
+                const [enrolled] = await pool.execute(
+                    'SELECT student_id FROM class_enrollments WHERE class_id = ? AND status = "active"',
+                    [classId]
+                );
+
+                for (const { student_id } of enrolled) {
+                    const rand = Math.random();
+                    let status = 'present';
+                    if (rand < 0.1) status = 'absent';
+                    else if (rand < 0.15) status = 'excuse';
+                    else if (rand < 0.2) status = 'retard';
+
+                    try {
+                        await pool.execute(
+                            'INSERT INTO school_attendance (association_id, class_id, student_id, session_date, status) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE status = VALUES(status)',
+                            [associationId, classId, student_id, dateStr, status]
+                        );
+                        attendanceCount++;
+                    } catch (e) {}
+                }
+            }
+        }
+        results.push('✓ ' + attendanceCount + ' présences enregistrées');
+
+        // ========== FRAIS DE SCOLARITÉ ==========
+        const months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier'];
+        let feeCount = 0;
+        for (const studentId of studentIds) {
+            for (let m = 0; m < months.length; m++) {
+                const feeNumber = 'SCO-2024' + String(m + 9).padStart(2, '0') + '-' + String(feeCount + 1).padStart(4, '0');
+                const isPaid = Math.random() > 0.3;
+                const isPartial = !isPaid && Math.random() > 0.5;
+                const amount = 50;
+                const paidAmount = isPaid ? amount : (isPartial ? 25 : 0);
+                const status = isPaid ? 'paid' : (isPartial ? 'partial' : (Math.random() > 0.5 ? 'pending' : 'overdue'));
+
+                try {
+                    await pool.execute(
+                        'INSERT INTO school_fees (association_id, student_id, fee_number, academic_year, period, period_label, amount, paid_amount, payment_status, due_date, payment_method) VALUES (?, ?, ?, "2024-2025", "mensuel", ?, ?, ?, ?, DATE_SUB(CURDATE(), INTERVAL ? MONTH), ?) ON DUPLICATE KEY UPDATE payment_status = VALUES(payment_status)',
+                        [associationId, studentId, feeNumber, months[m] + ' 2024', amount, paidAmount, status, months.length - m, isPaid ? 'cash' : null]
+                    );
+                    feeCount++;
+                } catch (e) {}
+            }
+        }
+        results.push('✓ ' + feeCount + ' frais de scolarité créés');
+
+        // ========== ÉVALUATIONS ==========
+        const evalTypes = ['controle', 'oral', 'memorisation'];
+        const subjects = ['Sourate Al-Fatiha', 'Sourate Al-Ikhlas', 'Alphabet arabe', 'Vocabulaire', 'Ablutions'];
+        let evalCount = 0;
+        for (const studentId of studentIds) {
+            const numEvals = 2 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < numEvals; i++) {
+                const classId = classIds[Math.floor(Math.random() * classIds.length)];
+                const evalDate = new Date();
+                evalDate.setDate(evalDate.getDate() - Math.floor(Math.random() * 60));
+                const score = 10 + Math.floor(Math.random() * 11);
+                const type = evalTypes[Math.floor(Math.random() * evalTypes.length)];
+                const subject = subjects[Math.floor(Math.random() * subjects.length)];
+                const teacherId = teachers[Math.floor(Math.random() * teachers.length)]?.id;
+
+                await pool.execute(
+                    'INSERT INTO school_evaluations (association_id, student_id, class_id, evaluation_date, type, subject_detail, score, max_score, evaluated_by) VALUES (?, ?, ?, ?, ?, ?, ?, 20, ?)',
+                    [associationId, studentId, classId, evalDate.toISOString().split('T')[0], type, subject, score, teacherId]
+                );
+                evalCount++;
+            }
+        }
+        results.push('✓ ' + evalCount + ' évaluations créées');
+
+        // Get admin for created_by
+        const [admins] = await pool.execute(
+            'SELECT id FROM users WHERE association_id = ? LIMIT 1',
+            [associationId]
+        );
+        const adminId = admins[0]?.id || 1;
+
+        // ========== PROGRAMMES PÉDAGOGIQUES ==========
+        const [classes] = await pool.execute('SELECT id, name, subject FROM school_classes WHERE association_id = ?', [associationId]);
+        const programsData = [
+            { subjectMatch: 'coran', levelMatch: 'Niveau 1', title: 'Programme Coran Débutant - T1', description: 'Mémorisation des sourates courtes', objectives: ['Mémoriser Al-Fatiha', 'Apprendre les 5 dernières sourates'], status: 'active' },
+            { subjectMatch: 'coran', levelMatch: 'Niveau 2', title: 'Programme Coran Intermédiaire', description: 'Juz Amma et Tajwid avancé', objectives: ['Compléter Juz Amma', 'Maîtriser le Tajwid'], status: 'active' },
+            { subjectMatch: 'arabe', levelMatch: 'Alphabet', title: 'Programme Arabe Débutant', description: 'Alphabet et lecture de base', objectives: ['Reconnaître les lettres', 'Lire les voyelles'], status: 'active' },
+            { subjectMatch: 'fiqh', levelMatch: '', title: 'Programme Fiqh - Bases', description: 'Les piliers de l\'Islam', objectives: ['Les 5 piliers', 'Les ablutions', 'La prière'], status: 'active' },
+            { subjectMatch: 'sira', levelMatch: '', title: 'Programme Sira', description: 'Vie du Prophète ﷺ', objectives: ['Naissance', 'Révélation', 'Hégire'], status: 'draft' }
+        ];
+
+        const programIds = [];
+        for (const prog of programsData) {
+            const matchClass = classes.find(c => c.subject === prog.subjectMatch || c.name.includes(prog.levelMatch));
+            if (matchClass) {
+                const [existing] = await pool.execute('SELECT id FROM school_programs WHERE association_id = ? AND title = ?', [associationId, prog.title]);
+                if (existing.length === 0) {
+                    const [result] = await pool.execute(
+                        'INSERT INTO school_programs (association_id, class_id, title, description, objectives, status, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        [associationId, matchClass.id, prog.title, prog.description, JSON.stringify(prog.objectives), prog.status, adminId]
+                    );
+                    programIds.push(result.insertId);
+                }
+            }
+        }
+        results.push('✓ ' + programIds.length + ' programmes créés');
+
+        // ========== CONTENUS ==========
+        let contentCount = 0;
+        for (let i = 0; i < programIds.length && i < 3; i++) {
+            const contents = [
+                { title: 'Audio récitation', type: 'audio', url: 'https://example.com/audio.mp3' },
+                { title: 'Support PDF', type: 'pdf', url: 'https://example.com/support.pdf' },
+                { title: 'Vidéo explicative', type: 'video', url: 'https://youtube.com/watch?v=example' }
+            ];
+            for (const c of contents) {
+                await pool.execute(
+                    'INSERT INTO school_content (association_id, program_id, title, content_type, url, created_by) VALUES (?, ?, ?, ?, ?, ?)',
+                    [associationId, programIds[i], c.title, c.type, c.url, adminId]
+                );
+                contentCount++;
+            }
+        }
+        results.push('✓ ' + contentCount + ' contenus créés');
+
+        // ========== ANNONCES ==========
+        const announcements = [
+            { title: 'Rentrée des classes', content: 'La rentrée de l\'école arabe aura lieu le samedi 7 septembre. Merci d\'accompagner vos enfants.', priority: 'high', published: true },
+            { title: 'Vacances de Toussaint', content: 'L\'école sera fermée du 26 octobre au 3 novembre.', priority: 'normal', published: true },
+            { title: 'Concours de récitation', content: 'Concours de récitation du Coran le 15 décembre. Inscriptions ouvertes!', priority: 'normal', published: true },
+            { title: 'Rappel paiement', content: 'Les frais de scolarité de novembre sont à régler avant le 15.', priority: 'high', published: true },
+            { title: 'Journée portes ouvertes', content: 'Journée portes ouvertes prévue en février 2025.', priority: 'low', published: false }
+        ];
+
+        let annCount = 0;
+        for (const ann of announcements) {
+            const [existing] = await pool.execute('SELECT id FROM school_announcements WHERE association_id = ? AND title = ?', [associationId, ann.title]);
+            if (existing.length === 0) {
+                await pool.execute(
+                    'INSERT INTO school_announcements (association_id, title, content, priority, is_published, published_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    [associationId, ann.title, ann.content, ann.priority, ann.published, ann.published ? new Date() : null, adminId]
+                );
+                annCount++;
+            }
+        }
+        results.push('✓ ' + annCount + ' annonces créées');
+
+        // ========== MESSAGES ==========
+        const [students] = await pool.execute('SELECT id, first_name FROM students WHERE association_id = ? LIMIT 5', [associationId]);
+        let msgCount = 0;
+        for (let i = 0; i < students.length; i++) {
+            const student = students[i];
+            const teacherId = teachers[i % teachers.length]?.id || 1;
+
+            await pool.execute(
+                'INSERT INTO school_messages (association_id, sender_type, sender_id, recipient_type, recipient_id, student_id, subject, content, is_read) VALUES (?, "teacher", ?, "parent", ?, ?, ?, ?, TRUE)',
+                [associationId, teacherId, student.id, student.id, 'Progrès de ' + student.first_name, student.first_name + ' fait de bons progrès en mémorisation. Félicitations!']
+            );
+            msgCount++;
+
+            await pool.execute(
+                'INSERT INTO school_messages (association_id, sender_type, sender_id, recipient_type, recipient_id, student_id, subject, content, is_read) VALUES (?, "parent", ?, "teacher", ?, ?, ?, ?, TRUE)',
+                [associationId, student.id, teacherId, student.id, 'Re: Progrès', 'Merci pour ce retour positif. Nous continuons à l\'encourager.']
+            );
+            msgCount++;
+        }
+        results.push('✓ ' + msgCount + ' messages créés');
+
+        // ========== BADGES ==========
+        const badges = [
+            { name: 'Sourate Al-Fatiha', icon: '📖', type: 'badge' },
+            { name: 'Sourate Al-Ikhlas', icon: '⭐', type: 'badge' },
+            { name: 'Alphabet Arabe', icon: '🔤', type: 'badge' },
+            { name: 'Lecture Niveau 1', icon: '📚', type: 'level' },
+            { name: 'Assidu', icon: '🌙', type: 'achievement' }
+        ];
+
+        let badgeCount = 0;
+        for (const studentId of studentIds) {
+            const numBadges = 1 + Math.floor(Math.random() * 4);
+            const shuffled = [...badges].sort(() => Math.random() - 0.5);
+            for (let j = 0; j < numBadges; j++) {
+                const badge = shuffled[j];
+                const achievedDate = new Date();
+                achievedDate.setDate(achievedDate.getDate() - Math.floor(Math.random() * 90));
+                const teacherId = teachers[Math.floor(Math.random() * teachers.length)]?.id;
+
+                const [existing] = await pool.execute(
+                    'SELECT id FROM student_progress WHERE association_id = ? AND student_id = ? AND milestone_name = ?',
+                    [associationId, studentId, badge.name]
+                );
+                if (existing.length === 0) {
+                    await pool.execute(
+                        'INSERT INTO student_progress (association_id, student_id, milestone_type, milestone_name, milestone_icon, achieved_at, awarded_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        [associationId, studentId, badge.type, badge.name, badge.icon, achievedDate.toISOString().split('T')[0], teacherId]
+                    );
+                    badgeCount++;
+                }
+            }
+        }
+        results.push('✓ ' + badgeCount + ' badges attribués');
+
+        res.json({
+            success: true,
+            message: 'Toutes les données de démo créées pour l\'association ' + associationId,
+            results
+        });
+
+    } catch (error) {
+        console.error('Seed all error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur création données',
+            error: error.message,
+            results
+        });
+    }
+});
+
 // GET /api/migrate/seed-school-ent - Créer des données de démo ENT (programmes, contenus, annonces, messages, badges)
 router.get('/seed-school-ent', async (req, res) => {
     try {
