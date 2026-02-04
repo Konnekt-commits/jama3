@@ -79,8 +79,12 @@ if (process.env.NODE_ENV === 'production') {
         res.sendFile(path.join(__dirname, '../frontend/index.html'));
     });
 
-    // SPA fallback - pour les routes du frontend
-    app.get('/app/*', (req, res) => {
+    // SPA fallback - pour les routes du frontend (exclure les fichiers statiques)
+    app.get('/app/*', (req, res, next) => {
+        // Si c'est un fichier statique (avec extension), passer au handler 404
+        if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json)$/)) {
+            return next();
+        }
         res.sendFile(path.join(__dirname, '../frontend/index.html'));
     });
 }
