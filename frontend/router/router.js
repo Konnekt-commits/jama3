@@ -5,8 +5,20 @@ class Router {
         this.beforeEach = null;
         this.afterEach = null;
 
+        // Détecter le base path (/app en production)
+        this.basePath = window.location.pathname.startsWith('/app') ? '/app' : '';
+
         window.addEventListener('popstate', () => this.handleRouteChange());
         document.addEventListener('click', (e) => this.handleLinkClick(e));
+    }
+
+    // Obtenir le chemin sans le basePath
+    getPath() {
+        let path = window.location.pathname;
+        if (this.basePath && path.startsWith(this.basePath)) {
+            path = path.slice(this.basePath.length) || '/';
+        }
+        return path;
     }
 
     addRoute(path, handler, options = {}) {
@@ -24,17 +36,20 @@ class Router {
     navigate(path, replace = false) {
         if (path === this.currentRoute) return;
 
+        // Ajouter le basePath pour la navigation
+        const fullPath = this.basePath + path;
+
         if (replace) {
-            history.replaceState(null, '', path);
+            history.replaceState(null, '', fullPath);
         } else {
-            history.pushState(null, '', path);
+            history.pushState(null, '', fullPath);
         }
 
         this.handleRouteChange();
     }
 
     async handleRouteChange() {
-        const path = window.location.pathname;
+        const path = this.getPath();
         const route = this.matchRoute(path);
 
         if (this.beforeEach) {
@@ -121,7 +136,7 @@ class Router {
     }
 
     getParam(name) {
-        const route = this.matchRoute(window.location.pathname);
+        const route = this.matchRoute(this.getPath());
         return route ? route.params[name] : null;
     }
 

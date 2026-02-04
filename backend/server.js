@@ -16,6 +16,7 @@ const eventsRoutes = require('./routes/events.routes');
 const intervenantsRoutes = require('./routes/intervenants.routes');
 const messagesRoutes = require('./routes/messages.routes');
 const migrateRoutes = require('./routes/migrate.routes');
+const superadminRoutes = require('./routes/superadmin.routes');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -50,6 +51,7 @@ app.use('/api/events', eventsRoutes);
 app.use('/api/intervenants', intervenantsRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/migrate', migrateRoutes);
+app.use('/api/superadmin', superadminRoutes);
 
 // ========== SERVIR LES FICHIERS STATIQUES ==========
 // En production (Cloud Run), servir le frontend

@@ -231,7 +231,13 @@ export async function renderLoginPage() {
             const response = await authService.login(email, password);
 
             if (response.success) {
-                router.navigate('/');
+                // Rediriger superadmin vers sa page dédiée
+                const user = authService.getUser();
+                if (user && user.role === 'super_admin') {
+                    router.navigate('/superadmin');
+                } else {
+                    router.navigate('/');
+                }
             } else {
                 throw new Error(response.message || 'خطأ في تسجيل الدخول');
             }

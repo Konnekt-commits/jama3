@@ -46,7 +46,7 @@ class UserModel {
         const [rows] = await pool.execute(
             `SELECT u.*, a.name as association_name, a.slug as association_slug, a.is_active as association_active
              FROM users u
-             JOIN associations a ON u.association_id = a.id
+             LEFT JOIN associations a ON u.association_id = a.id
              WHERE u.email = ?`,
             [email]
         );

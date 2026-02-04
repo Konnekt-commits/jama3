@@ -289,8 +289,8 @@ export async function renderOnboardingPage() {
 
             if (response.success) {
                 toastSuccess(i18n.t('onboarding.success'));
-                // Rediriger vers le dashboard (l'utilisateur est déjà connecté via apiService.createAssociation)
-                router.navigate('/dashboard');
+                // Rediriger vers les paramètres pour compléter les infos de l'association
+                router.navigate('/settings');
             } else {
                 throw new Error(response.message || i18n.t('onboarding.error'));
             }

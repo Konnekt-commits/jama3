@@ -14,8 +14,11 @@ import { renderCotisationsPage } from './pages/cotisations/cotisations.js';
 import { renderAgendaPage } from './pages/agenda/agenda.js';
 import { renderIntervenantsPage } from './pages/intervenants/intervenants.js';
 import { renderMessagesPage } from './pages/messages/messages.js';
+import { renderSettingsPage } from './pages/settings/settings.js';
+import { renderSuperadminPage } from './pages/superadmin/superadmin.js';
 
 const publicRoutes = ['/login', '/register', '/onboarding'];
+const superadminRoutes = ['/superadmin'];
 const membreRoutes = ['/membre'];
 
 // Routes publiques
@@ -34,6 +37,10 @@ router.addRoute('/cotisations', renderCotisationsPage, { requiresAuth: true });
 router.addRoute('/agenda', renderAgendaPage, { requiresAuth: true });
 router.addRoute('/intervenants', renderIntervenantsPage, { requiresAuth: true });
 router.addRoute('/messages', renderMessagesPage, { requiresAuth: true });
+router.addRoute('/settings', renderSettingsPage, { requiresAuth: true });
+
+// Route superadmin (accès super_admin uniquement)
+router.addRoute('/superadmin', renderSuperadminPage, { requiresAuth: true, requiresSuperAdmin: true });
 
 router.addRoute('/404', () => {
     const pageContent = document.getElementById('page-content');
@@ -48,8 +55,9 @@ router.addRoute('/404', () => {
 });
 
 router.setBeforeEach(async (to, from) => {
-    const path = window.location.pathname;
+    const path = router.getPath();
     const isPublicRoute = publicRoutes.includes(path);
+    const isSuperadminRoute = superadminRoutes.includes(path);
     const isAuthenticated = authService.isAuthenticated();
 
     if (!isPublicRoute && !isAuthenticated) {
@@ -58,19 +66,35 @@ router.setBeforeEach(async (to, from) => {
     }
 
     if ((path === '/login' || path === '/onboarding') && isAuthenticated) {
-        router.navigate('/', true);
+        const user = authService.getUser();
+        // Rediriger superadmin vers sa page dédiée
+        if (user && user.role === 'super_admin') {
+            router.navigate('/superadmin', true);
+        } else {
+            router.navigate('/', true);
+        }
         return false;
+    }
+
+    // Vérifier accès superadmin
+    if (isSuperadminRoute) {
+        const user = authService.getUser();
+        if (!user || user.role !== 'super_admin') {
+            router.navigate('/', true);
+            return false;
+        }
     }
 
     return true;
 });
 
 router.setAfterEach((to, from) => {
-    const path = window.location.pathname;
+    const path = router.getPath();
     const isPublicRoute = publicRoutes.includes(path);
     const isMembreRoute = membreRoutes.includes(path);
+    const isSuperadminRoute = superadminRoutes.includes(path);
 
-    if (!isPublicRoute && !isMembreRoute && authService.isAuthenticated()) {
+    if (!isPublicRoute && !isMembreRoute && !isSuperadminRoute && authService.isAuthenticated()) {
         hideLoginUI();
         renderSidebar();
         renderMobileNav();

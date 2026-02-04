@@ -55,7 +55,8 @@ const login = async (req, res) => {
             });
         }
 
-        if (!user.association_active) {
+        // Vérifier l'association seulement si l'utilisateur n'est pas super_admin
+        if (user.role !== 'super_admin' && !user.association_active) {
             return res.status(403).json({
                 success: false,
                 message: 'Association désactivée'

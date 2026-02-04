@@ -12,11 +12,6 @@ class EventModel {
         `;
         const params = [associationId];
 
-        if (filters.status) {
-            query += ' AND e.status = ?';
-            params.push(filters.status);
-        }
-
         if (filters.event_type) {
             query += ' AND e.event_type = ?';
             params.push(filters.event_type);
@@ -206,10 +201,9 @@ class EventModel {
     static async getUpcoming(associationId, limit = 5) {
         const safeLimit = parseInt(limit) || 5;
         const [rows] = await pool.query(
-            `SELECT e.*, i.first_name as intervenant_first_name, i.last_name as intervenant_last_name
+            `SELECT e.*
              FROM events e
-             LEFT JOIN intervenants i ON e.intervenant_id = i.id
-             WHERE e.association_id = ? AND e.start_datetime >= NOW() AND e.status = 'scheduled'
+             WHERE e.association_id = ? AND e.start_datetime >= NOW()
              ORDER BY e.start_datetime ASC
              LIMIT ${safeLimit}`,
             [associationId]

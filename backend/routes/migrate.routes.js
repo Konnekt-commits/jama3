@@ -259,6 +259,38 @@ router.get('/seed', async (req, res) => {
     }
 });
 
+// GET /api/migrate/create-superadmin - Créer le compte superadmin
+router.get('/create-superadmin', async (req, res) => {
+    const bcrypt = require('bcryptjs');
+
+    try {
+        const hashedPassword = await bcrypt.hash('SuperAdmin2026!', 10);
+
+        // Créer le superadmin sans association
+        await pool.execute(`
+            INSERT INTO users (association_id, email, password, role, first_name, last_name, is_owner, is_active)
+            VALUES (NULL, 'superadmin@jama3.fr', ?, 'super_admin', 'Super', 'Admin', FALSE, TRUE)
+            ON DUPLICATE KEY UPDATE password = ?
+        `, [hashedPassword, hashedPassword]);
+
+        res.json({
+            success: true,
+            message: 'Superadmin créé',
+            data: {
+                email: 'superadmin@jama3.fr',
+                password: 'SuperAdmin2026!'
+            }
+        });
+    } catch (error) {
+        console.error('Create superadmin error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur création superadmin',
+            error: error.message
+        });
+    }
+});
+
 // GET /api/migrate/create-user - Créer un utilisateur spécifique (temporaire)
 router.get('/create-user', async (req, res) => {
     const bcrypt = require('bcryptjs');
