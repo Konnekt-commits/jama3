@@ -414,40 +414,43 @@ function openAdherentDetail(adherent) {
             </div>
         `,
         footer: `
-            <button class="btn btn-outline" id="magic-link-btn" style="display: flex; align-items: center; gap: 6px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                Lien espace
-            </button>
+            ${adherent.email ? `
+                <button class="btn btn-outline" id="invite-btn" style="display: flex; align-items: center; gap: 6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    Envoyer accès
+                </button>
+            ` : ''}
             <button class="btn btn-secondary" id="edit-btn">${i18n.t('edit')}</button>
             <button class="btn btn-primary" id="close-detail-btn">${i18n.t('close')}</button>
         `
     });
 
-    document.getElementById('magic-link-btn').addEventListener('click', async () => {
-        const btn = document.getElementById('magic-link-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-sm"></span> Génération...';
+    const inviteBtn = document.getElementById('invite-btn');
+    if (inviteBtn) {
+        inviteBtn.addEventListener('click', async () => {
+            inviteBtn.disabled = true;
+            inviteBtn.innerHTML = '<span class="spinner-sm"></span> Envoi...';
 
-        try {
-            const response = await apiService.post('/adherent-space/generate-token', {
-                adherent_id: adherent.id,
-                validity_hours: 48
-            });
+            try {
+                const response = await apiService.post('/adherent-auth/send-invite', {
+                    adherent_id: adherent.id
+                });
 
-            if (response.success) {
-                const link = response.data.magic_link;
-                await navigator.clipboard.writeText(link);
-                toastSuccess('Lien copié ! Valide 48h');
-                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Copié !';
-            } else {
-                throw new Error(response.message);
+                if (response.success) {
+                    const link = response.data.setup_link;
+                    await navigator.clipboard.writeText(link);
+                    toastSuccess('Lien d\'accès copié !');
+                    inviteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Copié !';
+                } else {
+                    throw new Error(response.message);
+                }
+            } catch (error) {
+                toastError(error.message || 'Erreur envoi invitation');
+                inviteBtn.innerHTML = 'Envoyer accès';
             }
-        } catch (error) {
-            toastError('Erreur génération lien');
-            btn.innerHTML = 'Lien espace';
-        }
-        btn.disabled = false;
-    });
+            inviteBtn.disabled = false;
+        });
+    }
 
     document.getElementById('edit-btn').addEventListener('click', () => {
         closeBottomSheet();

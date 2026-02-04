@@ -357,6 +357,45 @@ router.get('/debug', async (req, res) => {
     }
 });
 
+// GET /api/migrate/add-adherent-auth - Ajouter les colonnes auth aux adhérents
+router.get('/add-adherent-auth', async (req, res) => {
+    try {
+        // Ajouter colonne password aux adhérents
+        await pool.execute(`
+            ALTER TABLE adherents
+            ADD COLUMN IF NOT EXISTS password VARCHAR(255) DEFAULT NULL,
+            ADD COLUMN IF NOT EXISTS password_set_at DATETIME DEFAULT NULL,
+            ADD COLUMN IF NOT EXISTS last_login DATETIME DEFAULT NULL
+        `).catch(() => {});
+
+        // Table pour les tokens de setup password
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS adherent_password_tokens (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                adherent_id INT NOT NULL,
+                token VARCHAR(64) NOT NULL UNIQUE,
+                expires_at DATETIME NOT NULL,
+                used_at DATETIME DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_token (token),
+                INDEX idx_adherent (adherent_id)
+            )
+        `);
+
+        res.json({
+            success: true,
+            message: 'Colonnes auth adhérents ajoutées'
+        });
+    } catch (error) {
+        console.error('Add adherent auth error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur',
+            error: error.message
+        });
+    }
+});
+
 // GET /api/migrate/add-tokens-table - Ajouter la table adherent_tokens
 router.get('/add-tokens-table', async (req, res) => {
     try {

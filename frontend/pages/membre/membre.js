@@ -11,28 +11,18 @@ const mockActus = [
     { id: 3, type: 'alert', title: 'Cotisation', subtitle: 'Rappel', desc: 'Pensez à régulariser votre cotisation', date: '2026-01-28' },
 ];
 
-// Variable globale pour stocker les données chargées via token
+// Variable globale pour stocker les données chargées
 let tokenData = null;
 
 export async function renderMembrePage(token = null) {
-    // Si token fourni, charger les données depuis l'API
+    // Si token magic link fourni
     if (token) {
         try {
             const response = await fetch(`/api/adherent-space/${token}`);
             const result = await response.json();
 
             if (!result.success) {
-                document.getElementById('page-content').innerHTML = `
-                    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; text-align: center; background: #FAFAFA;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" style="margin-bottom: 16px;">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                        <h2 style="margin-bottom: 8px; color: #1a1a1a;">Lien invalide ou expiré</h2>
-                        <p style="color: #666;">Contactez votre association pour obtenir un nouveau lien.</p>
-                    </div>
-                `;
+                showErrorPage('Lien invalide ou expiré', 'Contactez votre association pour obtenir un nouveau lien.');
                 return;
             }
 
@@ -42,6 +32,47 @@ export async function renderMembrePage(token = null) {
             toastError('Erreur de chargement');
             return;
         }
+    }
+    // Sinon, vérifier si adhérent connecté
+    else {
+        const adherentToken = localStorage.getItem('adherent_token');
+        if (adherentToken) {
+            try {
+                const response = await fetch('/api/adherent-auth/me', {
+                    headers: { 'Authorization': `Bearer ${adherentToken}` }
+                });
+                const result = await response.json();
+
+                if (!result.success) {
+                    // Token expiré, rediriger vers login
+                    localStorage.removeItem('adherent_token');
+                    localStorage.removeItem('adherent_data');
+                    localStorage.removeItem('adherent_association');
+                    window.location.href = '/app/login-adherent';
+                    return;
+                }
+
+                tokenData = result.data;
+            } catch (error) {
+                console.error('Error loading adherent data:', error);
+                window.location.href = '/app/login-adherent';
+                return;
+            }
+        }
+    }
+
+    function showErrorPage(title, message) {
+        document.getElementById('page-content').innerHTML = `
+            <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; text-align: center; background: #FAFAFA;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" style="margin-bottom: 16px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <h2 style="margin-bottom: 8px; color: #1a1a1a;">${title}</h2>
+                <p style="color: #666;">${message}</p>
+            </div>
+        `;
     }
     const pageContent = document.getElementById('page-content');
 

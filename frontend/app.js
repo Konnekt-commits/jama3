@@ -16,15 +16,19 @@ import { renderIntervenantsPage } from './pages/intervenants/intervenants.js';
 import { renderMessagesPage } from './pages/messages/messages.js';
 import { renderSettingsPage } from './pages/settings/settings.js';
 import { renderSuperadminPage } from './pages/superadmin/superadmin.js';
+import { renderLoginAdherentPage } from './pages/login-adherent/login-adherent.js';
+import { renderSetupPasswordPage } from './pages/setup-password/setup-password.js';
 
-const publicRoutes = ['/login', '/register', '/onboarding'];
+const publicRoutes = ['/login', '/register', '/onboarding', '/login-adherent'];
 const superadminRoutes = ['/superadmin'];
 const membreRoutes = ['/membre'];
 
 // Routes publiques
 router.addRoute('/login', renderLoginPage);
 router.addRoute('/onboarding', renderOnboardingPage);
-router.addRoute('/register', renderOnboardingPage); // Rediriger register vers onboarding
+router.addRoute('/register', renderOnboardingPage);
+router.addRoute('/login-adherent', renderLoginAdherentPage);
+router.addRoute('/setup-password/:token', (params) => renderSetupPasswordPage(params.token));
 
 // Route membre (vue simplifiée mobile)
 router.addRoute('/membre', renderMembrePage, { requiresAuth: true });
@@ -61,11 +65,18 @@ router.setBeforeEach(async (to, from) => {
     const path = router.getPath();
     const isPublicRoute = publicRoutes.includes(path);
     const isMembreWithToken = path.match(/^\/membre\/[a-f0-9]+$/);
+    const isSetupPassword = path.startsWith('/setup-password/');
     const isSuperadminRoute = superadminRoutes.includes(path);
     const isAuthenticated = authService.isAuthenticated();
+    const hasAdherentToken = !!localStorage.getItem('adherent_token');
 
-    // Membre avec token est public (accès par magic link)
-    if (isMembreWithToken) {
+    // Routes publiques avec token
+    if (isMembreWithToken || isSetupPassword) {
+        return true;
+    }
+
+    // Route /membre accessible si adherent connecté
+    if (path === '/membre' && hasAdherentToken) {
         return true;
     }
 
@@ -103,8 +114,9 @@ router.setAfterEach((to, from) => {
     const isMembreRoute = membreRoutes.includes(path);
     const isSuperadminRoute = superadminRoutes.includes(path);
     const isMembreWithToken = path.match(/^\/membre\/[a-f0-9]+$/);
+    const isSetupPassword = path.startsWith('/setup-password/');
 
-    if (!isPublicRoute && !isMembreRoute && !isSuperadminRoute && !isMembreWithToken && authService.isAuthenticated()) {
+    if (!isPublicRoute && !isMembreRoute && !isSuperadminRoute && !isMembreWithToken && !isSetupPassword && authService.isAuthenticated()) {
         hideLoginUI();
         renderSidebar();
         renderMobileNav();
