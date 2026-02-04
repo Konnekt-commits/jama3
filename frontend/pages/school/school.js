@@ -41,11 +41,11 @@ export async function renderSchoolPage() {
             }
 
             .school-header {
-                background: linear-gradient(135deg, #059669 0%, #047857 100%);
+                background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
                 border-radius: var(--radius-xl);
                 padding: var(--spacing-xl);
                 margin-bottom: var(--spacing-lg);
-                color: white;
+                color: var(--color-white);
                 position: relative;
                 overflow: hidden;
             }
@@ -110,6 +110,10 @@ export async function renderSchoolPage() {
                 -webkit-overflow-scrolling: touch;
             }
 
+            .school-tabs::-webkit-scrollbar {
+                display: none;
+            }
+
             .school-tab {
                 display: flex;
                 align-items: center;
@@ -132,13 +136,9 @@ export async function renderSchoolPage() {
             }
 
             .school-tab.active {
-                background-color: white;
-                color: #059669;
+                background-color: var(--color-card-bg);
+                color: var(--color-primary);
                 box-shadow: var(--shadow-sm);
-            }
-
-            [data-theme="dark"] .school-tab.active {
-                background-color: var(--color-bg-tertiary);
             }
 
             .school-tab svg {

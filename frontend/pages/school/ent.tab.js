@@ -1,6 +1,6 @@
 import apiService from '../../services/api.service.js';
 import { openBottomSheet, closeBottomSheet } from '../../components/bottomSheet/bottomSheet.js';
-import { showToast } from '../../components/toast/toast.js';
+import { toastSuccess, toastError } from '../../components/toast/toast.js';
 
 const icons = {
     plus: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
@@ -20,17 +20,13 @@ let availableBadges = [];
 export async function renderEntTab(container) {
     container.innerHTML = `
         <style>
-            .ent-tab {
-                display: flex;
-                flex-direction: column;
-                gap: var(--spacing-lg);
-            }
-
             .ent-subtabs {
                 display: flex;
                 gap: var(--spacing-sm);
                 border-bottom: 1px solid var(--color-border);
                 padding-bottom: var(--spacing-sm);
+                margin-bottom: var(--spacing-lg);
+                overflow-x: auto;
             }
 
             .ent-subtab {
@@ -46,6 +42,7 @@ export async function renderEntTab(container) {
                 font-weight: var(--font-medium);
                 border-radius: var(--radius-md);
                 transition: all var(--transition-fast);
+                white-space: nowrap;
             }
 
             .ent-subtab:hover {
@@ -54,8 +51,8 @@ export async function renderEntTab(container) {
             }
 
             .ent-subtab.active {
-                background-color: rgba(5, 150, 105, 0.1);
-                color: #059669;
+                background-color: var(--color-success-light);
+                color: var(--color-success);
             }
 
             .ent-subtab svg {
@@ -67,7 +64,23 @@ export async function renderEntTab(container) {
                 min-height: 400px;
             }
 
-            /* Announcements styles */
+            /* Section header */
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: var(--spacing-lg);
+                flex-wrap: wrap;
+                gap: var(--spacing-md);
+            }
+
+            .section-header h3 {
+                font-size: var(--font-lg);
+                font-weight: var(--font-semibold);
+                color: var(--color-text-primary);
+            }
+
+            /* Announcements */
             .announcements-list {
                 display: flex;
                 flex-direction: column;
@@ -75,8 +88,8 @@ export async function renderEntTab(container) {
             }
 
             .announcement-card {
-                background-color: var(--color-bg-primary);
-                border: 1px solid var(--color-border);
+                background-color: var(--color-card-bg);
+                border: 1px solid var(--color-card-border);
                 border-radius: var(--radius-lg);
                 padding: var(--spacing-md);
                 transition: all var(--transition-fast);
@@ -91,39 +104,42 @@ export async function renderEntTab(container) {
                 justify-content: space-between;
                 align-items: flex-start;
                 margin-bottom: var(--spacing-sm);
+                gap: var(--spacing-sm);
             }
 
             .announcement-title {
                 font-size: var(--font-lg);
                 font-weight: var(--font-semibold);
+                color: var(--color-text-primary);
             }
 
             .announcement-meta {
                 display: flex;
                 gap: var(--spacing-sm);
                 align-items: center;
+                flex-shrink: 0;
             }
 
             .announcement-date {
                 font-size: var(--font-xs);
-                color: var(--color-text-secondary);
+                color: var(--color-text-muted);
             }
 
             .announcement-status {
                 font-size: var(--font-xs);
-                padding: 2px 8px;
+                padding: var(--spacing-xs) var(--spacing-sm);
                 border-radius: var(--radius-full);
                 font-weight: var(--font-medium);
             }
 
             .announcement-status.published {
-                background-color: rgba(5, 150, 105, 0.1);
-                color: #059669;
+                background-color: var(--color-badge-actif);
+                color: var(--color-badge-actif-text);
             }
 
             .announcement-status.draft {
-                background-color: rgba(245, 158, 11, 0.1);
-                color: #f59e0b;
+                background-color: var(--color-badge-pending);
+                color: var(--color-badge-pending-text);
             }
 
             .announcement-content {
@@ -136,12 +152,13 @@ export async function renderEntTab(container) {
             .announcement-actions {
                 display: flex;
                 gap: var(--spacing-xs);
+                flex-wrap: wrap;
             }
 
             .announcement-actions button {
                 padding: var(--spacing-xs) var(--spacing-sm);
                 border: 1px solid var(--color-border);
-                background: none;
+                background: var(--color-bg-primary);
                 cursor: pointer;
                 border-radius: var(--radius-md);
                 font-size: var(--font-xs);
@@ -149,6 +166,7 @@ export async function renderEntTab(container) {
                 align-items: center;
                 gap: var(--spacing-xs);
                 transition: all var(--transition-fast);
+                color: var(--color-text-secondary);
             }
 
             .announcement-actions button:hover {
@@ -156,19 +174,19 @@ export async function renderEntTab(container) {
             }
 
             .announcement-actions button.publish {
-                color: #059669;
-                border-color: #059669;
+                color: var(--color-success);
+                border-color: var(--color-success);
             }
 
             .announcement-actions button.delete {
-                color: var(--color-danger);
-                border-color: var(--color-danger);
+                color: var(--color-error);
+                border-color: var(--color-error);
             }
 
-            /* Messages styles */
+            /* Messages */
             .messages-container {
                 display: grid;
-                grid-template-columns: 300px 1fr;
+                grid-template-columns: 280px 1fr;
                 gap: var(--spacing-md);
                 height: 500px;
             }
@@ -189,8 +207,8 @@ export async function renderEntTab(container) {
             }
 
             .students-list-panel {
-                background-color: var(--color-bg-primary);
-                border: 1px solid var(--color-border);
+                background-color: var(--color-card-bg);
+                border: 1px solid var(--color-card-border);
                 border-radius: var(--radius-lg);
                 overflow: hidden;
                 display: flex;
@@ -201,6 +219,8 @@ export async function renderEntTab(container) {
                 padding: var(--spacing-md);
                 border-bottom: 1px solid var(--color-border);
                 font-weight: var(--font-semibold);
+                color: var(--color-text-primary);
+                background-color: var(--color-bg-secondary);
             }
 
             .students-list-body {
@@ -211,35 +231,36 @@ export async function renderEntTab(container) {
             .student-msg-item {
                 padding: var(--spacing-sm) var(--spacing-md);
                 cursor: pointer;
-                border-bottom: 1px solid var(--color-border);
+                border-bottom: 1px solid var(--color-border-light);
                 transition: all var(--transition-fast);
             }
 
             .student-msg-item:hover {
-                background-color: var(--color-bg-secondary);
+                background-color: var(--color-bg-hover);
             }
 
             .student-msg-item.active {
-                background-color: rgba(5, 150, 105, 0.1);
-                border-left: 3px solid #059669;
+                background-color: var(--color-success-light);
+                border-left: 3px solid var(--color-success);
             }
 
             .student-msg-name {
                 font-weight: var(--font-medium);
                 margin-bottom: 2px;
+                color: var(--color-text-primary);
             }
 
             .student-msg-preview {
                 font-size: var(--font-xs);
-                color: var(--color-text-secondary);
+                color: var(--color-text-muted);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
 
             .conversation-panel {
-                background-color: var(--color-bg-primary);
-                border: 1px solid var(--color-border);
+                background-color: var(--color-card-bg);
+                border: 1px solid var(--color-card-border);
                 border-radius: var(--radius-lg);
                 display: flex;
                 flex-direction: column;
@@ -249,6 +270,8 @@ export async function renderEntTab(container) {
                 padding: var(--spacing-md);
                 border-bottom: 1px solid var(--color-border);
                 font-weight: var(--font-semibold);
+                color: var(--color-text-primary);
+                background-color: var(--color-bg-secondary);
             }
 
             .conversation-messages {
@@ -268,26 +291,23 @@ export async function renderEntTab(container) {
             }
 
             .message-bubble.sent {
-                background-color: #059669;
-                color: white;
+                background-color: var(--color-success);
+                color: var(--color-white);
                 align-self: flex-end;
                 border-bottom-right-radius: 4px;
             }
 
             .message-bubble.received {
-                background-color: var(--color-bg-secondary);
+                background-color: var(--color-bg-tertiary);
+                color: var(--color-text-primary);
                 align-self: flex-start;
                 border-bottom-left-radius: 4px;
             }
 
             .message-time {
                 font-size: var(--font-xs);
-                color: var(--color-text-secondary);
-                margin-top: 2px;
-            }
-
-            .message-bubble.sent .message-time {
-                color: rgba(255, 255, 255, 0.7);
+                margin-top: 4px;
+                opacity: 0.7;
             }
 
             .conversation-input {
@@ -302,21 +322,28 @@ export async function renderEntTab(container) {
                 padding: var(--spacing-sm) var(--spacing-md);
                 border: 1px solid var(--color-border);
                 border-radius: var(--radius-md);
+                background-color: var(--color-input-bg);
+                color: var(--color-text-primary);
             }
 
             .conversation-input button {
                 padding: var(--spacing-sm) var(--spacing-md);
-                background-color: #059669;
-                color: white;
+                background-color: var(--color-success);
+                color: var(--color-white);
                 border: none;
                 border-radius: var(--radius-md);
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 gap: var(--spacing-xs);
+                transition: all var(--transition-fast);
             }
 
-            /* Badges styles */
+            .conversation-input button:hover {
+                background-color: var(--color-success-hover);
+            }
+
+            /* Badges */
             .badges-section {
                 display: flex;
                 flex-direction: column;
@@ -336,17 +363,19 @@ export async function renderEntTab(container) {
                 border-radius: var(--radius-md);
                 font-size: var(--font-sm);
                 min-width: 200px;
+                background-color: var(--color-input-bg);
+                color: var(--color-text-primary);
             }
 
             .badges-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
                 gap: var(--spacing-md);
             }
 
             .badge-card {
-                background-color: var(--color-bg-primary);
-                border: 1px solid var(--color-border);
+                background-color: var(--color-card-bg);
+                border: 1px solid var(--color-card-border);
                 border-radius: var(--radius-lg);
                 padding: var(--spacing-md);
                 text-align: center;
@@ -359,12 +388,12 @@ export async function renderEntTab(container) {
             }
 
             .badge-card.earned {
-                border-color: #059669;
-                background-color: rgba(5, 150, 105, 0.05);
+                border-color: var(--color-success);
+                background-color: var(--color-success-light);
             }
 
             .badge-icon {
-                font-size: 48px;
+                font-size: 40px;
                 margin-bottom: var(--spacing-sm);
             }
 
@@ -380,17 +409,19 @@ export async function renderEntTab(container) {
             .badge-name {
                 font-weight: var(--font-semibold);
                 margin-bottom: var(--spacing-xs);
+                font-size: var(--font-sm);
+                color: var(--color-text-primary);
             }
 
             .badge-description {
                 font-size: var(--font-xs);
-                color: var(--color-text-secondary);
+                color: var(--color-text-muted);
                 margin-bottom: var(--spacing-sm);
             }
 
             .badge-date {
                 font-size: var(--font-xs);
-                color: #059669;
+                color: var(--color-success);
             }
 
             .badge-action {
@@ -399,9 +430,9 @@ export async function renderEntTab(container) {
 
             .badge-action button {
                 padding: var(--spacing-xs) var(--spacing-sm);
-                border: 1px solid #059669;
+                border: 1px solid var(--color-success);
                 background: none;
-                color: #059669;
+                color: var(--color-success);
                 border-radius: var(--radius-md);
                 font-size: var(--font-xs);
                 cursor: pointer;
@@ -409,43 +440,41 @@ export async function renderEntTab(container) {
             }
 
             .badge-action button:hover {
-                background-color: #059669;
-                color: white;
+                background-color: var(--color-success);
+                color: var(--color-white);
             }
 
-            .empty-state {
+            .ent-empty {
                 text-align: center;
                 padding: var(--spacing-2xl);
-                color: var(--color-text-secondary);
+                color: var(--color-text-muted);
             }
 
-            .section-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+            .ent-empty svg {
+                width: 48px;
+                height: 48px;
                 margin-bottom: var(--spacing-md);
+                opacity: 0.3;
             }
         </style>
 
-        <div class="ent-tab">
-            <div class="ent-subtabs">
-                <button class="ent-subtab active" data-subtab="announcements">
-                    ${icons.megaphone}
-                    <span>Annonces</span>
-                </button>
-                <button class="ent-subtab" data-subtab="messages">
-                    ${icons.message}
-                    <span>Messagerie</span>
-                </button>
-                <button class="ent-subtab" data-subtab="badges">
-                    ${icons.award}
-                    <span>Badges & Progression</span>
-                </button>
-            </div>
+        <div class="ent-subtabs">
+            <button class="ent-subtab active" data-subtab="announcements">
+                ${icons.megaphone}
+                <span>Annonces</span>
+            </button>
+            <button class="ent-subtab" data-subtab="messages">
+                ${icons.message}
+                <span>Messagerie</span>
+            </button>
+            <button class="ent-subtab" data-subtab="badges">
+                ${icons.award}
+                <span>Badges & Progression</span>
+            </button>
+        </div>
 
-            <div class="ent-content" id="ent-content">
-                <!-- Content loaded here -->
-            </div>
+        <div class="ent-content" id="ent-content">
+            <!-- Content loaded here -->
         </div>
     `;
 
@@ -521,7 +550,7 @@ async function loadAnnouncements() {
         }
     } catch (error) {
         console.error('Error loading announcements:', error);
-        listContainer.innerHTML = '<div class="empty-state"><p>Erreur de chargement</p></div>';
+        listContainer.innerHTML = '<div class="ent-empty"><p>Erreur de chargement</p></div>';
     }
 }
 
@@ -530,7 +559,7 @@ function renderAnnouncementsList(announcements) {
 
     if (announcements.length === 0) {
         container.innerHTML = `
-            <div class="empty-state">
+            <div class="ent-empty">
                 ${icons.megaphone}
                 <p>Aucune annonce</p>
             </div>
@@ -573,25 +602,25 @@ function showAnnouncementForm(announcement = null) {
     const content = `
         <form id="announcement-form" style="display: flex; flex-direction: column; gap: var(--spacing-md);">
             <div class="form-group">
-                <label>Titre *</label>
-                <input type="text" name="title" required value="${announcement?.title || ''}" placeholder="Titre de l'annonce">
+                <label class="form-label">Titre *</label>
+                <input type="text" name="title" class="form-input" required value="${announcement?.title || ''}" placeholder="Titre de l'annonce">
             </div>
 
             <div class="form-group">
-                <label>Contenu *</label>
-                <textarea name="content" required rows="6" placeholder="Contenu de l'annonce...">${announcement?.content || ''}</textarea>
+                <label class="form-label">Contenu *</label>
+                <textarea name="content" class="form-textarea" required rows="6" placeholder="Contenu de l'annonce...">${announcement?.content || ''}</textarea>
             </div>
 
             <div class="form-group">
-                <label>Public cible</label>
-                <select name="target_audience">
+                <label class="form-label">Public cible</label>
+                <select name="target_audience" class="form-select">
                     <option value="all" ${announcement?.target_audience === 'all' ? 'selected' : ''}>Tous</option>
                     <option value="parents" ${announcement?.target_audience === 'parents' ? 'selected' : ''}>Parents uniquement</option>
                     <option value="students" ${announcement?.target_audience === 'students' ? 'selected' : ''}>Élèves uniquement</option>
                 </select>
             </div>
 
-            <div class="form-actions" style="display: flex; gap: var(--spacing-sm); justify-content: flex-end;">
+            <div style="display: flex; gap: var(--spacing-sm); justify-content: flex-end;">
                 <button type="button" class="btn btn-secondary" onclick="window.closeBottomSheet()">Annuler</button>
                 <button type="submit" class="btn btn-primary">${isEdit ? 'Modifier' : 'Créer'}</button>
             </div>
@@ -602,6 +631,7 @@ function showAnnouncementForm(announcement = null) {
         title: isEdit ? 'Modifier l\'annonce' : 'Nouvelle annonce',
         content
     });
+
     window.closeBottomSheet = closeBottomSheet;
 
     document.getElementById('announcement-form').addEventListener('submit', async (e) => {
@@ -612,15 +642,15 @@ function showAnnouncementForm(announcement = null) {
         try {
             if (isEdit) {
                 await apiService.updateSchoolAnnouncement(announcement.id, data);
-                showToast('Annonce modifiée', 'success');
+                toastSuccess('Annonce modifiée');
             } else {
                 await apiService.createSchoolAnnouncement(data);
-                showToast('Annonce créée', 'success');
+                toastSuccess('Annonce créée');
             }
             closeBottomSheet();
             loadAnnouncements();
         } catch (error) {
-            showToast(error.message || 'Erreur', 'error');
+            toastError(error.message || 'Erreur');
         }
     });
 }
@@ -632,7 +662,7 @@ window.editAnnouncement = async (id) => {
             showAnnouncementForm(response.data);
         }
     } catch (error) {
-        showToast('Erreur de chargement', 'error');
+        toastError('Erreur de chargement');
     }
 };
 
@@ -641,20 +671,20 @@ window.deleteAnnouncement = async (id) => {
 
     try {
         await apiService.deleteSchoolAnnouncement(id);
-        showToast('Annonce supprimée', 'success');
+        toastSuccess('Annonce supprimée');
         loadAnnouncements();
     } catch (error) {
-        showToast(error.message || 'Erreur', 'error');
+        toastError(error.message || 'Erreur');
     }
 };
 
 window.publishAnnouncement = async (id) => {
     try {
         await apiService.publishSchoolAnnouncement(id);
-        showToast('Annonce publiée', 'success');
+        toastSuccess('Annonce publiée');
         loadAnnouncements();
     } catch (error) {
-        showToast(error.message || 'Erreur', 'error');
+        toastError(error.message || 'Erreur');
     }
 };
 
@@ -668,6 +698,7 @@ async function renderMessagesSection(container) {
             <div class="students-list-panel">
                 <div class="students-list-header">Élèves</div>
                 <div class="students-list-body" id="students-msg-list">
+                    ${currentStudents.length === 0 ? '<div class="ent-empty"><p>Aucun élève</p></div>' : ''}
                     ${currentStudents.map(s => `
                         <div class="student-msg-item" data-student-id="${s.id}" onclick="window.selectStudent(${s.id})">
                             <div class="student-msg-name">${s.first_name} ${s.last_name}</div>
@@ -679,7 +710,7 @@ async function renderMessagesSection(container) {
             <div class="conversation-panel" id="conversation-panel">
                 <div class="conversation-header" id="conversation-header">Sélectionnez un élève</div>
                 <div class="conversation-messages" id="conversation-messages">
-                    <div class="empty-state">
+                    <div class="ent-empty">
                         ${icons.message}
                         <p>Sélectionnez un élève pour voir la conversation</p>
                     </div>
@@ -727,7 +758,7 @@ async function loadConversation(studentId) {
         }
     } catch (error) {
         console.error('Error loading conversation:', error);
-        container.innerHTML = '<div class="empty-state"><p>Erreur de chargement</p></div>';
+        container.innerHTML = '<div class="ent-empty"><p>Erreur de chargement</p></div>';
     }
 }
 
@@ -736,7 +767,7 @@ function renderConversation(messages) {
 
     if (messages.length === 0) {
         container.innerHTML = `
-            <div class="empty-state">
+            <div class="ent-empty">
                 ${icons.message}
                 <p>Aucun message dans cette conversation</p>
             </div>
@@ -765,14 +796,14 @@ window.sendMessage = async () => {
     try {
         await apiService.sendSchoolMessage({
             recipient_type: 'parent',
-            recipient_id: selectedStudentId, // Will be resolved server-side
+            recipient_id: selectedStudentId,
             student_id: selectedStudentId,
             content
         });
         input.value = '';
         await loadConversation(selectedStudentId);
     } catch (error) {
-        showToast(error.message || 'Erreur d\'envoi', 'error');
+        toastError(error.message || 'Erreur d\'envoi');
     }
 };
 
@@ -804,7 +835,7 @@ async function renderBadgesSection(container) {
             </div>
 
             <div class="badges-grid" id="badges-grid">
-                <div class="empty-state" style="grid-column: 1 / -1;">
+                <div class="ent-empty" style="grid-column: 1 / -1;">
                     ${icons.award}
                     <p>Sélectionnez un élève pour voir et attribuer des badges</p>
                 </div>
@@ -819,7 +850,7 @@ window.loadStudentBadges = async () => {
 
     if (!selectedBadgeStudentId) {
         document.getElementById('badges-grid').innerHTML = `
-            <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="ent-empty" style="grid-column: 1 / -1;">
                 ${icons.award}
                 <p>Sélectionnez un élève pour voir et attribuer des badges</p>
             </div>
@@ -843,8 +874,6 @@ window.loadStudentBadges = async () => {
 
 function renderBadgesGrid() {
     const container = document.getElementById('badges-grid');
-
-    const earnedNames = studentEarnedBadges.map(b => b.milestone_name);
 
     container.innerHTML = availableBadges.map(badge => {
         const earned = studentEarnedBadges.find(b => b.milestone_name === badge.name);
@@ -877,9 +906,9 @@ window.awardBadge = async (name, icon, type) => {
             milestone_icon: icon,
             milestone_type: type
         });
-        showToast('Badge attribué', 'success');
+        toastSuccess('Badge attribué');
         window.loadStudentBadges();
     } catch (error) {
-        showToast(error.message || 'Erreur', 'error');
+        toastError(error.message || 'Erreur');
     }
 };

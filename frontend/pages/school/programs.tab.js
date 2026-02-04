@@ -1,6 +1,6 @@
 import apiService from '../../services/api.service.js';
 import { openBottomSheet, closeBottomSheet } from '../../components/bottomSheet/bottomSheet.js';
-import { showToast } from '../../components/toast/toast.js';
+import { toastSuccess, toastError } from '../../components/toast/toast.js';
 
 const icons = {
     plus: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
@@ -8,7 +8,8 @@ const icons = {
     trash: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
     file: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`,
     video: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>`,
-    link: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`
+    link: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
+    audio: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`
 };
 
 const contentTypeIcons = {
@@ -16,7 +17,7 @@ const contentTypeIcons = {
     video: icons.video,
     link: icons.link,
     document: icons.file,
-    audio: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`
+    audio: icons.audio
 };
 
 let currentPrograms = [];
@@ -25,18 +26,13 @@ let currentClasses = [];
 export async function renderProgramsTab(container) {
     container.innerHTML = `
         <style>
-            .programs-tab {
-                display: flex;
-                flex-direction: column;
-                gap: var(--spacing-lg);
-            }
-
             .programs-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 flex-wrap: wrap;
                 gap: var(--spacing-md);
+                margin-bottom: var(--spacing-lg);
             }
 
             .programs-filters {
@@ -49,8 +45,9 @@ export async function renderProgramsTab(container) {
                 padding: var(--spacing-sm) var(--spacing-md);
                 border: 1px solid var(--color-border);
                 border-radius: var(--radius-md);
-                background-color: var(--color-bg-primary);
+                background-color: var(--color-input-bg);
                 font-size: var(--font-sm);
+                color: var(--color-text-primary);
             }
 
             .programs-grid {
@@ -60,9 +57,9 @@ export async function renderProgramsTab(container) {
             }
 
             .program-card {
-                background-color: var(--color-bg-primary);
+                background-color: var(--color-card-bg);
                 border-radius: var(--radius-lg);
-                border: 1px solid var(--color-border);
+                border: 1px solid var(--color-card-border);
                 overflow: hidden;
                 transition: all var(--transition-fast);
             }
@@ -74,8 +71,8 @@ export async function renderProgramsTab(container) {
 
             .program-card-header {
                 padding: var(--spacing-md);
-                background: linear-gradient(135deg, #059669 0%, #047857 100%);
-                color: white;
+                background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+                color: var(--color-white);
             }
 
             .program-card-title {
@@ -116,7 +113,7 @@ export async function renderProgramsTab(container) {
             }
 
             .program-content-item svg {
-                color: #059669;
+                color: var(--color-primary);
                 flex-shrink: 0;
             }
 
@@ -127,7 +124,7 @@ export async function renderProgramsTab(container) {
             }
 
             .program-content-item a:hover {
-                color: #059669;
+                color: var(--color-primary);
             }
 
             .program-card-footer {
@@ -146,13 +143,13 @@ export async function renderProgramsTab(container) {
             }
 
             .program-status.active {
-                background-color: rgba(5, 150, 105, 0.1);
-                color: #059669;
+                background-color: var(--color-badge-actif);
+                color: var(--color-badge-actif-text);
             }
 
             .program-status.draft {
-                background-color: rgba(245, 158, 11, 0.1);
-                color: #f59e0b;
+                background-color: var(--color-badge-pending);
+                color: var(--color-badge-pending-text);
             }
 
             .program-actions {
@@ -171,21 +168,22 @@ export async function renderProgramsTab(container) {
             }
 
             .program-actions button:hover {
-                background-color: var(--color-bg-secondary);
+                background-color: var(--color-bg-hover);
                 color: var(--color-text-primary);
             }
 
             .program-actions button.delete:hover {
-                color: var(--color-danger);
+                color: var(--color-error);
             }
 
-            .empty-state {
+            .programs-empty {
                 text-align: center;
                 padding: var(--spacing-2xl);
-                color: var(--color-text-secondary);
+                color: var(--color-text-muted);
+                grid-column: 1 / -1;
             }
 
-            .empty-state svg {
+            .programs-empty svg {
                 width: 64px;
                 height: 64px;
                 margin-bottom: var(--spacing-md);
@@ -193,27 +191,25 @@ export async function renderProgramsTab(container) {
             }
         </style>
 
-        <div class="programs-tab">
-            <div class="programs-header">
-                <div class="programs-filters">
-                    <select id="filter-class">
-                        <option value="">Toutes les classes</option>
-                    </select>
-                    <select id="filter-status">
-                        <option value="">Tous les statuts</option>
-                        <option value="active">Actif</option>
-                        <option value="draft">Brouillon</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary" id="add-program-btn">
-                    ${icons.plus}
-                    <span>Nouveau programme</span>
-                </button>
+        <div class="programs-header">
+            <div class="programs-filters">
+                <select id="filter-class">
+                    <option value="">Toutes les classes</option>
+                </select>
+                <select id="filter-status">
+                    <option value="">Tous les statuts</option>
+                    <option value="active">Actif</option>
+                    <option value="draft">Brouillon</option>
+                </select>
             </div>
+            <button class="btn btn-primary" id="add-program-btn">
+                ${icons.plus}
+                <span>Nouveau programme</span>
+            </button>
+        </div>
 
-            <div class="programs-grid" id="programs-list">
-                <div class="loading-spinner"></div>
-            </div>
+        <div class="programs-grid" id="programs-list">
+            <div class="loading-spinner"></div>
         </div>
     `;
 
@@ -262,7 +258,7 @@ async function loadPrograms() {
         }
     } catch (error) {
         console.error('Error loading programs:', error);
-        listContainer.innerHTML = '<div class="empty-state"><p>Erreur de chargement</p></div>';
+        listContainer.innerHTML = '<div class="programs-empty"><p>Erreur de chargement</p></div>';
     }
 }
 
@@ -271,7 +267,7 @@ function renderProgramsList(programs) {
 
     if (programs.length === 0) {
         container.innerHTML = `
-            <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="programs-empty">
                 ${icons.file}
                 <p>Aucun programme trouvé</p>
                 <p>Créez votre premier programme pédagogique</p>
@@ -300,12 +296,12 @@ function renderProgramsList(programs) {
                         </div>
                     `).join('')}
                     ${(program.content || []).length > 3 ? `
-                        <div class="program-content-item" style="justify-content: center; color: var(--color-text-secondary);">
+                        <div class="program-content-item" style="justify-content: center; color: var(--color-text-muted);">
                             + ${(program.content || []).length - 3} autres ressources
                         </div>
                     ` : ''}
                     ${!program.content || program.content.length === 0 ? `
-                        <div class="program-content-item" style="justify-content: center; color: var(--color-text-secondary);">
+                        <div class="program-content-item" style="justify-content: center; color: var(--color-text-muted);">
                             Aucun contenu ajouté
                         </div>
                     ` : ''}
@@ -330,116 +326,15 @@ function showProgramForm(program = null) {
     const isEdit = program !== null;
 
     const content = `
-        <style>
-            .program-form {
-                display: flex;
-                flex-direction: column;
-                gap: var(--spacing-md);
-            }
-
-            .form-group {
-                display: flex;
-                flex-direction: column;
-                gap: var(--spacing-xs);
-            }
-
-            .form-group label {
-                font-weight: var(--font-medium);
-                font-size: var(--font-sm);
-            }
-
-            .form-group input,
-            .form-group select,
-            .form-group textarea {
-                padding: var(--spacing-sm) var(--spacing-md);
-                border: 1px solid var(--color-border);
-                border-radius: var(--radius-md);
-                font-size: var(--font-base);
-            }
-
-            .form-group textarea {
-                min-height: 100px;
-                resize: vertical;
-            }
-
-            .content-section {
-                margin-top: var(--spacing-md);
-                padding-top: var(--spacing-md);
-                border-top: 1px solid var(--color-border);
-            }
-
-            .content-section h4 {
-                margin-bottom: var(--spacing-md);
-            }
-
-            .content-list {
-                display: flex;
-                flex-direction: column;
-                gap: var(--spacing-sm);
-                margin-bottom: var(--spacing-md);
-            }
-
-            .content-item {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-sm);
-                padding: var(--spacing-sm);
-                background-color: var(--color-bg-secondary);
-                border-radius: var(--radius-md);
-            }
-
-            .content-item-info {
-                flex: 1;
-            }
-
-            .content-item-title {
-                font-weight: var(--font-medium);
-            }
-
-            .content-item-type {
-                font-size: var(--font-xs);
-                color: var(--color-text-secondary);
-            }
-
-            .content-item button {
-                padding: var(--spacing-xs);
-                border: none;
-                background: none;
-                cursor: pointer;
-                color: var(--color-danger);
-            }
-
-            .add-content-form {
-                display: grid;
-                grid-template-columns: 1fr 100px auto;
-                gap: var(--spacing-sm);
-                align-items: end;
-            }
-
-            .add-content-form input,
-            .add-content-form select {
-                padding: var(--spacing-sm);
-                border: 1px solid var(--color-border);
-                border-radius: var(--radius-md);
-            }
-
-            .form-actions {
-                display: flex;
-                gap: var(--spacing-sm);
-                justify-content: flex-end;
-                margin-top: var(--spacing-lg);
-            }
-        </style>
-
-        <form class="program-form" id="program-form">
+        <form class="form-group" id="program-form" style="display: flex; flex-direction: column; gap: var(--spacing-md);">
             <div class="form-group">
-                <label>Titre du programme *</label>
-                <input type="text" name="title" required value="${program?.title || ''}" placeholder="Ex: Programme Coran Niveau 1">
+                <label class="form-label">Titre du programme *</label>
+                <input type="text" name="title" class="form-input" required value="${program?.title || ''}" placeholder="Ex: Programme Coran Niveau 1">
             </div>
 
             <div class="form-group">
-                <label>Classe *</label>
-                <select name="class_id" required>
+                <label class="form-label">Classe *</label>
+                <select name="class_id" class="form-select" required>
                     <option value="">Sélectionner une classe</option>
                     ${currentClasses.map(c => `
                         <option value="${c.id}" ${program?.class_id === c.id ? 'selected' : ''}>${c.name}</option>
@@ -448,55 +343,24 @@ function showProgramForm(program = null) {
             </div>
 
             <div class="form-group">
-                <label>Objectifs pédagogiques</label>
-                <textarea name="objectives" placeholder="Décrire les objectifs du programme...">${program?.objectives || ''}</textarea>
+                <label class="form-label">Objectifs pédagogiques</label>
+                <textarea name="objectives" class="form-textarea" rows="3" placeholder="Décrire les objectifs du programme...">${program?.objectives || ''}</textarea>
             </div>
 
             <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" placeholder="Description détaillée du programme...">${program?.description || ''}</textarea>
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-textarea" rows="3" placeholder="Description détaillée du programme...">${program?.description || ''}</textarea>
             </div>
 
             <div class="form-group">
-                <label>Statut</label>
-                <select name="status">
+                <label class="form-label">Statut</label>
+                <select name="status" class="form-select">
                     <option value="draft" ${program?.status === 'draft' ? 'selected' : ''}>Brouillon</option>
                     <option value="active" ${program?.status === 'active' ? 'selected' : ''}>Actif</option>
                 </select>
             </div>
 
-            ${isEdit ? `
-                <div class="content-section">
-                    <h4>Contenus pédagogiques</h4>
-                    <div class="content-list" id="content-list">
-                        ${(program.content || []).map(c => `
-                            <div class="content-item" data-content-id="${c.id}">
-                                ${contentTypeIcons[c.content_type] || icons.file}
-                                <div class="content-item-info">
-                                    <div class="content-item-title">${c.title}</div>
-                                    <div class="content-item-type">${c.content_type?.toUpperCase() || 'Document'}</div>
-                                </div>
-                                <button type="button" onclick="window.deleteContent(${c.id})">${icons.trash}</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="add-content-form">
-                        <input type="text" id="new-content-title" placeholder="Titre du contenu">
-                        <select id="new-content-type">
-                            <option value="pdf">PDF</option>
-                            <option value="video">Vidéo</option>
-                            <option value="link">Lien</option>
-                            <option value="audio">Audio</option>
-                        </select>
-                        <button type="button" class="btn btn-secondary" onclick="window.addContent(${program.id})">
-                            ${icons.plus}
-                        </button>
-                    </div>
-                    <input type="text" id="new-content-url" placeholder="URL du contenu" style="width: 100%; margin-top: var(--spacing-sm); padding: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--radius-md);">
-                </div>
-            ` : ''}
-
-            <div class="form-actions">
+            <div style="display: flex; gap: var(--spacing-sm); justify-content: flex-end; margin-top: var(--spacing-md);">
                 <button type="button" class="btn btn-secondary" onclick="window.closeBottomSheet()">Annuler</button>
                 <button type="submit" class="btn btn-primary">${isEdit ? 'Modifier' : 'Créer'}</button>
             </div>
@@ -508,10 +372,8 @@ function showProgramForm(program = null) {
         content
     });
 
-    // Make closeBottomSheet available globally for the form
     window.closeBottomSheet = closeBottomSheet;
 
-    // Form submission
     document.getElementById('program-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -520,20 +382,19 @@ function showProgramForm(program = null) {
         try {
             if (isEdit) {
                 await apiService.updateProgram(program.id, data);
-                showToast('Programme modifié', 'success');
+                toastSuccess('Programme modifié');
             } else {
                 await apiService.createProgram(data);
-                showToast('Programme créé', 'success');
+                toastSuccess('Programme créé');
             }
             closeBottomSheet();
             loadPrograms();
         } catch (error) {
-            showToast(error.message || 'Erreur', 'error');
+            toastError(error.message || 'Erreur');
         }
     });
 }
 
-// Global functions for actions
 window.editProgram = async (id) => {
     try {
         const response = await apiService.getProgram(id);
@@ -541,7 +402,7 @@ window.editProgram = async (id) => {
             showProgramForm(response.data);
         }
     } catch (error) {
-        showToast('Erreur de chargement', 'error');
+        toastError('Erreur de chargement');
     }
 };
 
@@ -550,46 +411,9 @@ window.deleteProgram = async (id) => {
 
     try {
         await apiService.deleteProgram(id);
-        showToast('Programme supprimé', 'success');
+        toastSuccess('Programme supprimé');
         loadPrograms();
     } catch (error) {
-        showToast(error.message || 'Erreur', 'error');
-    }
-};
-
-window.addContent = async (programId) => {
-    const title = document.getElementById('new-content-title').value;
-    const type = document.getElementById('new-content-type').value;
-    const url = document.getElementById('new-content-url').value;
-
-    if (!title) {
-        showToast('Titre requis', 'error');
-        return;
-    }
-
-    try {
-        await apiService.createSchoolContent({
-            program_id: programId,
-            title,
-            content_type: type,
-            url: url || null
-        });
-        showToast('Contenu ajouté', 'success');
-        window.editProgram(programId); // Refresh the form
-    } catch (error) {
-        showToast(error.message || 'Erreur', 'error');
-    }
-};
-
-window.deleteContent = async (contentId) => {
-    if (!confirm('Supprimer ce contenu ?')) return;
-
-    try {
-        await apiService.deleteSchoolContent(contentId);
-        showToast('Contenu supprimé', 'success');
-        const contentItem = document.querySelector(`[data-content-id="${contentId}"]`);
-        if (contentItem) contentItem.remove();
-    } catch (error) {
-        showToast(error.message || 'Erreur', 'error');
+        toastError(error.message || 'Erreur');
     }
 };
