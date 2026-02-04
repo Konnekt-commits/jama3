@@ -3,6 +3,7 @@ import appState from '../../store/appState.store.js';
 import authService from '../../services/auth.service.js';
 import router from '../../router/router.js';
 import { openBottomSheet } from '../../components/bottomSheet/bottomSheet.js';
+import { toastError } from '../../components/toast/toast.js';
 
 const mockActus = [
     { id: 1, type: 'event', title: 'Cours de Coran', subtitle: 'Dimanche 10h', desc: 'Reprise des cours pour tous niveaux', date: '2026-02-05' },
@@ -10,19 +11,58 @@ const mockActus = [
     { id: 3, type: 'alert', title: 'Cotisation', subtitle: 'Rappel', desc: 'Pensez à régulariser votre cotisation', date: '2026-01-28' },
 ];
 
-const mockPaiements = [
-    { month: 'Janvier', year: 2026, amount: 25, status: 'paid', date: '2026-01-05' },
-    { month: 'Décembre', year: 2025, amount: 25, status: 'paid', date: '2025-12-03' },
-    { month: 'Novembre', year: 2025, amount: 25, status: 'paid', date: '2025-11-02' },
-    { month: 'Octobre', year: 2025, amount: 25, status: 'paid', date: '2025-10-01' },
-    { month: 'Septembre', year: 2025, amount: 25, status: 'paid', date: '2025-09-04' },
-    { month: 'Août', year: 2025, amount: 25, status: 'paid', date: '2025-08-02' },
-];
+// Variable globale pour stocker les données chargées via token
+let tokenData = null;
 
-export async function renderMembrePage() {
+export async function renderMembrePage(token = null) {
+    // Si token fourni, charger les données depuis l'API
+    if (token) {
+        try {
+            const response = await fetch(`/api/adherent-space/${token}`);
+            const result = await response.json();
+
+            if (!result.success) {
+                document.getElementById('page-content').innerHTML = `
+                    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; text-align: center; background: #FAFAFA;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" style="margin-bottom: 16px;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <h2 style="margin-bottom: 8px; color: #1a1a1a;">Lien invalide ou expiré</h2>
+                        <p style="color: #666;">Contactez votre association pour obtenir un nouveau lien.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            tokenData = result.data;
+        } catch (error) {
+            console.error('Error loading token data:', error);
+            toastError('Erreur de chargement');
+            return;
+        }
+    }
     const pageContent = document.getElementById('page-content');
-    const user = appState.get('user');
+
+    // Utiliser les données du token ou du user connecté
+    const adherent = tokenData?.adherent;
+    const user = adherent || appState.get('user');
     const initials = user ? (user.first_name[0] + user.last_name[0]).toUpperCase() : 'U';
+    const associationName = tokenData?.association?.name || 'jama3';
+    const isTokenAccess = !!tokenData;
+
+    // Paiements réels ou mock
+    const paiements = tokenData?.cotisations?.map(c => ({
+        season: c.season,
+        amount: parseFloat(c.amount),
+        amount_paid: parseFloat(c.amount_paid),
+        status: c.payment_status,
+        due_date: c.due_date,
+        paid_date: c.paid_date
+    })) || [];
+
+    const summary = tokenData?.summary || { total_due: 0, total_paid: 0, balance: 0 };
 
     document.getElementById('sidebar').style.display = 'none';
     document.getElementById('navbar').style.display = 'none';
@@ -907,22 +947,46 @@ export async function renderMembrePage() {
 
                 <section class="m-section" id="sec-paiements">
                     <div class="m-pay-header">
-                        <div class="m-pay-amount">${mockPaiements.reduce((s, p) => s + p.amount, 0)}€</div>
-                        <div class="m-pay-label">Total cotisations</div>
+                        ${isTokenAccess ? `
+                            <div class="m-pay-amount">${summary.balance.toFixed(0)}€</div>
+                            <div class="m-pay-label">Reste à payer</div>
+                            <div style="margin-top: 12px; font-size: 13px; color: #666;">
+                                Total: ${summary.total_due.toFixed(0)}€ • Payé: ${summary.total_paid.toFixed(0)}€
+                            </div>
+                        ` : `
+                            <div class="m-pay-amount">150€</div>
+                            <div class="m-pay-label">Total cotisations</div>
+                        `}
                     </div>
                     <div class="m-pay-list">
-                        ${mockPaiements.map(p => `
+                        ${isTokenAccess ? (paiements.length > 0 ? paiements.map(p => `
                             <div class="m-pay-item" data-paiement='${JSON.stringify(p)}'>
-                                <div class="m-pay-dot"></div>
+                                <div class="m-pay-dot" style="background: ${p.status === 'paid' ? '#22c55e' : p.status === 'partial' ? '#f59e0b' : '#dc2626'};"></div>
                                 <div class="m-pay-info">
-                                    <div class="m-pay-month">${p.month} ${p.year}</div>
-                                    <div class="m-pay-date">${new Date(p.date).toLocaleDateString('fr-FR')}</div>
+                                    <div class="m-pay-month">${p.season}</div>
+                                    <div class="m-pay-date">${p.status === 'paid' ? 'Payé' : p.status === 'partial' ? 'Partiel' : 'En attente'}</div>
                                 </div>
                                 <div class="m-pay-price">${p.amount}€</div>
                                 <svg class="m-pay-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                             </div>
-                        `).join('')}
+                        `).join('') : '<div style="padding: 20px; text-align: center; color: #999;">Aucune cotisation</div>') : `
+                            <div class="m-pay-item">
+                                <div class="m-pay-dot"></div>
+                                <div class="m-pay-info">
+                                    <div class="m-pay-month">2024-2025</div>
+                                    <div class="m-pay-date">En attente</div>
+                                </div>
+                                <div class="m-pay-price">150€</div>
+                                <svg class="m-pay-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                            </div>
+                        `}
                     </div>
+                    ${isTokenAccess && summary.balance > 0 ? `
+                        <button class="m-btn-stripe" style="margin: 16px; width: calc(100% - 32px);" id="btn-pay-online">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                            Payer ${summary.balance.toFixed(0)}€ en ligne
+                        </button>
+                    ` : ''}
                 </section>
 
                 <section class="m-section" id="sec-profil">

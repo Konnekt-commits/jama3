@@ -50,7 +50,7 @@ router.post('/generate-token', authMiddleware, tenantMiddleware, async (req, res
 
         // Construire l'URL
         const baseUrl = process.env.FRONTEND_URL || 'https://jama3-828246236461.europe-west1.run.app';
-        const magicLink = `${baseUrl}/app/espace-adherent/${token}`;
+        const magicLink = `${baseUrl}/app/membre/${token}`;
 
         res.json({
             success: true,
