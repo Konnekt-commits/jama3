@@ -7,7 +7,7 @@ class SchoolProgramModel {
                    sc.name as class_name, sc.subject,
                    CONCAT(u.first_name, ' ', u.last_name) as created_by_name
             FROM school_programs sp
-            JOIN school_classes sc ON sp.class_id = sc.id
+            LEFT JOIN school_classes sc ON sp.class_id = sc.id
             LEFT JOIN users u ON sp.created_by = u.id
             WHERE sp.association_id = ?
         `;
@@ -34,7 +34,7 @@ class SchoolProgramModel {
             SELECT sp.*,
                    sc.name as class_name, sc.subject
             FROM school_programs sp
-            JOIN school_classes sc ON sp.class_id = sc.id
+            LEFT JOIN school_classes sc ON sp.class_id = sc.id
             WHERE sp.id = ? AND sp.association_id = ?
         `, [id, associationId]);
         return rows[0];
