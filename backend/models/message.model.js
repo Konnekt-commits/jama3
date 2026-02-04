@@ -32,7 +32,7 @@ class MessageModel {
             params.push(filters.message_type);
         }
 
-        query += ' ORDER BY m.created_at DESC';
+        query += ' ORDER BY m.sent_at DESC';
 
         if (filters.limit) {
             query += ' LIMIT ?';
@@ -77,7 +77,7 @@ class MessageModel {
             query += ' AND m.is_read = FALSE';
         }
 
-        query += ' ORDER BY m.created_at DESC';
+        query += ' ORDER BY m.sent_at DESC';
 
         const [rows] = await pool.execute(query, params);
         return rows;
