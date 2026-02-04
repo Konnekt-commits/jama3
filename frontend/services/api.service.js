@@ -429,6 +429,112 @@ class ApiService {
     async getClassEvaluationStats(classId) {
         return this.get(`/school/evaluations/class/${classId}/stats`);
     }
+
+    // ========== ÉCOLE ARABE - PROGRAMMES PÉDAGOGIQUES ==========
+
+    async getPrograms(params = {}) {
+        return this.get('/school/programs', params);
+    }
+
+    async getProgram(id) {
+        return this.get(`/school/programs/${id}`);
+    }
+
+    async createProgram(data) {
+        return this.post('/school/programs', data);
+    }
+
+    async updateProgram(id, data) {
+        return this.put(`/school/programs/${id}`, data);
+    }
+
+    async deleteProgram(id) {
+        return this.delete(`/school/programs/${id}`);
+    }
+
+    // ========== ÉCOLE ARABE - CONTENUS PÉDAGOGIQUES ==========
+
+    async getSchoolContent(params = {}) {
+        return this.get('/school/content', params);
+    }
+
+    async createSchoolContent(data) {
+        return this.post('/school/content', data);
+    }
+
+    async deleteSchoolContent(id) {
+        return this.delete(`/school/content/${id}`);
+    }
+
+    // ========== ÉCOLE ARABE - PROGRESSION / BADGES ==========
+
+    async getAvailableBadges() {
+        return this.get('/school/progress/badges/available');
+    }
+
+    async getStudentProgress(studentId) {
+        return this.get(`/school/progress/student/${studentId}`);
+    }
+
+    async getStudentBadges(studentId) {
+        return this.get(`/school/progress/student/${studentId}/badges`);
+    }
+
+    async createStudentProgress(data) {
+        return this.post('/school/progress', data);
+    }
+
+    async deleteStudentProgress(id) {
+        return this.delete(`/school/progress/${id}`);
+    }
+
+    // ========== ÉCOLE ARABE - ANNONCES (ENT) ==========
+
+    async getSchoolAnnouncements(params = {}) {
+        return this.get('/school/announcements', params);
+    }
+
+    async getSchoolAnnouncement(id) {
+        return this.get(`/school/announcements/${id}`);
+    }
+
+    async createSchoolAnnouncement(data) {
+        return this.post('/school/announcements', data);
+    }
+
+    async updateSchoolAnnouncement(id, data) {
+        return this.put(`/school/announcements/${id}`, data);
+    }
+
+    async deleteSchoolAnnouncement(id) {
+        return this.delete(`/school/announcements/${id}`);
+    }
+
+    async publishSchoolAnnouncement(id) {
+        return this.post(`/school/announcements/${id}/publish`);
+    }
+
+    // ========== ÉCOLE ARABE - MESSAGERIE PROF-PARENTS ==========
+
+    async getSchoolMessages(params = {}) {
+        return this.get('/school/messages', params);
+    }
+
+    async getSchoolConversation(studentId) {
+        return this.get(`/school/messages/conversation/${studentId}`);
+    }
+
+    async getSchoolUnreadCount() {
+        return this.get('/school/messages/unread-count');
+    }
+
+    async sendSchoolMessage(data) {
+        return this.post('/school/messages', data);
+    }
+
+    async markSchoolMessageAsRead(id) {
+        return this.put(`/school/messages/${id}/read`);
+    }
 }
 
 export default new ApiService();

@@ -8,6 +8,10 @@ const classesController = require('../controllers/school/classes.controller');
 const attendanceController = require('../controllers/school/attendance.controller');
 const feesController = require('../controllers/school/fees.controller');
 const evaluationsController = require('../controllers/school/evaluations.controller');
+const programsController = require('../controllers/school/programs.controller');
+const progressController = require('../controllers/school/progress.controller');
+const announcementsController = require('../controllers/school/announcements.controller');
+const messagesController = require('../controllers/school/messages.controller');
 
 // Auth + Tenant middleware pour toutes les routes
 router.use(authMiddleware);
@@ -58,5 +62,39 @@ router.get('/evaluations/:id', evaluationsController.getById);
 router.post('/evaluations', evaluationsController.create);
 router.put('/evaluations/:id', evaluationsController.update);
 router.delete('/evaluations/:id', evaluationsController.delete);
+
+// ==================== PROGRAMMES PÉDAGOGIQUES ====================
+router.get('/programs', programsController.getAll);
+router.get('/programs/:id', programsController.getById);
+router.post('/programs', programsController.create);
+router.put('/programs/:id', programsController.update);
+router.delete('/programs/:id', programsController.delete);
+
+// Contenus pédagogiques
+router.get('/content', programsController.getContent);
+router.post('/content', programsController.createContent);
+router.delete('/content/:id', programsController.deleteContent);
+
+// ==================== PROGRESSION / BADGES ====================
+router.get('/progress/badges/available', progressController.getAvailableBadges);
+router.get('/progress/student/:studentId', progressController.getByStudent);
+router.get('/progress/student/:studentId/badges', progressController.getBadges);
+router.post('/progress', progressController.create);
+router.delete('/progress/:id', progressController.delete);
+
+// ==================== ANNONCES (ENT) ====================
+router.get('/announcements', announcementsController.getAll);
+router.get('/announcements/:id', announcementsController.getById);
+router.post('/announcements', announcementsController.create);
+router.put('/announcements/:id', announcementsController.update);
+router.delete('/announcements/:id', announcementsController.delete);
+router.post('/announcements/:id/publish', announcementsController.publish);
+
+// ==================== MESSAGERIE PROF-PARENTS ====================
+router.get('/messages', messagesController.getAll);
+router.get('/messages/conversation/:studentId', messagesController.getConversation);
+router.get('/messages/unread-count', messagesController.getUnreadCount);
+router.post('/messages', messagesController.create);
+router.put('/messages/:id/read', messagesController.markAsRead);
 
 module.exports = router;
