@@ -91,15 +91,15 @@ const modules = [
         id: 'ecole-arabe',
         name: 'École Arabe & Coran',
         description: 'Gestion complète de votre école coranique et cours d\'arabe.',
-        longDescription: 'Solution dédiée aux écoles coraniques : gestion des classes, suivi progression Coran, planning enseignants, inscriptions et examens.',
+        longDescription: 'Solution dédiée aux écoles coraniques : gestion des élèves, classes, présences, frais de scolarité et évaluations. Lien parent/adhérent pour le suivi familial.',
         icon: 'book',
-        color: '#14B8A6',
-        gradient: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
-        price: '25€',
-        priceDetail: '/mois',
-        features: ['Gestion des classes', 'Suivi progression', 'Planning enseignants', 'Inscriptions', 'Bulletins'],
-        status: 'coming',
-        popular: false
+        color: '#059669',
+        gradient: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+        price: 'Inclus',
+        priceDetail: 'Dans votre abonnement',
+        features: ['Gestion des élèves', 'Classes & inscriptions', 'Suivi présences', 'Frais de scolarité', 'Évaluations & notes', 'Lien parent/adhérent'],
+        status: 'active',
+        popular: true
     },
     {
         id: 'communication',

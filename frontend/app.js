@@ -19,6 +19,7 @@ import { renderSuperadminPage } from './pages/superadmin/superadmin.js';
 import { renderLoginAdherentPage } from './pages/login-adherent/login-adherent.js';
 import { renderSetupPasswordPage } from './pages/setup-password/setup-password.js';
 import { renderStorePage } from './pages/store/store.js';
+import { renderSchoolPage } from './pages/school/school.js';
 
 const publicRoutes = ['/login', '/register', '/onboarding', '/login-adherent'];
 const superadminRoutes = ['/superadmin'];
@@ -44,6 +45,7 @@ router.addRoute('/intervenants', renderIntervenantsPage, { requiresAuth: true })
 router.addRoute('/messages', renderMessagesPage, { requiresAuth: true });
 router.addRoute('/settings', renderSettingsPage, { requiresAuth: true });
 router.addRoute('/store', renderStorePage, { requiresAuth: true });
+router.addRoute('/school', renderSchoolPage, { requiresAuth: true });
 
 // Route superadmin (accès super_admin uniquement)
 router.addRoute('/superadmin', renderSuperadminPage, { requiresAuth: true, requiresSuperAdmin: true });

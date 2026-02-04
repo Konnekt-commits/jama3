@@ -19,6 +19,7 @@ const migrateRoutes = require('./routes/migrate.routes');
 const superadminRoutes = require('./routes/superadmin.routes');
 const adherentSpaceRoutes = require('./routes/adherent-space.routes');
 const adherentAuthRoutes = require('./routes/adherent-auth.routes');
+const schoolRoutes = require('./routes/school.routes');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -56,6 +57,7 @@ app.use('/api/migrate', migrateRoutes);
 app.use('/api/superadmin', superadminRoutes);
 app.use('/api/adherent-space', adherentSpaceRoutes);
 app.use('/api/adherent-auth', adherentAuthRoutes);
+app.use('/api/school', schoolRoutes);
 
 // ========== SERVIR LES FICHIERS STATIQUES ==========
 // En production (Cloud Run), servir le frontend

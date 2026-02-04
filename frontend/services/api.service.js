@@ -275,6 +275,160 @@ class ApiService {
     async getUnreadCount() {
         return this.get('/messages/unread-count');
     }
+
+    // ========== ÉCOLE ARABE - ÉLÈVES ==========
+
+    async getStudents(params = {}) {
+        return this.get('/school/students', params);
+    }
+
+    async getStudent(id) {
+        return this.get(`/school/students/${id}`);
+    }
+
+    async createStudent(data) {
+        return this.post('/school/students', data);
+    }
+
+    async updateStudent(id, data) {
+        return this.put(`/school/students/${id}`, data);
+    }
+
+    async deleteStudent(id) {
+        return this.delete(`/school/students/${id}`);
+    }
+
+    async getStudentStats() {
+        return this.get('/school/students/stats');
+    }
+
+    async getStudentAttendance(id, limit = 50) {
+        return this.get(`/school/students/${id}/attendance`, { limit });
+    }
+
+    async getStudentEvaluations(id, limit = 20) {
+        return this.get(`/school/students/${id}/evaluations`, { limit });
+    }
+
+    // ========== ÉCOLE ARABE - CLASSES ==========
+
+    async getSchoolClasses(params = {}) {
+        return this.get('/school/classes', params);
+    }
+
+    async getSchoolClass(id) {
+        return this.get(`/school/classes/${id}`);
+    }
+
+    async createSchoolClass(data) {
+        return this.post('/school/classes', data);
+    }
+
+    async updateSchoolClass(id, data) {
+        return this.put(`/school/classes/${id}`, data);
+    }
+
+    async deleteSchoolClass(id) {
+        return this.delete(`/school/classes/${id}`);
+    }
+
+    async getSchoolClassStats() {
+        return this.get('/school/classes/stats');
+    }
+
+    async enrollStudentInClass(classId, studentId) {
+        return this.post(`/school/classes/${classId}/enroll`, { student_id: studentId });
+    }
+
+    async unenrollStudentFromClass(classId, studentId) {
+        return this.delete(`/school/classes/${classId}/enroll/${studentId}`);
+    }
+
+    // ========== ÉCOLE ARABE - PRÉSENCES ==========
+
+    async getClassAttendance(classId, date) {
+        return this.get('/school/attendance', { class_id: classId, date });
+    }
+
+    async recordAttendance(classId, sessionDate, attendances) {
+        return this.post('/school/attendance', { class_id: classId, session_date: sessionDate, attendances });
+    }
+
+    async updateAttendance(id, data) {
+        return this.put(`/school/attendance/${id}`, data);
+    }
+
+    async getAttendanceStats(classId, fromDate, toDate) {
+        return this.get('/school/attendance/stats', { class_id: classId, from_date: fromDate, to_date: toDate });
+    }
+
+    // ========== ÉCOLE ARABE - FRAIS ==========
+
+    async getSchoolFees(params = {}) {
+        return this.get('/school/fees', params);
+    }
+
+    async getSchoolFee(id) {
+        return this.get(`/school/fees/${id}`);
+    }
+
+    async createSchoolFee(data) {
+        return this.post('/school/fees', data);
+    }
+
+    async updateSchoolFee(id, data) {
+        return this.put(`/school/fees/${id}`, data);
+    }
+
+    async deleteSchoolFee(id) {
+        return this.delete(`/school/fees/${id}`);
+    }
+
+    async markSchoolFeePaid(id, paymentMethod = 'cash') {
+        return this.post(`/school/fees/${id}/pay`, { payment_method: paymentMethod });
+    }
+
+    async recordPartialSchoolFeePayment(id, amount, paymentMethod = 'cash') {
+        return this.post(`/school/fees/${id}/partial-payment`, { amount, payment_method: paymentMethod });
+    }
+
+    async generateBatchFees(data) {
+        return this.post('/school/fees/generate', data);
+    }
+
+    async getSchoolFeeStats(academicYear) {
+        return this.get('/school/fees/stats', academicYear ? { academic_year: academicYear } : {});
+    }
+
+    // ========== ÉCOLE ARABE - ÉVALUATIONS ==========
+
+    async getEvaluations(params = {}) {
+        return this.get('/school/evaluations', params);
+    }
+
+    async getEvaluation(id) {
+        return this.get(`/school/evaluations/${id}`);
+    }
+
+    async createEvaluation(data) {
+        return this.post('/school/evaluations', data);
+    }
+
+    async updateEvaluation(id, data) {
+        return this.put(`/school/evaluations/${id}`, data);
+    }
+
+    async deleteEvaluation(id) {
+        return this.delete(`/school/evaluations/${id}`);
+    }
+
+    async getStudentEvaluationStats(studentId, classId) {
+        return this.get(`/school/evaluations/student/${studentId}/stats`, classId ? { class_id: classId } : {});
+    }
+
+    async getClassEvaluationStats(classId) {
+        return this.get(`/school/evaluations/class/${classId}/stats`);
+    }
 }
 
 export default new ApiService();

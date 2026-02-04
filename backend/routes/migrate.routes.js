@@ -427,4 +427,161 @@ router.get('/add-tokens-table', async (req, res) => {
     }
 });
 
+// GET /api/migrate/school-tables - Créer les tables École Arabe
+router.get('/school-tables', async (req, res) => {
+    const results = [];
+
+    try {
+        // Table students (élèves - distinct des adhérents)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS students (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                student_number VARCHAR(20) NOT NULL,
+                first_name VARCHAR(100) NOT NULL,
+                last_name VARCHAR(100) NOT NULL,
+                birth_date DATE,
+                gender ENUM('M', 'F') DEFAULT 'M',
+                photo_url VARCHAR(255),
+                parent_id INT,
+                parent_relation ENUM('pere', 'mere', 'tuteur', 'autre') DEFAULT 'pere',
+                emergency_contact VARCHAR(20),
+                emergency_name VARCHAR(100),
+                level ENUM('debutant', 'intermediaire', 'avance') DEFAULT 'debutant',
+                enrollment_date DATE,
+                status ENUM('actif', 'inactif', 'diplome', 'transfere') DEFAULT 'actif',
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_student_number (association_id, student_number),
+                INDEX idx_association (association_id),
+                INDEX idx_parent (parent_id),
+                INDEX idx_status (status)
+            )
+        `);
+        results.push('✓ Table students');
+
+        // Table school_classes (classes/groupes)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_classes (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                subject ENUM('coran', 'arabe', 'fiqh', 'sira', 'doua', 'autre') NOT NULL,
+                level ENUM('debutant', 'intermediaire', 'avance') DEFAULT 'debutant',
+                teacher_id INT,
+                max_capacity INT DEFAULT 20,
+                schedule JSON,
+                room VARCHAR(50),
+                academic_year VARCHAR(9),
+                status ENUM('active', 'inactive', 'archived') DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_teacher (teacher_id),
+                INDEX idx_status (status)
+            )
+        `);
+        results.push('✓ Table school_classes');
+
+        // Table class_enrollments (inscriptions aux classes)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS class_enrollments (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                student_id INT NOT NULL,
+                class_id INT NOT NULL,
+                enrollment_date DATE NOT NULL,
+                status ENUM('active', 'suspended', 'completed', 'withdrawn') DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_enrollment (student_id, class_id),
+                INDEX idx_association (association_id),
+                INDEX idx_student (student_id),
+                INDEX idx_class (class_id)
+            )
+        `);
+        results.push('✓ Table class_enrollments');
+
+        // Table school_attendance (présences)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_attendance (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                class_id INT NOT NULL,
+                student_id INT NOT NULL,
+                session_date DATE NOT NULL,
+                status ENUM('present', 'absent', 'excuse', 'retard') DEFAULT 'present',
+                notes VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_attendance (class_id, student_id, session_date),
+                INDEX idx_association (association_id),
+                INDEX idx_class_date (class_id, session_date)
+            )
+        `);
+        results.push('✓ Table school_attendance');
+
+        // Table school_fees (frais de scolarité)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_fees (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                student_id INT NOT NULL,
+                fee_number VARCHAR(20) NOT NULL,
+                academic_year VARCHAR(9) NOT NULL,
+                period ENUM('mensuel', 'trimestriel', 'annuel') DEFAULT 'mensuel',
+                period_label VARCHAR(50),
+                amount DECIMAL(10,2) NOT NULL,
+                paid_amount DECIMAL(10,2) DEFAULT 0,
+                payment_status ENUM('pending', 'partial', 'paid', 'overdue') DEFAULT 'pending',
+                due_date DATE,
+                paid_date DATE,
+                payment_method ENUM('cash', 'cheque', 'virement', 'carte', 'autre'),
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_student (student_id),
+                INDEX idx_status (payment_status)
+            )
+        `);
+        results.push('✓ Table school_fees');
+
+        // Table school_evaluations (évaluations/progression)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_evaluations (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                student_id INT NOT NULL,
+                class_id INT NOT NULL,
+                evaluation_date DATE NOT NULL,
+                type ENUM('examen', 'controle', 'oral', 'memorisation') DEFAULT 'controle',
+                subject_detail VARCHAR(100),
+                score DECIMAL(5,2),
+                max_score DECIMAL(5,2) DEFAULT 20,
+                level_achieved ENUM('debutant', 'intermediaire', 'avance'),
+                comments TEXT,
+                evaluated_by INT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_student (student_id),
+                INDEX idx_class (class_id)
+            )
+        `);
+        results.push('✓ Table school_evaluations');
+
+        res.json({
+            success: true,
+            message: 'Tables École Arabe créées',
+            results
+        });
+
+    } catch (error) {
+        console.error('School tables migration error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur migration tables école',
+            error: error.message,
+            results
+        });
+    }
+});
+
 module.exports = router;
