@@ -684,11 +684,14 @@ router.get('/school-tables', async (req, res) => {
                 photo_url VARCHAR(255),
                 parent_id INT,
                 parent_relation ENUM('pere', 'mere', 'tuteur', 'autre') DEFAULT 'pere',
+                parent_email VARCHAR(255),
+                parent_phone VARCHAR(20),
+                parent_name VARCHAR(200),
                 emergency_contact VARCHAR(20),
                 emergency_name VARCHAR(100),
                 level ENUM('debutant', 'intermediaire', 'avance') DEFAULT 'debutant',
                 enrollment_date DATE,
-                status ENUM('actif', 'inactif', 'diplome', 'transfere') DEFAULT 'actif',
+                status ENUM('actif', 'inactif', 'diplome', 'transfere', 'absent_longue_duree') DEFAULT 'actif',
                 notes TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -806,6 +809,158 @@ router.get('/school-tables', async (req, res) => {
         `);
         results.push('✓ Table school_evaluations');
 
+        // Table school_programs (programmes pédagogiques)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_programs (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                class_id INT NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                period VARCHAR(50),
+                objectives JSON,
+                start_date DATE,
+                end_date DATE,
+                status ENUM('draft', 'active', 'completed') DEFAULT 'draft',
+                created_by INT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_class (class_id)
+            )
+        `);
+        results.push('✓ Table school_programs');
+
+        // Table school_content (contenus pédagogiques - PDF, vidéos, etc.)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_content (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                class_id INT,
+                program_id INT,
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                content_type ENUM('pdf', 'video', 'audio', 'text', 'link', 'image') DEFAULT 'pdf',
+                url VARCHAR(500),
+                file_name VARCHAR(255),
+                file_size INT,
+                is_public BOOLEAN DEFAULT FALSE,
+                created_by INT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_class (class_id),
+                INDEX idx_program (program_id)
+            )
+        `);
+        results.push('✓ Table school_content');
+
+        // Table student_progress (progression et badges)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS student_progress (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                student_id INT NOT NULL,
+                class_id INT,
+                milestone_type ENUM('badge', 'level', 'certificate', 'achievement') DEFAULT 'badge',
+                milestone_name VARCHAR(100) NOT NULL,
+                milestone_description TEXT,
+                milestone_icon VARCHAR(50),
+                achieved_at DATE NOT NULL,
+                awarded_by INT,
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_student (student_id)
+            )
+        `);
+        results.push('✓ Table student_progress');
+
+        // Table school_announcements (annonces parents/élèves)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_announcements (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                class_id INT,
+                title VARCHAR(255) NOT NULL,
+                content TEXT NOT NULL,
+                priority ENUM('low', 'normal', 'high', 'urgent') DEFAULT 'normal',
+                target_audience ENUM('all', 'parents', 'students', 'teachers', 'class') DEFAULT 'all',
+                published_at DATETIME,
+                expires_at DATETIME,
+                is_published BOOLEAN DEFAULT FALSE,
+                created_by INT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_class (class_id),
+                INDEX idx_published (is_published, published_at)
+            )
+        `);
+        results.push('✓ Table school_announcements');
+
+        // Table school_messages (messagerie prof-parents)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_messages (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                sender_type ENUM('teacher', 'admin', 'parent') NOT NULL,
+                sender_id INT NOT NULL,
+                recipient_type ENUM('teacher', 'admin', 'parent', 'student') NOT NULL,
+                recipient_id INT NOT NULL,
+                student_id INT,
+                subject VARCHAR(255),
+                content TEXT NOT NULL,
+                is_read BOOLEAN DEFAULT FALSE,
+                read_at DATETIME,
+                parent_message_id INT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_sender (sender_type, sender_id),
+                INDEX idx_recipient (recipient_type, recipient_id),
+                INDEX idx_student (student_id)
+            )
+        `);
+        results.push('✓ Table school_messages');
+
+        // Table school_documents (documents scolaires)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_documents (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                student_id INT NOT NULL,
+                document_type ENUM('bulletin', 'certificat', 'attestation', 'facture', 'recu', 'autre') DEFAULT 'autre',
+                title VARCHAR(255) NOT NULL,
+                description TEXT,
+                file_url VARCHAR(500),
+                file_name VARCHAR(255),
+                academic_year VARCHAR(9),
+                period VARCHAR(50),
+                generated_at DATETIME,
+                created_by INT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_student (student_id),
+                INDEX idx_type (document_type)
+            )
+        `);
+        results.push('✓ Table school_documents');
+
+        // Table absence_alerts (alertes absences parents)
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS absence_alerts (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                student_id INT NOT NULL,
+                attendance_id INT NOT NULL,
+                alert_type ENUM('email', 'sms', 'app') DEFAULT 'email',
+                sent_at DATETIME,
+                status ENUM('pending', 'sent', 'failed') DEFAULT 'pending',
+                error_message TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id),
+                INDEX idx_student (student_id)
+            )
+        `);
+        results.push('✓ Table absence_alerts');
+
         res.json({
             success: true,
             message: 'Tables École Arabe créées',
@@ -819,6 +974,319 @@ router.get('/school-tables', async (req, res) => {
             message: 'Erreur migration tables école',
             error: error.message,
             results
+        });
+    }
+});
+
+// GET /api/migrate/seed-school-ent - Créer des données de démo ENT (programmes, contenus, annonces, messages, badges)
+router.get('/seed-school-ent', async (req, res) => {
+    try {
+        // Récupérer l'association
+        const [assocs] = await pool.execute('SELECT id FROM associations WHERE slug = ? LIMIT 1', ['mosquee-test-paris']);
+        const associationId = assocs[0]?.id || 1;
+
+        // Récupérer les classes existantes
+        const [classes] = await pool.execute(
+            'SELECT id, name, subject, teacher_id FROM school_classes WHERE association_id = ?',
+            [associationId]
+        );
+
+        // Récupérer les élèves
+        const [students] = await pool.execute(
+            'SELECT id, first_name, last_name FROM students WHERE association_id = ?',
+            [associationId]
+        );
+
+        // Récupérer les enseignants
+        const [teachers] = await pool.execute(
+            'SELECT id, first_name, last_name FROM intervenants WHERE association_id = ?',
+            [associationId]
+        );
+
+        // Récupérer l'admin
+        const [admins] = await pool.execute(
+            'SELECT id FROM users WHERE association_id = ? AND role IN ("admin", "gestionnaire") LIMIT 1',
+            [associationId]
+        );
+        const adminId = admins[0]?.id || 1;
+
+        const results = [];
+
+        // ========== 1. PROGRAMMES PÉDAGOGIQUES ==========
+        const programsData = [
+            {
+                class_id: classes.find(c => c.subject === 'coran' && c.name.includes('Niveau 1'))?.id || classes[0]?.id,
+                title: 'Programme Coran Débutant - Trimestre 1',
+                description: 'Programme de mémorisation et récitation pour les débutants. Apprentissage des sourates courtes du Juz Amma.',
+                period: 'Trimestre 1 - 2024-2025',
+                objectives: JSON.stringify(['Mémoriser Sourate Al-Fatiha', 'Mémoriser les 5 dernières sourates', 'Apprendre les règles de base du Tajwid', 'Réciter avec une prononciation correcte']),
+                status: 'active'
+            },
+            {
+                class_id: classes.find(c => c.subject === 'coran' && c.name.includes('Niveau 2'))?.id || classes[1]?.id,
+                title: 'Programme Coran Intermédiaire - Trimestre 1',
+                description: 'Continuation de la mémorisation du Juz Amma et introduction aux règles avancées du Tajwid.',
+                period: 'Trimestre 1 - 2024-2025',
+                objectives: JSON.stringify(['Compléter la mémorisation du Juz Amma', 'Maîtriser les règles de Noon Sakinah', 'Apprendre les règles de Meem Sakinah', 'Récitation fluide et mélodieuse']),
+                status: 'active'
+            },
+            {
+                class_id: classes.find(c => c.subject === 'arabe')?.id || classes[3]?.id,
+                title: 'Programme Arabe - Alphabet et Lecture',
+                description: 'Apprentissage de l\'alphabet arabe, lecture et écriture des lettres avec les voyelles.',
+                period: 'Année 2024-2025',
+                objectives: JSON.stringify(['Reconnaître toutes les lettres', 'Écrire les lettres en début/milieu/fin', 'Lire les voyelles courtes et longues', 'Former des mots simples']),
+                status: 'active'
+            },
+            {
+                class_id: classes.find(c => c.subject === 'fiqh')?.id || classes[5]?.id,
+                title: 'Programme Fiqh - Les Bases de l\'Islam',
+                description: 'Introduction aux piliers de l\'Islam et aux actes d\'adoration fondamentaux.',
+                period: 'Année 2024-2025',
+                objectives: JSON.stringify(['Connaître les 5 piliers de l\'Islam', 'Apprendre les étapes des ablutions', 'Connaître les conditions de la prière', 'Mémoriser les invocations de base']),
+                status: 'active'
+            },
+            {
+                class_id: classes.find(c => c.subject === 'sira')?.id || classes[6]?.id,
+                title: 'Programme Sira - Vie du Prophète ﷺ',
+                description: 'Étude de la vie du Prophète Muhammad ﷺ de sa naissance à l\'Hégire.',
+                period: 'Semestre 1 - 2024-2025',
+                objectives: JSON.stringify(['La naissance et l\'enfance du Prophète ﷺ', 'La révélation et le début de la mission', 'Les premiers compagnons', 'L\'émigration vers Médine']),
+                status: 'draft'
+            }
+        ];
+
+        const programIds = [];
+        for (const prog of programsData) {
+            if (prog.class_id) {
+                const [existing] = await pool.execute(
+                    'SELECT id FROM school_programs WHERE association_id = ? AND title = ?',
+                    [associationId, prog.title]
+                );
+                if (existing.length === 0) {
+                    const [result] = await pool.execute(
+                        'INSERT INTO school_programs (association_id, class_id, title, description, period, objectives, status, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                        [associationId, prog.class_id, prog.title, prog.description, prog.period, prog.objectives, prog.status, adminId]
+                    );
+                    programIds.push(result.insertId);
+                } else {
+                    programIds.push(existing[0].id);
+                }
+            }
+        }
+        results.push('✓ ' + programIds.length + ' programmes créés');
+
+        // ========== 2. CONTENUS PÉDAGOGIQUES ==========
+        const contentsData = [
+            { program_idx: 0, title: 'Sourate Al-Fatiha - Audio récitation', content_type: 'audio', url: 'https://example.com/fatiha.mp3' },
+            { program_idx: 0, title: 'Sourate Al-Fatiha - Traduction et Tafsir', content_type: 'pdf', url: 'https://example.com/fatiha-tafsir.pdf' },
+            { program_idx: 0, title: 'Les règles de base du Tajwid', content_type: 'video', url: 'https://youtube.com/watch?v=example1' },
+            { program_idx: 0, title: 'Exercices de prononciation', content_type: 'pdf', url: 'https://example.com/exercices-prononciation.pdf' },
+            { program_idx: 1, title: 'Juz Amma complet - Audio', content_type: 'audio', url: 'https://example.com/juz-amma.mp3' },
+            { program_idx: 1, title: 'Règles de Noon Sakinah - Vidéo', content_type: 'video', url: 'https://youtube.com/watch?v=example2' },
+            { program_idx: 1, title: 'Tableau des règles du Tajwid', content_type: 'pdf', url: 'https://example.com/tajwid-rules.pdf' },
+            { program_idx: 2, title: 'Alphabet arabe - Poster', content_type: 'image', url: 'https://example.com/alphabet.jpg' },
+            { program_idx: 2, title: 'Cahier d\'écriture arabe', content_type: 'pdf', url: 'https://example.com/cahier-ecriture.pdf' },
+            { program_idx: 2, title: 'Vocabulaire de base - Flashcards', content_type: 'link', url: 'https://quizlet.com/arabic-basics' },
+            { program_idx: 3, title: 'Les ablutions étape par étape', content_type: 'video', url: 'https://youtube.com/watch?v=example3' },
+            { program_idx: 3, title: 'Invocations quotidiennes - Audio', content_type: 'audio', url: 'https://example.com/douas.mp3' },
+            { program_idx: 3, title: 'Fiche récapitulative - Les 5 piliers', content_type: 'pdf', url: 'https://example.com/5-piliers.pdf' },
+            { program_idx: 4, title: 'Frise chronologique de la Sira', content_type: 'pdf', url: 'https://example.com/sira-timeline.pdf' },
+            { program_idx: 4, title: 'Documentaire - La vie du Prophète ﷺ', content_type: 'video', url: 'https://youtube.com/watch?v=example4' }
+        ];
+
+        let contentCount = 0;
+        for (const content of contentsData) {
+            const programId = programIds[content.program_idx];
+            if (programId) {
+                const [existing] = await pool.execute(
+                    'SELECT id FROM school_content WHERE association_id = ? AND title = ?',
+                    [associationId, content.title]
+                );
+                if (existing.length === 0) {
+                    await pool.execute(
+                        'INSERT INTO school_content (association_id, program_id, title, content_type, url, created_by) VALUES (?, ?, ?, ?, ?, ?)',
+                        [associationId, programId, content.title, content.content_type, content.url, adminId]
+                    );
+                    contentCount++;
+                }
+            }
+        }
+        results.push('✓ ' + contentCount + ' contenus pédagogiques créés');
+
+        // ========== 3. ANNONCES ==========
+        const announcementsData = [
+            {
+                title: 'Rentrée des classes - Septembre 2024',
+                content: 'Chers parents, nous avons le plaisir de vous informer que la rentrée de l\'école arabe aura lieu le samedi 7 septembre 2024 à 10h00. Merci de bien vouloir accompagner vos enfants pour cette première journée. Une réunion d\'information avec les enseignants suivra à 11h30.',
+                priority: 'high',
+                target_audience: 'all',
+                is_published: true
+            },
+            {
+                title: 'Vacances de Toussaint',
+                content: 'L\'école sera fermée du 26 octobre au 3 novembre 2024 pour les vacances de Toussaint. Les cours reprendront le samedi 9 novembre. Bon repos à tous !',
+                priority: 'normal',
+                target_audience: 'parents',
+                is_published: true
+            },
+            {
+                title: 'Concours de récitation du Coran',
+                content: 'Nous organisons un concours de récitation du Coran le dimanche 15 décembre 2024. Les inscriptions sont ouvertes jusqu\'au 1er décembre. Des prix seront remis aux meilleurs récitants de chaque niveau. Encouragez vos enfants à participer !',
+                priority: 'normal',
+                target_audience: 'all',
+                is_published: true
+            },
+            {
+                title: 'Rappel : Paiement des frais de scolarité',
+                content: 'Chers parents, nous vous rappelons que les frais de scolarité du mois de novembre sont à régler avant le 15 du mois. Merci de régulariser votre situation si ce n\'est pas encore fait.',
+                priority: 'high',
+                target_audience: 'parents',
+                is_published: true
+            },
+            {
+                title: 'Journée portes ouvertes - Février 2025',
+                content: 'Nous prévoyons une journée portes ouvertes le samedi 8 février 2025 pour présenter notre école aux nouvelles familles. N\'hésitez pas à en parler autour de vous !',
+                priority: 'low',
+                target_audience: 'all',
+                is_published: false
+            },
+            {
+                title: 'Nouveau : Cours de Tajwid avancé',
+                content: 'À partir de janvier 2025, nous proposerons un nouveau cours de Tajwid avancé pour les élèves ayant terminé le Juz Amma. Les inscriptions ouvriront bientôt.',
+                priority: 'normal',
+                target_audience: 'parents',
+                is_published: false
+            }
+        ];
+
+        let announcementCount = 0;
+        for (const ann of announcementsData) {
+            const [existing] = await pool.execute(
+                'SELECT id FROM school_announcements WHERE association_id = ? AND title = ?',
+                [associationId, ann.title]
+            );
+            if (existing.length === 0) {
+                await pool.execute(
+                    'INSERT INTO school_announcements (association_id, title, content, priority, target_audience, is_published, published_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                    [associationId, ann.title, ann.content, ann.priority, ann.target_audience, ann.is_published, ann.is_published ? new Date() : null, adminId]
+                );
+                announcementCount++;
+            }
+        }
+        results.push('✓ ' + announcementCount + ' annonces créées');
+
+        // ========== 4. MESSAGES (Conversations prof-parents) ==========
+        const messagesData = [];
+
+        // Créer quelques conversations pour différents élèves
+        for (let i = 0; i < Math.min(5, students.length); i++) {
+            const student = students[i];
+            const teacher = teachers[i % teachers.length];
+
+            // Message du professeur
+            messagesData.push({
+                sender_type: 'teacher',
+                sender_id: teacher?.id || 1,
+                recipient_type: 'parent',
+                recipient_id: student.id,
+                student_id: student.id,
+                subject: 'Progrès de ' + student.first_name,
+                content: 'Assalam alaykoum, je tenais à vous informer que ' + student.first_name + ' fait de très bons progrès en mémorisation. Il/Elle a réussi à mémoriser Sourate Al-Fatiha cette semaine. Continuez à l\'encourager à la maison. Barakallahu fikum.',
+                is_read: true
+            });
+
+            // Réponse du parent
+            messagesData.push({
+                sender_type: 'parent',
+                sender_id: student.id,
+                recipient_type: 'teacher',
+                recipient_id: teacher?.id || 1,
+                student_id: student.id,
+                subject: 'Re: Progrès de ' + student.first_name,
+                content: 'Wa alaykoum assalam wa rahmatullah, jazakAllahu khayran pour ce retour positif. Nous sommes très contents des progrès de ' + student.first_name + '. Nous continuerons à l\'accompagner dans sa mémorisation in sha Allah.',
+                is_read: true
+            });
+
+            // Message de suivi
+            if (i < 2) {
+                messagesData.push({
+                    sender_type: 'teacher',
+                    sender_id: teacher?.id || 1,
+                    recipient_type: 'parent',
+                    recipient_id: student.id,
+                    student_id: student.id,
+                    subject: 'Absence du ' + new Date().toLocaleDateString('fr-FR'),
+                    content: 'Assalam alaykoum, ' + student.first_name + ' était absent(e) au dernier cours. Est-ce que tout va bien ? Merci de nous informer de la raison de cette absence.',
+                    is_read: false
+                });
+            }
+        }
+
+        let messageCount = 0;
+        for (const msg of messagesData) {
+            await pool.execute(
+                'INSERT INTO school_messages (association_id, sender_type, sender_id, recipient_type, recipient_id, student_id, subject, content, is_read, read_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [associationId, msg.sender_type, msg.sender_id, msg.recipient_type, msg.recipient_id, msg.student_id, msg.subject, msg.content, msg.is_read, msg.is_read ? new Date() : null]
+            );
+            messageCount++;
+        }
+        results.push('✓ ' + messageCount + ' messages créés');
+
+        // ========== 5. BADGES ET PROGRESSION ==========
+        const badgesData = [
+            { name: 'Sourate Al-Fatiha', icon: '📖', type: 'badge' },
+            { name: 'Sourate Al-Ikhlas', icon: '⭐', type: 'badge' },
+            { name: 'Sourate An-Nas', icon: '🌟', type: 'badge' },
+            { name: 'Sourate Al-Falaq', icon: '✨', type: 'badge' },
+            { name: 'Alphabet Arabe', icon: '🔤', type: 'badge' },
+            { name: 'Lecture Niveau 1', icon: '📚', type: 'level' },
+            { name: 'Tajwid Bases', icon: '🎯', type: 'badge' },
+            { name: 'Assidu', icon: '🌙', type: 'achievement' },
+            { name: 'Progrès Remarquable', icon: '📈', type: 'achievement' }
+        ];
+
+        let progressCount = 0;
+        for (let i = 0; i < students.length; i++) {
+            const student = students[i];
+            // Chaque élève reçoit 2-5 badges aléatoires
+            const numBadges = 2 + Math.floor(Math.random() * 4);
+            const shuffledBadges = [...badgesData].sort(() => Math.random() - 0.5);
+
+            for (let j = 0; j < numBadges && j < shuffledBadges.length; j++) {
+                const badge = shuffledBadges[j];
+                const achievedDate = new Date();
+                achievedDate.setDate(achievedDate.getDate() - Math.floor(Math.random() * 90));
+
+                const [existing] = await pool.execute(
+                    'SELECT id FROM student_progress WHERE association_id = ? AND student_id = ? AND milestone_name = ?',
+                    [associationId, student.id, badge.name]
+                );
+
+                if (existing.length === 0) {
+                    const teacherId = teachers[Math.floor(Math.random() * teachers.length)]?.id || null;
+                    await pool.execute(
+                        'INSERT INTO student_progress (association_id, student_id, milestone_type, milestone_name, milestone_icon, achieved_at, awarded_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        [associationId, student.id, badge.type, badge.name, badge.icon, achievedDate.toISOString().split('T')[0], teacherId]
+                    );
+                    progressCount++;
+                }
+            }
+        }
+        results.push('✓ ' + progressCount + ' badges/progression créés');
+
+        res.json({
+            success: true,
+            message: 'Données de démo ENT créées',
+            results
+        });
+
+    } catch (error) {
+        console.error('Seed ENT error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur création données ENT',
+            error: error.message
         });
     }
 });
