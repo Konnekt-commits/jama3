@@ -357,4 +357,35 @@ router.get('/debug', async (req, res) => {
     }
 });
 
+// GET /api/migrate/add-tokens-table - Ajouter la table adherent_tokens
+router.get('/add-tokens-table', async (req, res) => {
+    try {
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS adherent_tokens (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                adherent_id INT NOT NULL,
+                token VARCHAR(64) NOT NULL UNIQUE,
+                expires_at DATETIME NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                used_at DATETIME,
+                INDEX idx_token (token),
+                INDEX idx_adherent (adherent_id),
+                INDEX idx_expires (expires_at)
+            )
+        `);
+
+        res.json({
+            success: true,
+            message: 'Table adherent_tokens créée'
+        });
+    } catch (error) {
+        console.error('Add tokens table error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur création table',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;

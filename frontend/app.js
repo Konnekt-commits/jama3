@@ -16,8 +16,10 @@ import { renderIntervenantsPage } from './pages/intervenants/intervenants.js';
 import { renderMessagesPage } from './pages/messages/messages.js';
 import { renderSettingsPage } from './pages/settings/settings.js';
 import { renderSuperadminPage } from './pages/superadmin/superadmin.js';
+import { renderEspaceAdherentPage } from './pages/espace-adherent/espace-adherent.js';
 
 const publicRoutes = ['/login', '/register', '/onboarding'];
+const espaceAdherentPattern = /^\/espace-adherent\/[a-f0-9]+$/;
 const superadminRoutes = ['/superadmin'];
 const membreRoutes = ['/membre'];
 
@@ -42,6 +44,9 @@ router.addRoute('/settings', renderSettingsPage, { requiresAuth: true });
 // Route superadmin (accès super_admin uniquement)
 router.addRoute('/superadmin', renderSuperadminPage, { requiresAuth: true, requiresSuperAdmin: true });
 
+// Route espace adhérent (publique, accès par token)
+router.addRoute('/espace-adherent/:token', (params) => renderEspaceAdherentPage(params.token));
+
 router.addRoute('/404', () => {
     const pageContent = document.getElementById('page-content');
     pageContent.innerHTML = `
@@ -57,8 +62,14 @@ router.addRoute('/404', () => {
 router.setBeforeEach(async (to, from) => {
     const path = router.getPath();
     const isPublicRoute = publicRoutes.includes(path);
+    const isEspaceAdherent = path.startsWith('/espace-adherent/');
     const isSuperadminRoute = superadminRoutes.includes(path);
     const isAuthenticated = authService.isAuthenticated();
+
+    // Espace adhérent est public (accès par token)
+    if (isEspaceAdherent) {
+        return true;
+    }
 
     if (!isPublicRoute && !isAuthenticated) {
         router.navigate('/login', true);
@@ -93,8 +104,9 @@ router.setAfterEach((to, from) => {
     const isPublicRoute = publicRoutes.includes(path);
     const isMembreRoute = membreRoutes.includes(path);
     const isSuperadminRoute = superadminRoutes.includes(path);
+    const isEspaceAdherent = path.startsWith('/espace-adherent/');
 
-    if (!isPublicRoute && !isMembreRoute && !isSuperadminRoute && authService.isAuthenticated()) {
+    if (!isPublicRoute && !isMembreRoute && !isSuperadminRoute && !isEspaceAdherent && authService.isAuthenticated()) {
         hideLoginUI();
         renderSidebar();
         renderMobileNav();

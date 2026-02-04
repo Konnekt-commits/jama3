@@ -414,9 +414,39 @@ function openAdherentDetail(adherent) {
             </div>
         `,
         footer: `
+            <button class="btn btn-outline" id="magic-link-btn" style="display: flex; align-items: center; gap: 6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                Lien espace
+            </button>
             <button class="btn btn-secondary" id="edit-btn">${i18n.t('edit')}</button>
             <button class="btn btn-primary" id="close-detail-btn">${i18n.t('close')}</button>
         `
+    });
+
+    document.getElementById('magic-link-btn').addEventListener('click', async () => {
+        const btn = document.getElementById('magic-link-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-sm"></span> Génération...';
+
+        try {
+            const response = await apiService.post('/adherent-space/generate-token', {
+                adherent_id: adherent.id,
+                validity_hours: 48
+            });
+
+            if (response.success) {
+                const link = response.data.magic_link;
+                await navigator.clipboard.writeText(link);
+                toastSuccess('Lien copié ! Valide 48h');
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Copié !';
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            toastError('Erreur génération lien');
+            btn.innerHTML = 'Lien espace';
+        }
+        btn.disabled = false;
     });
 
     document.getElementById('edit-btn').addEventListener('click', () => {
