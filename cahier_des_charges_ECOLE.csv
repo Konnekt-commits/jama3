@@ -1,0 +1,160 @@
+🎓 PROMPT — Module Medrassa pour JAMA3 (gestion école & élèves)
+
+Tu es un architecte logiciel SaaS spécialisé dans les plateformes de gestion associative et éducative.
+
+Je dispose déjà d’un logiciel appelé JAMA3 qui permet :
+
+la création d’associations / mosquées
+
+la gestion des adhérents
+
+l’enregistrement des cotisations et paiements
+
+Je souhaite ajouter un module complémentaire payant, totalement séparé fonctionnellement, nommé :
+
+👉 Medrassa.Jama3.fr
+
+Ce module est dédié à la gestion pédagogique des élèves enfants et adultes, comme un ENT scolaire.
+
+🎯 Objectifs du module Medrassa
+
+Créer une brique indépendante permettant :
+
+gestion des élèves (sans obligation d’être adhérent JAMA3)
+
+suivi pédagogique
+
+communication avec les parents
+
+suivi financier des cours
+
+🧱 Architecture logique demandée
+
+Une mosquée/association peut :
+
+activer ou non le module Medrassa (abonnement séparé)
+
+gérer ses élèves indépendamment des adhérents classiques
+
+Relations :
+
+Élève ≠ forcément adhérent JAMA3
+
+Possibilité de lier un élève à un adhérent parent/tuteur (optionnel)
+
+📚 Fonctionnalités à développer
+👨‍🎓 Gestion des élèves
+
+Création fiche élève :
+
+nom, âge, niveau, classe/groupe
+
+parent/tuteur
+
+historique scolaire
+
+statut : actif, absent longue durée, ancien élève
+
+🏫 Classes & groupes
+
+Création de groupes :
+
+par âge
+
+par niveau (débutant, intermédiaire, avancé)
+
+par matière (Coran, arabe, fiqh, etc.)
+
+affectation enseignants/intervenants
+
+📆 Présences & absences
+
+feuille d’appel par séance
+
+historique absences
+
+alertes parents
+
+📖 Programme pédagogique
+
+plan de cours par classe
+
+objectifs par période
+
+progression par élève
+
+contenus (pdf, textes, vidéos)
+
+📝 Suivi des connaissances
+
+évaluations
+
+niveaux validés
+
+commentaires enseignants
+
+badges ou étapes de progression
+
+💬 Espace parents / élèves (ENT)
+
+messagerie interne :
+
+prof ↔ parents
+
+administration ↔ parents
+
+annonces générales
+
+documents scolaires
+
+💳 Paiement & cotisations élèves
+
+abonnements mensuels ou annuels
+
+paiements par élève
+
+rappels de retard
+
+reçus
+
+séparés de la comptabilité adhérents JAMA3
+
+🔐 Gestion des rôles
+
+Admin mosquée
+
+Enseignants
+
+Parents
+
+Élèves (optionnel)
+
+Avec accès différenciés.
+
+🎨 Interface
+
+cohérente avec JAMA3
+
+Dark / Light
+
+simple et mobile-friendly
+
+tableaux clairs
+
+⚙️ Attentes techniques
+
+module activable/désactivable par mosquée
+
+données bien séparées (adhérents vs élèves)
+
+API propre entre JAMA3 et Medrassa
+
+possibilité future de multi-écoles
+
+📦 Business model
+
+abonnement JAMA3 = gestion mosquée
+
+abonnement Medrassa = gestion école
+
+indépendants mais connectables

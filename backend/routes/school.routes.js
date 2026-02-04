@@ -1,15 +1,17 @@
 const express = require('express');
 const router = express.Router();
 
-const authMiddleware = require('../middleware/auth.middleware');
+const { authMiddleware } = require('../middleware/auth.middleware');
+const tenantMiddleware = require('../middleware/tenant.middleware');
 const studentsController = require('../controllers/school/students.controller');
 const classesController = require('../controllers/school/classes.controller');
 const attendanceController = require('../controllers/school/attendance.controller');
 const feesController = require('../controllers/school/fees.controller');
 const evaluationsController = require('../controllers/school/evaluations.controller');
 
-// Toutes les routes nécessitent une authentification
+// Auth + Tenant middleware pour toutes les routes
 router.use(authMiddleware);
+router.use(tenantMiddleware);
 
 // ==================== ÉLÈVES ====================
 router.get('/students', studentsController.getAll);
