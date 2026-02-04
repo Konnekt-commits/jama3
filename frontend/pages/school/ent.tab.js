@@ -1,5 +1,5 @@
 import apiService from '../../services/api.service.js';
-import { showBottomSheet, closeBottomSheet } from '../../components/bottomSheet/bottomSheet.js';
+import { openBottomSheet, closeBottomSheet } from '../../components/bottomSheet/bottomSheet.js';
 import { showToast } from '../../components/toast/toast.js';
 
 const icons = {
@@ -598,7 +598,10 @@ function showAnnouncementForm(announcement = null) {
         </form>
     `;
 
-    showBottomSheet(isEdit ? 'Modifier l\'annonce' : 'Nouvelle annonce', content);
+    openBottomSheet({
+        title: isEdit ? 'Modifier l\'annonce' : 'Nouvelle annonce',
+        content
+    });
     window.closeBottomSheet = closeBottomSheet;
 
     document.getElementById('announcement-form').addEventListener('submit', async (e) => {

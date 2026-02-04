@@ -1,5 +1,5 @@
 import apiService from '../../services/api.service.js';
-import { showBottomSheet, closeBottomSheet } from '../../components/bottomSheet/bottomSheet.js';
+import { openBottomSheet, closeBottomSheet } from '../../components/bottomSheet/bottomSheet.js';
 import { showToast } from '../../components/toast/toast.js';
 
 const icons = {
@@ -503,7 +503,10 @@ function showProgramForm(program = null) {
         </form>
     `;
 
-    showBottomSheet(isEdit ? 'Modifier le programme' : 'Nouveau programme', content);
+    openBottomSheet({
+        title: isEdit ? 'Modifier le programme' : 'Nouveau programme',
+        content
+    });
 
     // Make closeBottomSheet available globally for the form
     window.closeBottomSheet = closeBottomSheet;
