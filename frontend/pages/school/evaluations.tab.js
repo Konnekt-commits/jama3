@@ -36,8 +36,8 @@ export async function renderEvaluationsTab(container) {
 
             .add-eval-btn {
                 padding: var(--spacing-sm) var(--spacing-lg);
-                background: linear-gradient(135deg, #059669 0%, #047857 100%);
-                color: white;
+                background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+                color: var(--color-white);
                 border: none;
                 border-radius: var(--radius-md);
                 font-weight: var(--font-medium);
@@ -65,7 +65,7 @@ export async function renderEvaluationsTab(container) {
 
             .eval-card:hover {
                 box-shadow: var(--shadow-md);
-                border-color: #059669;
+                border-color: var(--color-success);
             }
 
             .eval-info {
@@ -98,19 +98,19 @@ export async function renderEvaluationsTab(container) {
             }
 
             .eval-score.excellent .eval-score-value {
-                color: #059669;
+                color: var(--color-success);
             }
 
             .eval-score.good .eval-score-value {
-                color: #2563eb;
+                color: var(--color-info);
             }
 
             .eval-score.average .eval-score-value {
-                color: #d97706;
+                color: var(--color-warning);
             }
 
             .eval-score.poor .eval-score-value {
-                color: #dc2626;
+                color: var(--color-error);
             }
 
             .eval-type {
@@ -122,23 +122,23 @@ export async function renderEvaluationsTab(container) {
             }
 
             .eval-type.examen {
-                background-color: #fee2e2;
-                color: #dc2626;
+                background-color: var(--color-error-light);
+                color: var(--color-error);
             }
 
             .eval-type.controle {
-                background-color: #dbeafe;
-                color: #2563eb;
+                background-color: var(--color-info-light);
+                color: var(--color-info-dark);
             }
 
             .eval-type.oral {
-                background-color: #d1fae5;
-                color: #059669;
+                background-color: var(--color-success-light);
+                color: var(--color-success);
             }
 
             .eval-type.memorisation {
-                background-color: #fef3c7;
-                color: #d97706;
+                background-color: var(--color-warning-light);
+                color: var(--color-warning);
             }
 
             .evaluations-empty {
@@ -212,7 +212,8 @@ async function loadStudents() {
     try {
         const response = await apiService.getStudents({ status: 'actif', limit: 200 });
         if (response.success) {
-            students = response.data.students || response.data || [];
+            const data = response.data;
+            students = Array.isArray(data) ? data : (Array.isArray(data?.students) ? data.students : []);
         }
     } catch (error) {
         console.error('Error loading students:', error);
@@ -223,10 +224,11 @@ async function loadIntervenants() {
     try {
         const response = await apiService.getIntervenants({ is_active: true });
         if (response.success) {
-            intervenants = response.data || [];
+            intervenants = Array.isArray(response.data) ? response.data : [];
         }
     } catch (error) {
         console.error('Error loading intervenants:', error);
+        intervenants = [];
     }
 }
 

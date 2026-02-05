@@ -10,7 +10,7 @@ const announcementsController = {
                 active_only: req.query.active_only === 'true',
                 limit: req.query.limit
             };
-            const announcements = await SchoolAnnouncementModel.findAll(req.associationId, filters);
+            const announcements = await SchoolAnnouncementModel.findAllWithClassNames(req.associationId, filters);
             res.json({ success: true, data: announcements });
         } catch (error) {
             console.error('Get announcements error:', error);

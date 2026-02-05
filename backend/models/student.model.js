@@ -42,11 +42,11 @@ class StudentModel {
         query += ' ORDER BY s.last_name, s.first_name';
 
         if (filters.limit) {
-            query += ' LIMIT ?';
-            params.push(parseInt(filters.limit));
+            const limit = parseInt(filters.limit, 10);
+            query += ` LIMIT ${limit}`;
             if (filters.offset) {
-                query += ' OFFSET ?';
-                params.push(parseInt(filters.offset));
+                const offset = parseInt(filters.offset, 10);
+                query += ` OFFSET ${offset}`;
             }
         }
 
@@ -194,8 +194,8 @@ class StudentModel {
             JOIN school_classes sc ON sa.class_id = sc.id
             WHERE sa.student_id = ? AND sa.association_id = ?
             ORDER BY sa.session_date DESC
-            LIMIT ?
-        `, [studentId, associationId, limit]);
+            LIMIT ${parseInt(limit, 10)}
+        `, [studentId, associationId]);
         return rows;
     }
 
@@ -208,8 +208,8 @@ class StudentModel {
             LEFT JOIN intervenants i ON se.evaluated_by = i.id
             WHERE se.student_id = ? AND se.association_id = ?
             ORDER BY se.evaluation_date DESC
-            LIMIT ?
-        `, [studentId, associationId, limit]);
+            LIMIT ${parseInt(limit, 10)}
+        `, [studentId, associationId]);
         return rows;
     }
 }

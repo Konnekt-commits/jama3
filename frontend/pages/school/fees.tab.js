@@ -37,14 +37,14 @@ export async function renderFeesTab(container) {
             }
 
             .status-filter:hover {
-                border-color: #059669;
-                color: #059669;
+                border-color: var(--color-success);
+                color: var(--color-success);
             }
 
             .status-filter.active {
-                background-color: #059669;
-                color: white;
-                border-color: #059669;
+                background-color: var(--color-success);
+                color: var(--color-white);
+                border-color: var(--color-success);
             }
 
             .fees-actions {
@@ -62,8 +62,8 @@ export async function renderFeesTab(container) {
             }
 
             .add-fee-btn {
-                background: linear-gradient(135deg, #059669 0%, #047857 100%);
-                color: white;
+                background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+                color: var(--color-white);
             }
 
             .generate-fees-btn {
@@ -92,7 +92,7 @@ export async function renderFeesTab(container) {
 
             .fee-card:hover {
                 box-shadow: var(--shadow-md);
-                border-color: #059669;
+                border-color: var(--color-success);
             }
 
             .fee-info {
@@ -131,23 +131,23 @@ export async function renderFeesTab(container) {
             }
 
             .fee-status.pending {
-                background-color: #fef3c7;
-                color: #d97706;
+                background-color: var(--color-warning-light);
+                color: var(--color-warning);
             }
 
             .fee-status.partial {
-                background-color: #dbeafe;
-                color: #2563eb;
+                background-color: var(--color-info-light);
+                color: var(--color-info-dark);
             }
 
             .fee-status.paid {
-                background-color: #d1fae5;
-                color: #059669;
+                background-color: var(--color-success-light);
+                color: var(--color-success);
             }
 
             .fee-status.overdue {
-                background-color: #fee2e2;
-                color: #dc2626;
+                background-color: var(--color-error-light);
+                color: var(--color-error);
             }
 
             .fees-empty {
@@ -188,15 +188,15 @@ export async function renderFeesTab(container) {
                 <div class="stat-label">Total attendu</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="stat-total-paid" style="color: #059669;">-</div>
+                <div class="stat-value" id="stat-total-paid" style="color: var(--color-success);">-</div>
                 <div class="stat-label">Total payé</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="stat-pending" style="color: #d97706;">-</div>
+                <div class="stat-value" id="stat-pending" style="color: var(--color-warning);">-</div>
                 <div class="stat-label">En attente</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="stat-overdue" style="color: #dc2626;">-</div>
+                <div class="stat-value" id="stat-overdue" style="color: var(--color-error);">-</div>
                 <div class="stat-label">En retard</div>
             </div>
         </div>
@@ -244,7 +244,8 @@ async function loadStudents() {
     try {
         const response = await apiService.getStudents({ status: 'actif', limit: 200 });
         if (response.success) {
-            students = response.data.students || response.data || [];
+            const data = response.data;
+            students = Array.isArray(data) ? data : (Array.isArray(data?.students) ? data.students : []);
         }
     } catch (error) {
         console.error('Error loading students:', error);
@@ -255,9 +256,9 @@ async function loadFeeStats() {
     try {
         const response = await apiService.getSchoolFeeStats();
         if (response.success) {
-            const stats = response.data;
-            document.getElementById('stat-total-amount').textContent = `${(stats.total_amount || 0).toFixed(0)}€`;
-            document.getElementById('stat-total-paid').textContent = `${(stats.total_paid || 0).toFixed(0)}€`;
+            const stats = response.data || {};
+            document.getElementById('stat-total-amount').textContent = `${parseFloat(stats.total_amount || 0).toFixed(0)}€`;
+            document.getElementById('stat-total-paid').textContent = `${parseFloat(stats.total_paid || 0).toFixed(0)}€`;
             document.getElementById('stat-pending').textContent = stats.pending_count || 0;
             document.getElementById('stat-overdue').textContent = stats.overdue_count || 0;
         }
@@ -557,7 +558,7 @@ async function openFeeDetail(fee) {
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Reste à payer</span>
-                            <span class="detail-value" style="color: ${remaining > 0 ? '#dc2626' : '#059669'}">${remaining.toFixed(2)}€</span>
+                            <span class="detail-value" style="color: var(${remaining > 0 ? '--color-error' : '--color-success'})">${remaining.toFixed(2)}€</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Statut</span>

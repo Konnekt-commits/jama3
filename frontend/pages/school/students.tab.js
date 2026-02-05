@@ -51,14 +51,14 @@ export async function renderStudentsTab(container) {
             }
 
             .filter-btn:hover {
-                border-color: #059669;
-                color: #059669;
+                border-color: var(--color-success);
+                color: var(--color-success);
             }
 
             .filter-btn.active {
-                background-color: #059669;
-                color: white;
-                border-color: #059669;
+                background-color: var(--color-success);
+                color: var(--color-white);
+                border-color: var(--color-success);
             }
 
             .students-grid {
@@ -75,8 +75,8 @@ export async function renderStudentsTab(container) {
 
             .add-student-btn {
                 padding: var(--spacing-sm) var(--spacing-lg);
-                background: linear-gradient(135deg, #059669 0%, #047857 100%);
-                color: white;
+                background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+                color: var(--color-white);
                 border: none;
                 border-radius: var(--radius-md);
                 font-weight: var(--font-medium);
@@ -152,7 +152,8 @@ async function loadStudents() {
         const response = await apiService.getStudents(currentFilters);
 
         if (response.success) {
-            students = response.data.students || response.data || [];
+            const data = response.data;
+            students = Array.isArray(data) ? data : (Array.isArray(data?.students) ? data.students : []);
 
             if (students.length === 0) {
                 grid.innerHTML = `

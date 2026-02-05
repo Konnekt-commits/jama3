@@ -1,6 +1,7 @@
 import { renderNavbar } from '../../components/navbar/navbar.js';
 import { openBottomSheet, closeBottomSheet } from '../../components/bottomSheet/bottomSheet.js';
 import { toastSuccess } from '../../components/toast/toast.js';
+import router from '../../router/router.js';
 
 const modules = [
     {
@@ -15,7 +16,8 @@ const modules = [
         priceDetail: 'Dans votre abonnement',
         features: ['Fiches adhérents illimitées', 'Import/Export Excel', 'Recherche avancée', 'Historique complet', 'Statuts personnalisés'],
         status: 'active',
-        popular: false
+        popular: false,
+        route: '/'
     },
     {
         id: 'cotisations',
@@ -29,7 +31,8 @@ const modules = [
         priceDetail: 'Dans votre abonnement',
         features: ['Suivi des paiements', 'Relances automatiques', 'Reçus PDF', 'Tableau de bord', 'Multi-saisons'],
         status: 'active',
-        popular: false
+        popular: false,
+        route: '/cotisations'
     },
     {
         id: 'agenda',
@@ -43,7 +46,8 @@ const modules = [
         priceDetail: 'Dans votre abonnement',
         features: ['Calendrier interactif', 'Inscriptions en ligne', 'Rappels automatiques', 'Gestion présences', 'Récurrence'],
         status: 'active',
-        popular: false
+        popular: false,
+        route: '/agenda'
     },
     {
         id: 'espace-membre',
@@ -57,7 +61,8 @@ const modules = [
         priceDetail: '/mois',
         features: ['App mobile dédiée', 'Paiement Stripe', 'Notifications push', 'Actualités', 'QR Code membre'],
         status: 'available',
-        popular: true
+        popular: true,
+        route: null
     },
     {
         id: 'comptabilite',
@@ -71,7 +76,8 @@ const modules = [
         priceDetail: '/mois',
         features: ['Journal des opérations', 'Bilan automatique', 'Export comptable', 'Catégories personnalisées', 'Rapports annuels'],
         status: 'coming',
-        popular: false
+        popular: false,
+        route: null
     },
     {
         id: 'dons-zekat',
@@ -85,7 +91,8 @@ const modules = [
         priceDetail: '/mois',
         features: ['Collecte en ligne', 'Reçus fiscaux', 'Campagnes de dons', 'Suivi donateurs', 'Rapports Zakat'],
         status: 'coming',
-        popular: true
+        popular: true,
+        route: null
     },
     {
         id: 'ecole-arabe',
@@ -93,13 +100,14 @@ const modules = [
         description: 'Gestion complète de votre école coranique et cours d\'arabe.',
         longDescription: 'Solution dédiée aux écoles coraniques : gestion des élèves, classes, présences, frais de scolarité et évaluations. Lien parent/adhérent pour le suivi familial.',
         icon: 'book',
-        color: '#059669',
-        gradient: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+        color: '#6B8E23',
+        gradient: 'linear-gradient(135deg, #6B8E23 0%, #4A6318 100%)',
         price: 'Inclus',
         priceDetail: 'Dans votre abonnement',
         features: ['Gestion des élèves', 'Classes & inscriptions', 'Suivi présences', 'Frais de scolarité', 'Évaluations & notes', 'Lien parent/adhérent'],
         status: 'active',
-        popular: true
+        popular: true,
+        route: '/school/dashboard'
     },
     {
         id: 'communication',
@@ -113,7 +121,8 @@ const modules = [
         priceDetail: '/mois + SMS',
         features: ['Emails illimités', 'SMS en masse', 'Templates', 'Segmentation', 'Statistiques'],
         status: 'coming',
-        popular: false
+        popular: false,
+        route: null
     },
     {
         id: 'site-web',
@@ -127,7 +136,8 @@ const modules = [
         priceDetail: '/mois',
         features: ['Site clé en main', 'Horaires de prière', 'Actualités', 'Dons intégrés', 'Domaine personnalisé'],
         status: 'coming',
-        popular: false
+        popular: false,
+        route: null
     }
 ];
 
@@ -142,11 +152,23 @@ const icons = {
     message: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
     globe: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`,
     check: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
-    star: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`
+    star: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`,
+    arrowRight: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`
 };
 
 export async function renderStorePage() {
-    renderNavbar('Store');
+    // Hide sidebar for store page
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+        sidebar.style.display = 'none';
+    }
+
+    // Adjust main content
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.style.marginLeft = '0';
+    }
+
     const pageContent = document.getElementById('page-content');
 
     pageContent.innerHTML = `
@@ -438,11 +460,19 @@ export async function renderStorePage() {
                 border: none;
                 cursor: pointer;
                 transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 8px;
             }
 
             .module-action.active {
                 background: rgba(16, 185, 129, 0.1);
                 color: #10B981;
+            }
+
+            .module-action.active:hover {
+                background: #10B981;
+                color: white;
             }
 
             .module-action.available {
@@ -686,14 +716,8 @@ export async function renderStorePage() {
 }
 
 function renderModuleCard(module) {
-    const statusLabels = {
-        active: 'Actif',
-        available: 'Disponible',
-        coming: 'Bientôt'
-    };
-
     const actionLabels = {
-        active: 'Activé',
+        active: 'Accéder',
         available: 'Souscrire',
         coming: 'Bientôt'
     };
@@ -704,8 +728,8 @@ function renderModuleCard(module) {
                 <div class="module-card-visual" style="background: ${module.gradient}">
                     ${icons[module.icon]}
                 </div>
-                ${module.popular ? '<span class="module-badge popular">${icons.star} Populaire</span>' : ''}
-                ${module.status === 'active' ? '<span class="module-badge active">Actif</span>' : ''}
+                ${module.popular ? '<span class="module-badge popular">' + icons.star + ' Populaire</span>' : ''}
+                ${!module.popular && module.status === 'active' ? '<span class="module-badge active">Actif</span>' : ''}
                 ${module.status === 'coming' ? '<span class="module-badge coming">Bientôt</span>' : ''}
                 <h3 class="module-card-title">${module.name}</h3>
                 <p class="module-card-desc">${module.description}</p>
@@ -715,7 +739,10 @@ function renderModuleCard(module) {
                     <span class="module-price-value">${module.price}</span>
                     <span class="module-price-period">${module.priceDetail}</span>
                 </div>
-                <button class="module-action ${module.status}">${actionLabels[module.status]}</button>
+                <button class="module-action ${module.status}">
+                    ${actionLabels[module.status]}
+                    ${module.status === 'active' ? icons.arrowRight : ''}
+                </button>
             </div>
         </div>
     `;
@@ -750,7 +777,9 @@ function openModuleDetail(module) {
             </div>
         `,
         footer: `
-            ${module.status === 'active' ? `
+            ${module.status === 'active' && module.route ? `
+                <button class="btn btn-primary" style="flex: 1;" id="access-module-btn">Accéder au module</button>
+            ` : module.status === 'active' ? `
                 <button class="btn btn-secondary" style="flex: 1;">Déjà actif</button>
             ` : module.status === 'available' ? `
                 <button class="btn btn-primary" style="flex: 1;" id="subscribe-btn">Souscrire maintenant</button>
@@ -759,6 +788,15 @@ function openModuleDetail(module) {
             `}
         `
     });
+
+    // Handle access to active module
+    const accessBtn = document.getElementById('access-module-btn');
+    if (accessBtn && module.route) {
+        accessBtn.addEventListener('click', () => {
+            closeBottomSheet();
+            router.navigate(module.route);
+        });
+    }
 
     const subscribeBtn = document.getElementById('subscribe-btn');
     if (subscribeBtn) {

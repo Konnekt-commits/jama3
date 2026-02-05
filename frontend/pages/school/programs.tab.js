@@ -23,6 +23,24 @@ const contentTypeIcons = {
 let currentPrograms = [];
 let currentClasses = [];
 
+// Helper function to format objectives (can be array or string)
+function formatObjectives(objectives) {
+    if (!objectives) return '';
+
+    // If it's an array, join with bullet points
+    if (Array.isArray(objectives)) {
+        const text = objectives.slice(0, 3).join(' • ');
+        return text.length > 120 ? text.substring(0, 120) + '...' : text;
+    }
+
+    // If it's already a string
+    if (typeof objectives === 'string') {
+        return objectives.length > 120 ? objectives.substring(0, 120) + '...' : objectives;
+    }
+
+    return '';
+}
+
 export async function renderProgramsTab(container) {
     container.innerHTML = `
         <style>
@@ -283,9 +301,9 @@ function renderProgramsList(programs) {
                 <div class="program-card-class">${program.class_name || 'Classe non définie'}</div>
             </div>
             <div class="program-card-body">
-                ${program.objectives ? `
+                ${program.objectives && program.objectives.length > 0 ? `
                     <div class="program-objectives">
-                        <strong>Objectifs:</strong> ${program.objectives.substring(0, 150)}${program.objectives.length > 150 ? '...' : ''}
+                        <strong>Objectifs:</strong> ${formatObjectives(program.objectives)}
                     </div>
                 ` : ''}
                 <div class="program-content-list">
@@ -344,7 +362,7 @@ function showProgramForm(program = null) {
 
             <div class="form-group">
                 <label class="form-label">Objectifs pédagogiques</label>
-                <textarea name="objectives" class="form-textarea" rows="3" placeholder="Décrire les objectifs du programme...">${program?.objectives || ''}</textarea>
+                <textarea name="objectives" class="form-textarea" rows="3" placeholder="Décrire les objectifs du programme...">${Array.isArray(program?.objectives) ? program.objectives.join('\n') : (program?.objectives || '')}</textarea>
             </div>
 
             <div class="form-group">
@@ -378,6 +396,12 @@ function showProgramForm(program = null) {
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
+
+        // Convert objectives from multiline string to array
+        if (data.objectives && typeof data.objectives === 'string') {
+            const lines = data.objectives.split('\n').map(l => l.trim()).filter(l => l);
+            data.objectives = lines.length > 0 ? lines : null;
+        }
 
         try {
             if (isEdit) {

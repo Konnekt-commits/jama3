@@ -52,7 +52,11 @@ class ApiService {
     }
 
     get(endpoint, params = {}) {
-        const queryString = new URLSearchParams(params).toString();
+        // Filter out undefined/null values
+        const cleanParams = Object.fromEntries(
+            Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== '')
+        );
+        const queryString = new URLSearchParams(cleanParams).toString();
         const url = queryString ? `${endpoint}?${queryString}` : endpoint;
         return this.request(url, { method: 'GET' });
     }
@@ -534,6 +538,72 @@ class ApiService {
 
     async markSchoolMessageAsRead(id) {
         return this.put(`/school/messages/${id}/read`);
+    }
+
+    // ========== ÉCOLE ARABE - ENSEIGNANTS ==========
+
+    async getSchoolTeachers(params = {}) {
+        return this.get('/school/teachers', params);
+    }
+
+    async getSchoolTeachersStats() {
+        return this.get('/school/teachers/stats');
+    }
+
+    async getSchoolTeacher(id) {
+        return this.get(`/school/teachers/${id}`);
+    }
+
+    async getAvailableIntervenants() {
+        return this.get('/school/teachers/available');
+    }
+
+    async markAsTeacher(id) {
+        return this.post(`/school/teachers/${id}/mark-as-teacher`);
+    }
+
+    async removeTeacherStatus(id) {
+        return this.post(`/school/teachers/${id}/remove-teacher`);
+    }
+
+    async createTeacher(data) {
+        return this.post('/school/teachers', data);
+    }
+
+    // ========== ÉCOLE ARABE - PARENTS ==========
+
+    async getSchoolParents() {
+        return this.get('/school/parents');
+    }
+
+    async getParentChildren(parentId) {
+        return this.get(`/school/parents/${parentId}/children`);
+    }
+
+    // ========== ÉCOLE ARABE - THÈMES / TOPICS ==========
+
+    async getSchoolTopics() {
+        return this.get('/school/topics');
+    }
+
+    async getSchoolTopicsByCategory() {
+        return this.get('/school/topics/by-category');
+    }
+
+    async createSchoolTopic(data) {
+        return this.post('/school/topics', data);
+    }
+
+    async deleteSchoolTopic(id) {
+        return this.delete(`/school/topics/${id}`);
+    }
+
+    async getClassTopics(classId) {
+        return this.get(`/school/classes/${classId}/topics`);
+    }
+
+    async updateClassTopics(classId, topicIds) {
+        return this.put(`/school/classes/${classId}/topics`, { topic_ids: topicIds });
     }
 }
 

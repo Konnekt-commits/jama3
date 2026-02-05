@@ -42,11 +42,11 @@ class SchoolFeeModel {
         query += ' ORDER BY sf.due_date DESC, sf.created_at DESC';
 
         if (filters.limit) {
-            query += ' LIMIT ?';
-            params.push(parseInt(filters.limit));
+            const limit = parseInt(filters.limit, 10);
+            query += ` LIMIT ${limit}`;
             if (filters.offset) {
-                query += ' OFFSET ?';
-                params.push(parseInt(filters.offset));
+                const offset = parseInt(filters.offset, 10);
+                query += ` OFFSET ${offset}`;
             }
         }
 

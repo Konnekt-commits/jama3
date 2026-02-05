@@ -12,8 +12,19 @@ const programsController = require('../controllers/school/programs.controller');
 const progressController = require('../controllers/school/progress.controller');
 const announcementsController = require('../controllers/school/announcements.controller');
 const messagesController = require('../controllers/school/messages.controller');
+const teachersController = require('../controllers/school/teachers.controller');
+const parentsController = require('../controllers/school/parents.controller');
+const parentAuthController = require('../controllers/school/parent-auth.controller');
+const topicsController = require('../controllers/school/topics.controller');
 
-// Auth + Tenant middleware pour toutes les routes
+// ==================== PARENT AUTH (PUBLIC) ====================
+// These routes must be BEFORE auth middleware
+router.post('/parent-auth/login', parentAuthController.login);
+router.get('/parent-auth/me', parentAuthController.getMe);
+router.post('/parent-auth/send-message', parentAuthController.sendMessage);
+router.put('/parent-auth/mark-read', parentAuthController.markMessagesRead);
+
+// Auth + Tenant middleware pour toutes les autres routes
 router.use(authMiddleware);
 router.use(tenantMiddleware);
 
@@ -96,5 +107,26 @@ router.get('/messages/conversation/:studentId', messagesController.getConversati
 router.get('/messages/unread-count', messagesController.getUnreadCount);
 router.post('/messages', messagesController.create);
 router.put('/messages/:id/read', messagesController.markAsRead);
+
+// ==================== ENSEIGNANTS ====================
+router.get('/teachers', teachersController.getAll);
+router.get('/teachers/stats', teachersController.getStats);
+router.get('/teachers/available', teachersController.getAvailable);
+router.post('/teachers', teachersController.create);  // Créer un nouvel enseignant
+router.get('/teachers/:id', teachersController.getById);
+router.post('/teachers/:id/mark-as-teacher', teachersController.markAsTeacher);
+router.post('/teachers/:id/remove-teacher', teachersController.removeTeacher);
+
+// ==================== PARENTS ====================
+router.get('/parents', parentsController.getAll);
+router.get('/parents/:id/children', parentsController.getChildren);
+
+// ==================== THÈMES / TOPICS ====================
+router.get('/topics', topicsController.getAll);
+router.get('/topics/by-category', topicsController.getByCategory);
+router.post('/topics', topicsController.create);
+router.delete('/topics/:id', topicsController.delete);
+router.get('/classes/:id/topics', topicsController.getClassTopics);
+router.put('/classes/:id/topics', topicsController.updateClassTopics);
 
 module.exports = router;

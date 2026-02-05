@@ -6,10 +6,8 @@ const getMenuItems = () => [
     { path: '/adherents', icon: 'users', label: i18n.t('nav.adherents') },
     { path: '/cotisations', icon: 'wallet', label: i18n.t('nav.cotisations') },
     { path: '/agenda', icon: 'calendar', label: i18n.t('nav.agenda') },
-    { path: '/school', icon: 'school', label: 'École Arabe' },
     { path: '/intervenants', icon: 'briefcase', label: i18n.t('nav.intervenants') },
     { path: '/messages', icon: 'message', label: i18n.t('nav.messages') },
-    { path: '/store', icon: 'store', label: 'Store' },
     { path: '/settings', icon: 'settings', label: 'Paramètres' }
 ];
 
@@ -208,6 +206,38 @@ export function renderSidebar() {
                 color: var(--color-error);
             }
 
+            .sidebar-divider {
+                height: 1px;
+                background: var(--color-border);
+                margin: var(--spacing-md) 0;
+            }
+
+            .sidebar-back-link {
+                display: flex;
+                align-items: center;
+                gap: var(--spacing-md);
+                padding: var(--spacing-sm) var(--spacing-md);
+                border-radius: var(--radius-md);
+                color: var(--color-text-muted);
+                transition: all var(--transition-fast);
+                text-decoration: none;
+                font-size: var(--font-sm);
+            }
+
+            .sidebar-back-link:hover {
+                background-color: var(--color-bg-hover);
+                color: var(--color-text-primary);
+            }
+
+            .sidebar.collapsed .sidebar-back-link span {
+                display: none;
+            }
+
+            .sidebar.collapsed .sidebar-back-link {
+                justify-content: center;
+                padding: var(--spacing-sm);
+            }
+
             @media (max-width: 1023px) {
                 .sidebar-toggle {
                     display: none;
@@ -233,6 +263,13 @@ export function renderSidebar() {
                     <span>${item.label}</span>
                 </a>
             `).join('')}
+
+            <div class="sidebar-divider"></div>
+
+            <a href="/store" data-link class="sidebar-back-link">
+                ${icons.store}
+                <span>Changer de module</span>
+            </a>
         </nav>
 
         <div class="sidebar-footer">

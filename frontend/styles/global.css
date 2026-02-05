@@ -424,6 +424,41 @@ body {
     display: none !important;
 }
 
+/* Fullscreen calendar mode */
+body.fullscreen-calendar .navbar {
+    display: none !important;
+}
+
+body.fullscreen-calendar .main-content {
+    margin-left: var(--sidebar-width) !important;
+    padding-top: 0 !important;
+}
+
+body.fullscreen-calendar .page-content {
+    padding: 0 !important;
+    max-width: none !important;
+    background-image: none !important;
+}
+
+body.fullscreen-calendar .page-content > *,
+.fullscreen-content {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+}
+
+body.fullscreen-calendar .sidebar,
+body.fullscreen-calendar .sidebar.school-sidebar {
+    transform: translateX(0) !important;
+}
+
+@media (max-width: 1023px) {
+    body.fullscreen-calendar .main-content {
+        margin-left: 0 !important;
+    }
+}
+
 .sr-only {
     position: absolute;
     width: 1px;

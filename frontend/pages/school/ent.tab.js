@@ -15,6 +15,7 @@ const icons = {
 
 let currentSubTab = 'announcements';
 let currentStudents = [];
+let currentClasses = [];
 let availableBadges = [];
 
 export async function renderEntTab(container) {
@@ -147,6 +148,29 @@ export async function renderEntTab(container) {
                 font-size: var(--font-sm);
                 line-height: 1.6;
                 margin-bottom: var(--spacing-md);
+            }
+
+            .announcement-classes {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--spacing-xs);
+                margin-bottom: var(--spacing-sm);
+            }
+
+            .class-badge {
+                font-size: var(--font-xs);
+                padding: 2px var(--spacing-sm);
+                background: var(--color-success-light);
+                color: var(--color-success);
+                border-radius: var(--radius-full);
+                font-weight: var(--font-medium);
+            }
+
+            .announcement-target {
+                font-size: var(--font-xs);
+                color: var(--color-text-muted);
+                margin-bottom: var(--spacing-sm);
+                font-style: italic;
             }
 
             .announcement-actions {
@@ -489,7 +513,7 @@ export async function renderEntTab(container) {
     });
 
     // Load initial data
-    await loadStudents();
+    await Promise.all([loadStudents(), loadClasses()]);
     loadSubTabContent(currentSubTab);
 }
 
@@ -501,6 +525,17 @@ async function loadStudents() {
         }
     } catch (error) {
         console.error('Error loading students:', error);
+    }
+}
+
+async function loadClasses() {
+    try {
+        const response = await apiService.getSchoolClasses();
+        if (response.success) {
+            currentClasses = response.data;
+        }
+    } catch (error) {
+        console.error('Error loading classes:', error);
     }
 }
 
@@ -567,39 +602,142 @@ function renderAnnouncementsList(announcements) {
         return;
     }
 
-    container.innerHTML = announcements.map(a => `
-        <div class="announcement-card" data-id="${a.id}">
-            <div class="announcement-header">
-                <div class="announcement-title">${a.title}</div>
-                <div class="announcement-meta">
-                    <span class="announcement-status ${a.is_published ? 'published' : 'draft'}">
-                        ${a.is_published ? 'Publiée' : 'Brouillon'}
-                    </span>
-                    <span class="announcement-date">${new Date(a.created_at).toLocaleDateString('fr-FR')}</span>
+    container.innerHTML = announcements.map(a => {
+        // Determine target display
+        let targetDisplay = '';
+        if (a.class_names && a.class_names.length > 0) {
+            targetDisplay = `<div class="announcement-classes">${a.class_names.map(name => `<span class="class-badge">${name}</span>`).join('')}</div>`;
+        } else if (a.target_audience === 'parents') {
+            targetDisplay = '<div class="announcement-target">Parents uniquement</div>';
+        } else if (a.target_audience === 'students') {
+            targetDisplay = '<div class="announcement-target">Élèves uniquement</div>';
+        }
+
+        return `
+            <div class="announcement-card" data-id="${a.id}">
+                <div class="announcement-header">
+                    <div class="announcement-title">${a.title}</div>
+                    <div class="announcement-meta">
+                        <span class="announcement-status ${a.is_published ? 'published' : 'draft'}">
+                            ${a.is_published ? 'Publiée' : 'Brouillon'}
+                        </span>
+                        <span class="announcement-date">${new Date(a.created_at).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                </div>
+                ${targetDisplay}
+                <div class="announcement-content">${a.content.substring(0, 200)}${a.content.length > 200 ? '...' : ''}</div>
+                <div class="announcement-actions">
+                    ${!a.is_published ? `
+                        <button class="publish" onclick="window.publishAnnouncement(${a.id})">
+                            ${icons.check} Publier
+                        </button>
+                    ` : ''}
+                    <button onclick="window.editAnnouncement(${a.id})">
+                        ${icons.edit} Modifier
+                    </button>
+                    <button class="delete" onclick="window.deleteAnnouncement(${a.id})">
+                        ${icons.trash} Supprimer
+                    </button>
                 </div>
             </div>
-            <div class="announcement-content">${a.content.substring(0, 200)}${a.content.length > 200 ? '...' : ''}</div>
-            <div class="announcement-actions">
-                ${!a.is_published ? `
-                    <button class="publish" onclick="window.publishAnnouncement(${a.id})">
-                        ${icons.check} Publier
-                    </button>
-                ` : ''}
-                <button onclick="window.editAnnouncement(${a.id})">
-                    ${icons.edit} Modifier
-                </button>
-                <button class="delete" onclick="window.deleteAnnouncement(${a.id})">
-                    ${icons.trash} Supprimer
-                </button>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function showAnnouncementForm(announcement = null) {
     const isEdit = announcement !== null;
+    const selectedClassIds = announcement?.class_ids || [];
 
     const content = `
+        <style>
+            .class-selector-section {
+                background: var(--color-bg-secondary);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                padding: var(--spacing-md);
+                margin-top: var(--spacing-xs);
+            }
+
+            .class-selector-label {
+                font-size: var(--font-sm);
+                color: var(--color-text-secondary);
+                margin-bottom: var(--spacing-sm);
+                display: block;
+            }
+
+            .class-checkboxes {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--spacing-sm);
+                max-height: 180px;
+                overflow-y: auto;
+            }
+
+            .class-checkbox-item {
+                display: flex;
+                align-items: center;
+                gap: var(--spacing-xs);
+                padding: var(--spacing-xs) var(--spacing-sm);
+                background: var(--color-bg-primary);
+                border: 1px solid var(--color-border);
+                border-radius: var(--radius-md);
+                cursor: pointer;
+                transition: all var(--transition-fast);
+                font-size: var(--font-sm);
+            }
+
+            .class-checkbox-item:hover {
+                border-color: var(--color-success);
+            }
+
+            .class-checkbox-item.selected {
+                background: var(--color-success-light);
+                border-color: var(--color-success);
+                color: var(--color-success);
+            }
+
+            .class-checkbox-item input {
+                display: none;
+            }
+
+            .class-checkbox-icon {
+                width: 16px;
+                height: 16px;
+                border: 2px solid var(--color-border);
+                border-radius: 3px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all var(--transition-fast);
+            }
+
+            .class-checkbox-item.selected .class-checkbox-icon {
+                background: var(--color-success);
+                border-color: var(--color-success);
+            }
+
+            .class-checkbox-item.selected .class-checkbox-icon svg {
+                display: block;
+            }
+
+            .class-checkbox-icon svg {
+                display: none;
+                width: 12px;
+                height: 12px;
+                stroke: white;
+            }
+
+            .select-all-classes {
+                font-size: var(--font-xs);
+                color: var(--color-success);
+                cursor: pointer;
+                margin-bottom: var(--spacing-sm);
+            }
+
+            .select-all-classes:hover {
+                text-decoration: underline;
+            }
+        </style>
         <form id="announcement-form" style="display: flex; flex-direction: column; gap: var(--spacing-md);">
             <div class="form-group">
                 <label class="form-label">Titre *</label>
@@ -613,11 +751,34 @@ function showAnnouncementForm(announcement = null) {
 
             <div class="form-group">
                 <label class="form-label">Public cible</label>
-                <select name="target_audience" class="form-select">
+                <select name="target_audience" class="form-select" id="target-audience-select">
                     <option value="all" ${announcement?.target_audience === 'all' ? 'selected' : ''}>Tous</option>
                     <option value="parents" ${announcement?.target_audience === 'parents' ? 'selected' : ''}>Parents uniquement</option>
                     <option value="students" ${announcement?.target_audience === 'students' ? 'selected' : ''}>Élèves uniquement</option>
                 </select>
+            </div>
+
+            <div class="form-group" id="class-selector-group">
+                <label class="form-label">Classes destinataires</label>
+                <div class="class-selector-section">
+                    ${currentClasses.length > 0 ? `
+                        <span class="select-all-classes" id="toggle-all-classes">Tout sélectionner</span>
+                        <div class="class-checkboxes" id="class-checkboxes">
+                            ${currentClasses.map(c => `
+                                <div class="class-checkbox-item ${selectedClassIds.includes(c.id) ? 'selected' : ''}" data-class-id="${c.id}">
+                                    <span class="class-checkbox-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        </svg>
+                                    </span>
+                                    <span>${c.name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <span class="class-selector-label">Aucune classe disponible. L'annonce sera envoyée à tous.</span>
+                    `}
+                </div>
             </div>
 
             <div style="display: flex; gap: var(--spacing-sm); justify-content: flex-end;">
@@ -634,10 +795,48 @@ function showAnnouncementForm(announcement = null) {
 
     window.closeBottomSheet = closeBottomSheet;
 
+    // Handle class checkbox clicks - using setTimeout to ensure DOM is ready
+    setTimeout(() => {
+        document.querySelectorAll('.class-checkbox-item').forEach(item => {
+            item.addEventListener('click', () => {
+                item.classList.toggle('selected');
+            });
+        });
+
+        // Toggle all classes
+        const toggleAllBtn = document.getElementById('toggle-all-classes');
+        if (toggleAllBtn) {
+            toggleAllBtn.addEventListener('click', () => {
+                const items = document.querySelectorAll('.class-checkbox-item');
+                const allSelected = Array.from(items).every(item => item.classList.contains('selected'));
+
+                items.forEach(item => {
+                    if (allSelected) {
+                        item.classList.remove('selected');
+                    } else {
+                        item.classList.add('selected');
+                    }
+                });
+
+                toggleAllBtn.textContent = allSelected ? 'Tout sélectionner' : 'Tout désélectionner';
+            });
+        }
+    }, 100);
+
     document.getElementById('announcement-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData);
+
+        // Get all selected class IDs from data-class-id attribute
+        const classIds = Array.from(document.querySelectorAll('.class-checkbox-item.selected'))
+            .map(item => parseInt(item.dataset.classId));
+
+        const data = {
+            title: formData.get('title'),
+            content: formData.get('content'),
+            target_audience: formData.get('target_audience'),
+            class_ids: classIds
+        };
 
         try {
             if (isEdit) {

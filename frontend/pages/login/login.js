@@ -236,7 +236,15 @@ export async function renderLoginPage() {
                 if (user && user.role === 'super_admin') {
                     router.navigate('/superadmin');
                 } else {
-                    router.navigate('/');
+                    // Check if there's a redirect URL saved
+                    const redirectUrl = localStorage.getItem('redirectAfterLogin');
+                    localStorage.removeItem('redirectAfterLogin');
+
+                    if (redirectUrl && redirectUrl !== '/login') {
+                        router.navigate(redirectUrl);
+                    } else {
+                        router.navigate('/');
+                    }
                 }
             } else {
                 throw new Error(response.message || 'خطأ في تسجيل الدخول');

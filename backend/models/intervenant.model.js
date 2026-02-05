@@ -21,6 +21,11 @@ class IntervenantModel {
             params.push(searchTerm, searchTerm, searchTerm);
         }
 
+        if (filters.is_teacher !== undefined) {
+            query += ' AND is_teacher = ?';
+            params.push(filters.is_teacher ? 1 : 0);
+        }
+
         query += ' ORDER BY last_name, first_name';
 
         const [rows] = await pool.execute(query, params);
@@ -76,7 +81,7 @@ class IntervenantModel {
 
         const allowedFields = [
             'first_name', 'last_name', 'email', 'phone', 'speciality',
-            'bio', 'photo_url', 'hourly_rate', 'contract_type', 'status'
+            'bio', 'photo_url', 'hourly_rate', 'contract_type', 'status', 'is_teacher'
         ];
 
         for (const field of allowedFields) {

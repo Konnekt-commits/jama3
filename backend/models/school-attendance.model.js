@@ -101,8 +101,7 @@ class SchoolAttendanceModel {
         query += ' ORDER BY sa.session_date DESC';
 
         if (filters.limit) {
-            query += ' LIMIT ?';
-            params.push(parseInt(filters.limit));
+            query += ` LIMIT ${parseInt(filters.limit, 10)}`;
         }
 
         const [rows] = await pool.execute(query, params);
@@ -144,8 +143,8 @@ class SchoolAttendanceModel {
             FROM school_attendance sa
             WHERE class_id = ? AND association_id = ?
             ORDER BY session_date DESC
-            LIMIT ?
-        `, [classId, classId, classId, associationId, limit]);
+            LIMIT ${parseInt(limit, 10)}
+        `, [classId, classId, classId, associationId]);
         return rows;
     }
 }

@@ -62,25 +62,54 @@ app.use('/api/school', schoolRoutes);
 // ========== SERVIR LES FICHIERS STATIQUES ==========
 // En production (Cloud Run), servir le frontend
 if (process.env.NODE_ENV === 'production') {
-    // Fichiers statiques du frontend (app de gestion)
-    app.use('/app', express.static(path.join(__dirname, '../frontend')));
+    const frontendPath = path.resolve(__dirname, '../frontend');
+    const landingPath = path.resolve(__dirname, '../landing');
+
+    // Fichiers statiques du frontend (app de gestion) - DOIT etre en premier
+    app.use('/app', express.static(frontendPath, {
+        setHeaders: (res, filePath) => {
+            if (filePath.endsWith('.js')) {
+                res.setHeader('Content-Type', 'application/javascript');
+            } else if (filePath.endsWith('.css')) {
+                res.setHeader('Content-Type', 'text/css');
+            }
+        }
+    }));
 
     // Fichiers statiques des landing pages
-    app.use('/landing', express.static(path.join(__dirname, '../landing')));
+    app.use('/landing', express.static(landingPath));
 
     // Page Ramadan accessible à la racine /ramadan
     app.get('/ramadan', (req, res) => {
-        res.sendFile(path.join(__dirname, '../landing/ramadan.html'));
+        res.sendFile(path.join(landingPath, 'ramadan.html'));
     });
 
-    // Landing page principale
+    // ========== ROUTES MADRASSA (MODULE ÉCOLE) ==========
+    // Landing page Madrassa et onboarding - servir le SPA frontend
+    app.get('/madrassa', (req, res) => {
+        res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+    app.get('/madrassa/*', (req, res) => {
+        res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+
+    // ========== ROUTES PARENT PORTAL ==========
+    // Login parent et espace parent - servir le SPA frontend
+    app.get('/login-parent', (req, res) => {
+        res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+    app.get('/parent', (req, res) => {
+        res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+
+    // Landing page principale (Association)
     app.get('/', (req, res) => {
-        res.sendFile(path.join(__dirname, '../landing/index.html'));
+        res.sendFile(path.join(landingPath, 'index.html'));
     });
 
     // Rediriger /app vers l'index du frontend
     app.get('/app', (req, res) => {
-        res.sendFile(path.join(__dirname, '../frontend/index.html'));
+        res.sendFile(path.join(frontendPath, 'index.html'));
     });
 
     // SPA fallback - pour les routes du frontend (exclure les fichiers statiques)
@@ -89,7 +118,7 @@ if (process.env.NODE_ENV === 'production') {
         if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json)$/)) {
             return next();
         }
-        res.sendFile(path.join(__dirname, '../frontend/index.html'));
+        res.sendFile(path.join(frontendPath, 'index.html'));
     });
 }
 

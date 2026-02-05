@@ -14,13 +14,14 @@ const icons = {
     user: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`
 };
 
+// Subject colors using CSS variable names
 const subjectColors = {
-    coran: { bg: '#d1fae5', color: '#059669', gradient: 'linear-gradient(135deg, #059669 0%, #047857 100%)' },
-    arabe: { bg: '#dbeafe', color: '#2563eb', gradient: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)' },
-    fiqh: { bg: '#fef3c7', color: '#d97706', gradient: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)' },
-    sira: { bg: '#fce7f3', color: '#db2777', gradient: 'linear-gradient(135deg, #db2777 0%, #be185d 100%)' },
-    doua: { bg: '#e0e7ff', color: '#4f46e5', gradient: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)' },
-    autre: { bg: '#f3f4f6', color: '#6b7280', gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)' }
+    coran: { bgVar: '--color-success-light', colorVar: '--color-success', gradientVar: 'var(--color-success), var(--color-success-dark)' },
+    arabe: { bgVar: '--color-info-light', colorVar: '--color-info-dark', gradientVar: 'var(--color-info), var(--color-info-dark)' },
+    fiqh: { bgVar: '--color-warning-light', colorVar: '--color-warning', gradientVar: 'var(--color-warning), var(--color-warning-dark)' },
+    sira: { bgVar: '--color-accent-light', colorVar: '--color-accent', gradientVar: 'var(--color-accent), var(--color-accent-dark)' },
+    doua: { bgVar: '--color-primary-light', colorVar: '--color-primary', gradientVar: 'var(--color-primary), var(--color-primary-dark)' },
+    autre: { bgVar: '--color-bg-tertiary', colorVar: '--color-text-muted', gradientVar: 'var(--color-text-muted), var(--color-text-secondary)' }
 };
 
 export function initClassCardStyles() {
@@ -144,18 +145,18 @@ export function initClassCardStyles() {
         }
 
         .class-card-level.debutant {
-            background-color: #d1fae5;
-            color: #059669;
+            background-color: var(--color-success-light);
+            color: var(--color-success);
         }
 
         .class-card-level.intermediaire {
-            background-color: #fef3c7;
-            color: #d97706;
+            background-color: var(--color-warning-light);
+            color: var(--color-warning);
         }
 
         .class-card-level.avance {
-            background-color: #dbeafe;
-            color: #2563eb;
+            background-color: var(--color-info-light);
+            color: var(--color-info-dark);
         }
 
         .class-card-status.inactive,
@@ -194,7 +195,7 @@ export function createClassCard(schoolClass, options = {}) {
     const enrolled = schoolClass.enrolled_count || 0;
     const capacity = schoolClass.max_capacity || 20;
     const capacityPercent = Math.min((enrolled / capacity) * 100, 100);
-    const capacityColor = capacityPercent > 90 ? '#ef4444' : capacityPercent > 70 ? '#f59e0b' : '#10b981';
+    const capacityColorVar = capacityPercent > 90 ? 'var(--color-error)' : capacityPercent > 70 ? 'var(--color-warning)' : 'var(--color-success)';
 
     const card = document.createElement('div');
     card.className = `class-card ${schoolClass.status !== 'active' ? `class-card-status ${schoolClass.status}` : ''}`;
@@ -212,13 +213,13 @@ export function createClassCard(schoolClass, options = {}) {
 
     card.innerHTML = `
         <div class="class-card-header">
-            <div class="class-card-icon" style="background: ${colors.gradient}">
+            <div class="class-card-icon" style="background: linear-gradient(135deg, ${colors.gradientVar})">
                 ${subjectIcons[schoolClass.subject] || subjectIcons.autre}
             </div>
             <div class="class-card-info">
                 <h3>${schoolClass.name}</h3>
                 <div class="class-card-subject">
-                    <span class="class-card-subject-badge" style="background-color: ${colors.bg}; color: ${colors.color}">
+                    <span class="class-card-subject-badge" style="background-color: var(${colors.bgVar}); color: var(${colors.colorVar})">
                         ${subjectLabels[schoolClass.subject] || schoolClass.subject}
                     </span>
                     <span class="class-card-level ${schoolClass.level}">${levelLabels[schoolClass.level] || schoolClass.level}</span>
@@ -231,7 +232,7 @@ export function createClassCard(schoolClass, options = {}) {
                     ${icons.users}
                     <span>${enrolled}/${capacity}</span>
                     <div class="class-card-capacity-bar">
-                        <div class="class-card-capacity-fill" style="width: ${capacityPercent}%; background-color: ${capacityColor}"></div>
+                        <div class="class-card-capacity-fill" style="width: ${capacityPercent}%; background-color: ${capacityColorVar}"></div>
                     </div>
                 </div>
             ` : ''}

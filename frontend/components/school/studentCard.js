@@ -25,7 +25,7 @@ export function initStudentCardStyles() {
 
         .student-card:hover {
             box-shadow: var(--shadow-md);
-            border-color: #059669;
+            border-color: var(--color-success);
         }
 
         .student-card-header {
@@ -39,8 +39,8 @@ export function initStudentCardStyles() {
             width: 56px;
             height: 56px;
             border-radius: var(--radius-full);
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+            color: var(--color-white);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -113,18 +113,18 @@ export function initStudentCardStyles() {
         }
 
         .student-level-badge.debutant {
-            background-color: #d1fae5;
-            color: #059669;
+            background-color: var(--color-success-light);
+            color: var(--color-success);
         }
 
         .student-level-badge.intermediaire {
-            background-color: #fef3c7;
-            color: #d97706;
+            background-color: var(--color-warning-light);
+            color: var(--color-warning);
         }
 
         .student-level-badge.avance {
-            background-color: #dbeafe;
-            color: #2563eb;
+            background-color: var(--color-info-light);
+            color: var(--color-info-dark);
         }
 
         .student-status-badge {
@@ -145,8 +145,8 @@ export function initStudentCardStyles() {
         }
 
         .student-status-badge.diplome {
-            background-color: #dbeafe;
-            color: #2563eb;
+            background-color: var(--color-info-light);
+            color: var(--color-info-dark);
         }
 
         .student-status-badge.transfere {

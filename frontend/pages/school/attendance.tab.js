@@ -58,8 +58,8 @@ export async function renderAttendanceTab(container) {
                 width: 40px;
                 height: 40px;
                 border-radius: var(--radius-full);
-                background: linear-gradient(135deg, #059669 0%, #047857 100%);
-                color: white;
+                background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+                color: var(--color-white);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -89,51 +89,51 @@ export async function renderAttendanceTab(container) {
             }
 
             .attendance-btn.present {
-                background-color: #d1fae5;
-                color: #059669;
-                border-color: #d1fae5;
+                background-color: var(--color-success-light);
+                color: var(--color-success);
+                border-color: var(--color-success-light);
             }
 
             .attendance-btn.present.active {
-                background-color: #059669;
-                color: white;
-                border-color: #059669;
+                background-color: var(--color-success);
+                color: var(--color-white);
+                border-color: var(--color-success);
             }
 
             .attendance-btn.absent {
-                background-color: #fee2e2;
-                color: #dc2626;
-                border-color: #fee2e2;
+                background-color: var(--color-error-light);
+                color: var(--color-error);
+                border-color: var(--color-error-light);
             }
 
             .attendance-btn.absent.active {
-                background-color: #dc2626;
-                color: white;
-                border-color: #dc2626;
+                background-color: var(--color-error);
+                color: var(--color-white);
+                border-color: var(--color-error);
             }
 
             .attendance-btn.excuse {
-                background-color: #fef3c7;
-                color: #d97706;
-                border-color: #fef3c7;
+                background-color: var(--color-warning-light);
+                color: var(--color-warning);
+                border-color: var(--color-warning-light);
             }
 
             .attendance-btn.excuse.active {
-                background-color: #d97706;
-                color: white;
-                border-color: #d97706;
+                background-color: var(--color-warning);
+                color: var(--color-white);
+                border-color: var(--color-warning);
             }
 
             .attendance-btn.retard {
-                background-color: #ffedd5;
-                color: #ea580c;
-                border-color: #ffedd5;
+                background-color: var(--color-warning-light);
+                color: var(--color-warning-dark);
+                border-color: var(--color-warning-light);
             }
 
             .attendance-btn.retard.active {
-                background-color: #ea580c;
-                color: white;
-                border-color: #ea580c;
+                background-color: var(--color-warning-dark);
+                color: var(--color-white);
+                border-color: var(--color-warning-dark);
             }
 
             .attendance-empty {
@@ -144,8 +144,8 @@ export async function renderAttendanceTab(container) {
 
             .save-attendance-btn {
                 padding: var(--spacing-sm) var(--spacing-xl);
-                background: linear-gradient(135deg, #059669 0%, #047857 100%);
-                color: white;
+                background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+                color: var(--color-white);
                 border: none;
                 border-radius: var(--radius-md);
                 font-weight: var(--font-medium);
@@ -221,19 +221,19 @@ export async function renderAttendanceTab(container) {
 
         <div class="attendance-summary" id="attendance-summary" style="display: none;">
             <div class="summary-item">
-                <div class="summary-value" id="summary-present" style="color: #059669;">0</div>
+                <div class="summary-value" id="summary-present" style="color: var(--color-success);">0</div>
                 <div class="summary-label">Présents</div>
             </div>
             <div class="summary-item">
-                <div class="summary-value" id="summary-absent" style="color: #dc2626;">0</div>
+                <div class="summary-value" id="summary-absent" style="color: var(--color-error);">0</div>
                 <div class="summary-label">Absents</div>
             </div>
             <div class="summary-item">
-                <div class="summary-value" id="summary-excuse" style="color: #d97706;">0</div>
+                <div class="summary-value" id="summary-excuse" style="color: var(--color-warning);">0</div>
                 <div class="summary-label">Excusés</div>
             </div>
             <div class="summary-item">
-                <div class="summary-value" id="summary-retard" style="color: #ea580c;">0</div>
+                <div class="summary-value" id="summary-retard" style="color: var(--color-warning-dark);">0</div>
                 <div class="summary-label">Retards</div>
             </div>
         </div>

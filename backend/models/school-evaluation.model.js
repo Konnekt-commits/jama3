@@ -43,11 +43,11 @@ class SchoolEvaluationModel {
         query += ' ORDER BY se.evaluation_date DESC, se.created_at DESC';
 
         if (filters.limit) {
-            query += ' LIMIT ?';
-            params.push(parseInt(filters.limit));
+            const limit = parseInt(filters.limit, 10);
+            query += ` LIMIT ${limit}`;
             if (filters.offset) {
-                query += ' OFFSET ?';
-                params.push(parseInt(filters.offset));
+                const offset = parseInt(filters.offset, 10);
+                query += ` OFFSET ${offset}`;
             }
         }
 
@@ -173,8 +173,8 @@ class SchoolEvaluationModel {
             JOIN school_classes sc ON se.class_id = sc.id
             WHERE se.student_id = ? AND se.association_id = ?
             ORDER BY se.evaluation_date DESC
-            LIMIT ?
-        `, [studentId, associationId, limit]);
+            LIMIT ${parseInt(limit, 10)}
+        `, [studentId, associationId]);
         return rows;
     }
 }

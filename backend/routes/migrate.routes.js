@@ -361,6 +361,34 @@ router.get('/debug', async (req, res) => {
     }
 });
 
+// GET /api/migrate/test-programs/:assocId - Tester l'API programmes
+router.get('/test-programs/:assocId', async (req, res) => {
+    try {
+        const associationId = parseInt(req.params.assocId);
+        const [programs] = await pool.execute(`
+            SELECT sp.*,
+                   sc.name as class_name, sc.subject
+            FROM school_programs sp
+            LEFT JOIN school_classes sc ON sp.class_id = sc.id
+            WHERE sp.association_id = ?
+            ORDER BY sp.created_at DESC
+        `, [associationId]);
+
+        res.json({
+            success: true,
+            count: programs.length,
+            data: programs
+        });
+    } catch (error) {
+        console.error('Test programs error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur test programmes',
+            error: error.message
+        });
+    }
+});
+
 // GET /api/migrate/add-adherent-auth - Ajouter les colonnes auth aux adhérents
 router.get('/add-adherent-auth', async (req, res) => {
     try {
@@ -884,6 +912,7 @@ router.get('/school-tables', async (req, res) => {
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 association_id INT NOT NULL,
                 class_id INT,
+                class_ids JSON,
                 title VARCHAR(255) NOT NULL,
                 content TEXT NOT NULL,
                 priority ENUM('low', 'normal', 'high', 'urgent') DEFAULT 'normal',
@@ -898,6 +927,17 @@ router.get('/school-tables', async (req, res) => {
                 INDEX idx_published (is_published, published_at)
             )
         `);
+
+        // Add class_ids column if not exists (migration for existing tables)
+        try {
+            await pool.execute(`
+                ALTER TABLE school_announcements
+                ADD COLUMN IF NOT EXISTS class_ids JSON AFTER class_id
+            `);
+        } catch (e) {
+            // Column might already exist or syntax not supported
+            console.log('Note: class_ids column migration:', e.message);
+        }
         results.push('✓ Table school_announcements');
 
         // Table school_messages (messagerie prof-parents)
@@ -1674,6 +1714,474 @@ router.get('/seed-school-ent', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Erreur création données ENT',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/migrate/add-topics - Ajouter les tables pour les thèmes/tags de cours
+router.get('/add-topics', async (req, res) => {
+    try {
+        // Table des thèmes prédéfinis
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_topics (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT,
+                name_fr VARCHAR(100) NOT NULL,
+                name_ar VARCHAR(100),
+                color VARCHAR(20) DEFAULT '#6B8E23',
+                icon VARCHAR(50),
+                category ENUM('langue', 'religion', 'activite', 'autre') DEFAULT 'autre',
+                is_default BOOLEAN DEFAULT FALSE,
+                sort_order INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_association (association_id)
+            )
+        `);
+
+        // Table de liaison classe-thèmes
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS class_topics (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                class_id INT NOT NULL,
+                topic_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_class_topic (class_id, topic_id),
+                INDEX idx_class (class_id),
+                INDEX idx_topic (topic_id)
+            )
+        `);
+
+        // Insérer les thèmes par défaut (globaux, association_id = NULL)
+        const defaultTopics = [
+            { name_fr: 'Alphabet arabe', name_ar: 'الأبجدية', color: '#3b82f6', category: 'langue', icon: 'alphabet' },
+            { name_fr: 'Vocabulaire', name_ar: 'مفردات', color: '#8b5cf6', category: 'langue', icon: 'vocabulary' },
+            { name_fr: 'Grammaire', name_ar: 'قواعد', color: '#ec4899', category: 'langue', icon: 'grammar' },
+            { name_fr: 'Conjugaison', name_ar: 'تصريف أفعال', color: '#f59e0b', category: 'langue', icon: 'conjugation' },
+            { name_fr: 'Compréhension écrite', name_ar: 'فهم المقروء', color: '#10b981', category: 'langue', icon: 'reading' },
+            { name_fr: 'Compréhension orale', name_ar: 'فهم المسموع', color: '#14b8a6', category: 'langue', icon: 'listening' },
+            { name_fr: 'Discrimination phonétique', name_ar: 'التمييز الصوتي', color: '#6366f1', category: 'langue', icon: 'phonetic' },
+            { name_fr: 'Expression écrite', name_ar: 'التعبير الكتابي', color: '#0ea5e9', category: 'langue', icon: 'writing' },
+            { name_fr: 'Expression orale', name_ar: 'التعبير الشفوي', color: '#06b6d4', category: 'langue', icon: 'speaking' },
+            { name_fr: 'Lecture', name_ar: 'قراءة', color: '#84cc16', category: 'langue', icon: 'book' },
+            { name_fr: 'Écriture', name_ar: 'كتابة', color: '#22c55e', category: 'langue', icon: 'pen' },
+            { name_fr: 'Mémorisation Coran', name_ar: 'حفظ القرآن', color: '#6B8E23', category: 'religion', icon: 'quran' },
+            { name_fr: 'Tajwid', name_ar: 'تجويد', color: '#4A6318', category: 'religion', icon: 'tajwid' },
+            { name_fr: 'Fiqh', name_ar: 'فقه', color: '#78716c', category: 'religion', icon: 'fiqh' },
+            { name_fr: 'Sira', name_ar: 'سيرة', color: '#a3a3a3', category: 'religion', icon: 'sira' },
+            { name_fr: 'Douas', name_ar: 'أدعية', color: '#fbbf24', category: 'religion', icon: 'doua' },
+            { name_fr: 'Jeux éducatifs', name_ar: 'ألعاب تعليمية', color: '#f472b6', category: 'activite', icon: 'games' },
+            { name_fr: 'Livres numériques', name_ar: 'كتب رقمية', color: '#a78bfa', category: 'activite', icon: 'ebook' },
+            { name_fr: 'Chants / Anasheed', name_ar: 'أناشيد', color: '#fb923c', category: 'activite', icon: 'music' },
+            { name_fr: 'Révision', name_ar: 'مراجعة', color: '#64748b', category: 'autre', icon: 'revision' },
+            { name_fr: 'Évaluation', name_ar: 'تقييم', color: '#ef4444', category: 'autre', icon: 'evaluation' }
+        ];
+
+        for (let i = 0; i < defaultTopics.length; i++) {
+            const t = defaultTopics[i];
+            await pool.execute(`
+                INSERT INTO school_topics (association_id, name_fr, name_ar, color, category, icon, is_default, sort_order)
+                VALUES (NULL, ?, ?, ?, ?, ?, TRUE, ?)
+                ON DUPLICATE KEY UPDATE name_fr = VALUES(name_fr)
+            `, [t.name_fr, t.name_ar, t.color, t.category, t.icon, i]);
+        }
+
+        res.json({
+            success: true,
+            message: 'Tables topics créées avec ' + defaultTopics.length + ' thèmes par défaut'
+        });
+    } catch (error) {
+        console.error('Add topics error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/migrate/add-teacher-flag - Ajouter le flag is_teacher aux intervenants
+router.get('/add-teacher-flag', async (req, res) => {
+    try {
+        // Ajouter colonne is_teacher aux intervenants
+        await pool.execute(`
+            ALTER TABLE intervenants
+            ADD COLUMN IF NOT EXISTS is_teacher BOOLEAN DEFAULT FALSE
+        `).catch(() => {});
+
+        // Mettre à jour les intervenants qui sont déjà enseignants dans des classes
+        await pool.execute(`
+            UPDATE intervenants i
+            SET is_teacher = TRUE
+            WHERE i.id IN (
+                SELECT DISTINCT teacher_id FROM school_classes WHERE teacher_id IS NOT NULL
+            )
+        `).catch(() => {});
+
+        res.json({
+            success: true,
+            message: 'Colonne is_teacher ajoutée aux intervenants'
+        });
+    } catch (error) {
+        console.error('Add teacher flag error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur',
+            error: error.message
+        });
+    }
+});
+
+// Route pour créer un parent test avec 2 enfants
+router.get('/create-test-parent', async (req, res) => {
+    try {
+        const results = [];
+
+        // Trouver une association existante
+        const [associations] = await pool.execute('SELECT id, name FROM associations LIMIT 1');
+        if (associations.length === 0) {
+            return res.status(400).json({ success: false, message: 'Aucune association trouvée' });
+        }
+        const associationId = associations[0].id;
+        results.push(`Association: ${associations[0].name}`);
+
+        // Créer le parent (adhérent)
+        const parentPhone = '0612345678';
+        const parentEmail = 'parent.test@example.com';
+
+        // Vérifier si le parent existe déjà
+        const [existingParent] = await pool.execute(
+            'SELECT id FROM adherents WHERE association_id = ? AND (email = ? OR phone = ?)',
+            [associationId, parentEmail, parentPhone]
+        );
+
+        let parentId;
+        if (existingParent.length > 0) {
+            parentId = existingParent[0].id;
+            results.push(`Parent existant trouve (ID: ${parentId})`);
+        } else {
+            const [parentResult] = await pool.execute(
+                `INSERT INTO adherents (association_id, member_number, first_name, last_name, email, phone, status, created_at)
+                 VALUES (?, ?, ?, ?, ?, ?, 'actif', NOW())`,
+                [associationId, 'PAR-TEST-001', 'Mohamed', 'Benali', parentEmail, parentPhone]
+            );
+            parentId = parentResult.insertId;
+            results.push(`Parent cree: Mohamed Benali (ID: ${parentId})`);
+        }
+
+        // Créer les 2 enfants
+        const enfants = [
+            { first_name: 'Youssef', last_name: 'Benali', birth_date: '2015-03-15', level: 'intermediaire' },
+            { first_name: 'Fatima', last_name: 'Benali', birth_date: '2018-07-22', level: 'debutant' }
+        ];
+
+        for (const enfant of enfants) {
+            // Vérifier si l'enfant existe déjà
+            const [existingChild] = await pool.execute(
+                'SELECT id FROM students WHERE association_id = ? AND first_name = ? AND last_name = ? AND parent_id = ?',
+                [associationId, enfant.first_name, enfant.last_name, parentId]
+            );
+
+            if (existingChild.length === 0) {
+                // Générer un numéro d'élève
+                const studentNumber = `ELV-TEST-${Date.now().toString().slice(-4)}`;
+
+                await pool.execute(
+                    `INSERT INTO students (association_id, student_number, first_name, last_name, birth_date, gender, parent_id, parent_relation, level, status, enrollment_date, created_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, 'pere', ?, 'actif', CURDATE(), NOW())`,
+                    [associationId, studentNumber, enfant.first_name, enfant.last_name, enfant.birth_date, enfant.first_name === 'Fatima' ? 'F' : 'M', parentId, enfant.level]
+                );
+                results.push(`Enfant cree: ${enfant.first_name} ${enfant.last_name}`);
+            } else {
+                results.push(`Enfant existant: ${enfant.first_name} ${enfant.last_name}`);
+            }
+        }
+
+        // Récupérer les enfants créés
+        const [children] = await pool.execute(
+            'SELECT id, first_name, last_name FROM students WHERE parent_id = ?',
+            [parentId]
+        );
+
+        // Inscrire les enfants dans une classe si elle existe
+        const [classes] = await pool.execute(
+            'SELECT id, name FROM school_classes WHERE association_id = ? AND status = "active" LIMIT 2',
+            [associationId]
+        );
+
+        for (let i = 0; i < Math.min(children.length, classes.length); i++) {
+            const [existingEnrollment] = await pool.execute(
+                'SELECT id FROM class_enrollments WHERE student_id = ? AND class_id = ?',
+                [children[i].id, classes[i].id]
+            );
+
+            if (existingEnrollment.length === 0) {
+                await pool.execute(
+                    `INSERT INTO class_enrollments (association_id, student_id, class_id, enrollment_date, status)
+                     VALUES (?, ?, ?, CURDATE(), 'active')`,
+                    [associationId, children[i].id, classes[i].id]
+                );
+                results.push(`${children[i].first_name} inscrit en ${classes[i].name}`);
+            }
+        }
+
+        res.json({
+            success: true,
+            message: 'Parent test cree avec succes',
+            credentials: {
+                url: '/login-parent',
+                email: parentEmail,
+                phone: parentPhone,
+                password: parentPhone + ' (ou ' + parentEmail + ')'
+            },
+            results
+        });
+    } catch (error) {
+        console.error('Create test parent error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur creation parent test',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/migrate/populate-parent-data - Remplir données test pour portail parent
+router.get('/populate-parent-data', async (req, res) => {
+    try {
+        const results = [];
+
+        // Find Fatima Benali (test parent)
+        const [parents] = await pool.execute(`
+            SELECT id, association_id FROM adherents WHERE phone = '0612345678' LIMIT 1
+        `);
+
+        if (parents.length === 0) {
+            return res.status(404).json({ success: false, message: 'Parent test non trouve. Executez /create-test-parent d\'abord.' });
+        }
+
+        const parentId = parents[0].id;
+        const assocId = parents[0].association_id;
+
+        // 1. Create a teacher (intervenant)
+        const [existingTeacher] = await pool.execute(`
+            SELECT id FROM intervenants WHERE association_id = ? AND email = 'prof.ahmed@madrassa.fr' LIMIT 1
+        `, [assocId]);
+
+        let teacherId;
+        if (existingTeacher.length === 0) {
+            const [teacherResult] = await pool.execute(`
+                INSERT INTO intervenants (association_id, first_name, last_name, email, phone, speciality, status, is_teacher)
+                VALUES (?, 'Ahmed', 'Mansouri', 'prof.ahmed@madrassa.fr', '0698765432', 'Coran et Arabe', 'actif', TRUE)
+            `, [assocId]);
+            teacherId = teacherResult.insertId;
+            results.push('✓ Enseignant Ahmed Mansouri cree');
+        } else {
+            teacherId = existingTeacher[0].id;
+            results.push('✓ Enseignant existe deja');
+        }
+
+        // 2. Create classes
+        const classesData = [
+            { name: 'Coran - Niveau 1', subject: 'coran', level: 'debutant' },
+            { name: 'Arabe - Alphabet', subject: 'arabe', level: 'debutant' },
+            { name: 'Education Islamique', subject: 'fiqh', level: 'debutant' }
+        ];
+
+        const classIds = [];
+        for (const cls of classesData) {
+            const [existing] = await pool.execute(`
+                SELECT id FROM school_classes WHERE association_id = ? AND name = ? LIMIT 1
+            `, [assocId, cls.name]);
+
+            if (existing.length === 0) {
+                const [result] = await pool.execute(`
+                    INSERT INTO school_classes (association_id, name, subject, level, teacher_id, max_capacity, academic_year, status)
+                    VALUES (?, ?, ?, ?, ?, 20, '2024-2025', 'active')
+                `, [assocId, cls.name, cls.subject, cls.level, teacherId]);
+                classIds.push(result.insertId);
+            } else {
+                classIds.push(existing[0].id);
+            }
+        }
+        results.push('✓ 3 classes creees');
+
+        // 3. Create students (children)
+        const studentsData = [
+            { first_name: 'Youssef', last_name: 'Benali', birth_date: '2015-03-15', gender: 'M', level: 'debutant' },
+            { first_name: 'Meryem', last_name: 'Benali', birth_date: '2017-07-22', gender: 'F', level: 'debutant' }
+        ];
+
+        const studentIds = [];
+        for (let i = 0; i < studentsData.length; i++) {
+            const s = studentsData[i];
+            const [existing] = await pool.execute(`
+                SELECT id FROM students WHERE association_id = ? AND first_name = ? AND last_name = ? LIMIT 1
+            `, [assocId, s.first_name, s.last_name]);
+
+            if (existing.length === 0) {
+                const studentNumber = `ELV-2024-${String(i + 1).padStart(3, '0')}`;
+                const [result] = await pool.execute(`
+                    INSERT INTO students (association_id, student_number, first_name, last_name, birth_date, gender, parent_id, parent_relation, level, enrollment_date, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'mere', ?, CURDATE(), 'actif')
+                `, [assocId, studentNumber, s.first_name, s.last_name, s.birth_date, s.gender, parentId, s.level]);
+                studentIds.push(result.insertId);
+            } else {
+                studentIds.push(existing[0].id);
+            }
+        }
+        results.push('✓ 2 enfants crees (Youssef et Meryem)');
+
+        // 4. Enroll students in classes
+        for (const studentId of studentIds) {
+            for (const classId of classIds) {
+                await pool.execute(`
+                    INSERT IGNORE INTO class_enrollments (association_id, student_id, class_id, enrollment_date, status)
+                    VALUES (?, ?, ?, CURDATE(), 'active')
+                `, [assocId, studentId, classId]);
+            }
+        }
+        results.push('✓ Inscriptions aux classes');
+
+        // 5. Create attendance records (last 30 days)
+        const attendanceStatuses = ['present', 'present', 'present', 'present', 'absent', 'present', 'present', 'excuse'];
+        for (const studentId of studentIds) {
+            for (const classId of classIds) {
+                for (let day = 1; day <= 10; day++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (day * 3));
+                    const dateStr = date.toISOString().split('T')[0];
+                    const status = attendanceStatuses[Math.floor(Math.random() * attendanceStatuses.length)];
+
+                    await pool.execute(`
+                        INSERT IGNORE INTO school_attendance (association_id, class_id, student_id, session_date, status)
+                        VALUES (?, ?, ?, ?, ?)
+                    `, [assocId, classId, studentId, dateStr, status]);
+                }
+            }
+        }
+        results.push('✓ Historique de presence');
+
+        // 6. Create evaluations/grades
+        const evaluationTypes = ['controle', 'oral', 'memorisation'];
+        for (const studentId of studentIds) {
+            for (let i = 0; i < classIds.length; i++) {
+                const classId = classIds[i];
+                for (let e = 0; e < 3; e++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (e * 10 + i * 5));
+                    const dateStr = date.toISOString().split('T')[0];
+                    const score = Math.floor(Math.random() * 6) + 14; // 14-20
+                    const type = evaluationTypes[e % evaluationTypes.length];
+
+                    await pool.execute(`
+                        INSERT INTO school_evaluations (association_id, student_id, class_id, evaluation_date, type, score, max_score, evaluated_by)
+                        VALUES (?, ?, ?, ?, ?, ?, 20, ?)
+                        ON DUPLICATE KEY UPDATE score = VALUES(score)
+                    `, [assocId, studentId, classId, dateStr, type, score, teacherId]);
+                }
+            }
+        }
+        results.push('✓ Notes et evaluations');
+
+        // 7. Create school fees
+        const academicYear = '2024-2025';
+        const months = ['Septembre', 'Octobre', 'Novembre', 'Decembre', 'Janvier', 'Fevrier'];
+        for (const studentId of studentIds) {
+            for (let m = 0; m < months.length; m++) {
+                const feeNumber = `SCO-${academicYear.substring(2, 4)}${String(m + 1).padStart(2, '0')}-${String(studentId).padStart(4, '0')}`;
+                const isPaid = m < 4; // First 4 months paid
+                const dueDate = new Date(2024, 8 + m, 5);
+
+                await pool.execute(`
+                    INSERT INTO school_fees (association_id, student_id, fee_number, academic_year, period, period_label, amount, paid_amount, payment_status, due_date, paid_date, payment_method)
+                    VALUES (?, ?, ?, ?, 'mensuel', ?, 50.00, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE paid_amount = VALUES(paid_amount), payment_status = VALUES(payment_status)
+                `, [
+                    assocId, studentId, feeNumber, academicYear, months[m] + ' 2024',
+                    isPaid ? 50.00 : 0,
+                    isPaid ? 'paid' : 'pending',
+                    dueDate.toISOString().split('T')[0],
+                    isPaid ? dueDate.toISOString().split('T')[0] : null,
+                    isPaid ? 'cash' : null
+                ]);
+            }
+        }
+        results.push('✓ Frais de scolarite (4 mois payes, 2 en attente)');
+
+        // 8. Create announcements
+        const announcements = [
+            { title: 'Vacances scolaires', content: 'L\'ecole sera fermee du 20 decembre au 5 janvier. Bonnes fetes a tous!', days_ago: 2 },
+            { title: 'Reunion parents-professeurs', content: 'Une reunion est prevue le samedi 15 fevrier a 14h. Votre presence est souhaitee.', days_ago: 5 },
+            { title: 'Concours de recitation', content: 'Un concours de recitation du Coran aura lieu le 1er mars. Inscriptions ouvertes!', days_ago: 10 }
+        ];
+
+        for (const ann of announcements) {
+            const pubDate = new Date();
+            pubDate.setDate(pubDate.getDate() - ann.days_ago);
+
+            await pool.execute(`
+                INSERT INTO school_announcements (association_id, title, content, target_audience, is_published, published_at)
+                VALUES (?, ?, ?, 'parents', TRUE, ?)
+                ON DUPLICATE KEY UPDATE content = VALUES(content)
+            `, [assocId, ann.title, ann.content, pubDate.toISOString()]);
+        }
+        results.push('✓ 3 annonces creees');
+
+        // 9. Create messages between teacher and parent
+        const messages = [
+            { from: 'teacher', content: 'Bonjour Mme Benali, Youssef progresse tres bien en memorisation du Coran. Felicitations!', days_ago: 3 },
+            { from: 'parent', content: 'Merci beaucoup pour ce retour encourageant. Il travaille dur a la maison aussi.', days_ago: 3 },
+            { from: 'teacher', content: 'Meryem a eu du mal avec la derniere lecon d\'arabe. Pourriez-vous revoir avec elle les lettres solaires?', days_ago: 7 },
+            { from: 'parent', content: 'D\'accord, nous allons travailler cela ce weekend. Merci de m\'avoir prevenue.', days_ago: 6 },
+            { from: 'teacher', content: 'Rappel: les photos de classe seront prises samedi prochain.', days_ago: 1 }
+        ];
+
+        // Check if school_messages table exists, create if not
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS school_messages (
+                id INT PRIMARY KEY AUTO_INCREMENT,
+                association_id INT NOT NULL,
+                student_id INT NOT NULL,
+                sender_type ENUM('teacher', 'parent') NOT NULL,
+                sender_id INT NOT NULL,
+                content TEXT NOT NULL,
+                is_read BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE CASCADE,
+                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+            )
+        `);
+
+        for (const msg of messages) {
+            const createdAt = new Date();
+            createdAt.setDate(createdAt.getDate() - msg.days_ago);
+            const senderId = msg.from === 'teacher' ? teacherId : parentId;
+
+            await pool.execute(`
+                INSERT INTO school_messages (association_id, student_id, sender_type, sender_id, content, is_read, created_at)
+                VALUES (?, ?, ?, ?, ?, TRUE, ?)
+            `, [assocId, studentIds[0], msg.from, senderId, msg.content, createdAt.toISOString()]);
+        }
+        results.push('✓ Messages parent-professeur');
+
+        res.json({
+            success: true,
+            message: 'Donnees de test creees avec succes',
+            results,
+            summary: {
+                parent: 'Fatima Benali (0612345678)',
+                children: ['Youssef Benali', 'Meryem Benali'],
+                classes: classesData.map(c => c.name),
+                teacher: 'Ahmed Mansouri'
+            }
+        });
+
+    } catch (error) {
+        console.error('Populate parent data error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur population donnees',
             error: error.message
         });
     }

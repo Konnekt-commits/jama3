@@ -4,10 +4,13 @@ const SchoolContentModel = require('../../models/school-content.model');
 const programsController = {
     async getAll(req, res) {
         try {
-            const filters = {
-                class_id: req.query.class_id,
-                status: req.query.status
-            };
+            const filters = {};
+            if (req.query.class_id && req.query.class_id !== 'undefined') {
+                filters.class_id = req.query.class_id;
+            }
+            if (req.query.status && req.query.status !== 'undefined') {
+                filters.status = req.query.status;
+            }
             const programs = await SchoolProgramModel.findAll(req.associationId, filters);
             res.json({ success: true, data: programs });
         } catch (error) {

@@ -5,8 +5,11 @@ class Router {
         this.beforeEach = null;
         this.afterEach = null;
 
-        // Détecter le base path (/app en production)
-        this.basePath = window.location.pathname.startsWith('/app') ? '/app' : '';
+        // Détecter le base path (/app en production, sauf pour les routes spéciales)
+        const path = window.location.pathname;
+        const specialRoutes = ['/madrassa', '/login-parent', '/parent'];
+        const isSpecialRoute = specialRoutes.some(r => path === r || path.startsWith(r + '/'));
+        this.basePath = path.startsWith('/app') ? '/app' : (isSpecialRoute ? '' : '');
 
         window.addEventListener('popstate', () => this.handleRouteChange());
         document.addEventListener('click', (e) => this.handleLinkClick(e));
