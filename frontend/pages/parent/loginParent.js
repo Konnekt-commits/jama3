@@ -19,28 +19,28 @@ export async function renderLoginParentPage() {
             @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
 
             :root {
-                /* Colors - Ocean/Teal Theme for Madrassa */
-                --color-bg-primary: #F0F7F7;
-                --color-bg-secondary: #E3EEEE;
-                --color-bg-tertiary: #D4E4E4;
-                --color-bg-dark: #1A2F2F;
+                /* Colors - Olive/Beige Theme for Madrassa */
+                --color-bg-primary: #F5F0E8;
+                --color-bg-secondary: #EDE6DA;
+                --color-bg-tertiary: #E5DDD0;
+                --color-bg-dark: #1a2314;
 
-                --color-primary: #0D7377;
-                --color-primary-hover: #095B5E;
-                --color-primary-light: #D4EDED;
-                --color-primary-dark: #064547;
+                --color-primary: #6B8E23;
+                --color-primary-hover: #556B2F;
+                --color-primary-light: rgba(107, 142, 35, 0.15);
+                --color-primary-dark: #4A6318;
 
-                --color-text-primary: #1A2F2F;
-                --color-text-secondary: #3D5555;
-                --color-text-muted: #6B8585;
-                --color-text-inverse: #F0F7F7;
+                --color-text-primary: #3D3D3D;
+                --color-text-secondary: #5D5D5D;
+                --color-text-muted: #8B7355;
+                --color-text-inverse: #F5F0E8;
 
-                --color-success: #2E8B57;
+                --color-success: #6B8E23;
                 --color-error: #C94B4B;
                 --color-error-light: #F8E8E8;
 
-                --color-border: #B8D4D4;
-                --color-card-bg: #F7FBFB;
+                --color-border: #D4CFC5;
+                --color-card-bg: #FFFFFF;
 
                 --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
                 --font-arabic: 'Amiri', serif;
