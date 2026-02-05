@@ -98,7 +98,8 @@ function renderApp(container) {
             .announce-date{font-size:12px;color:#8B7355;margin-left:12px;}
 
             .msg-list{background:#fff;}
-            .msg-item{padding:14px 16px;border-bottom:1px solid #F0EBE3;}
+            .msg-item{padding:14px 16px;border-bottom:1px solid #F0EBE3;cursor:pointer;}
+            .msg-item:active{background:#FAF8F5;}
             .msg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
             .msg-sender{font-size:13px;font-weight:600;color:#3D3D3D;}
             .msg-sender.teacher{color:#6B8E23;}
@@ -182,7 +183,7 @@ function renderApp(container) {
                 <div class="app-section" id="section-messages">
                     <div class="msg-list" id="messagesList">
                         ${messages && messages.length > 0 ? messages.map(msg => `
-                            <div class="msg-item ${!msg.is_read && msg.sender_type === 'teacher' ? 'msg-unread' : ''}">
+                            <div class="msg-item ${!msg.is_read && msg.sender_type === 'teacher' ? 'msg-unread' : ''}" data-msg-id="${msg.id}" data-student-id="${msg.student_id}" data-student-name="${esc(msg.student_first_name)} ${esc(msg.student_last_name)}" data-sender="${esc(msg.sender_name)}" data-sender-type="${msg.sender_type}" data-content="${esc(msg.content)}" data-date="${msg.created_at}">
                                 <div class="msg-header">
                                     <span class="msg-sender ${msg.sender_type}">${msg.sender_type === 'teacher' ? 'Prof. ' : ''}${esc(msg.sender_name)}</span>
                                     <span class="msg-date">${formatDate(msg.created_at)}</span>
@@ -274,6 +275,22 @@ function renderApp(container) {
             if (e.key === 'Enter') sendMessage();
         });
     }
+
+    // Message items click - open reply sheet
+    document.querySelectorAll('.msg-item').forEach(el => {
+        el.addEventListener('click', () => {
+            const msgData = {
+                id: el.dataset.msgId,
+                studentId: el.dataset.studentId,
+                studentName: el.dataset.studentName,
+                sender: el.dataset.sender,
+                senderType: el.dataset.senderType,
+                content: el.dataset.content,
+                date: el.dataset.date
+            };
+            openMessageSheet(msgData);
+        });
+    });
 }
 
 async function sendMessage() {
@@ -489,6 +506,117 @@ function openChildSheet(child) {
             </div>
         `
     });
+}
+
+function openMessageSheet(msg) {
+    const isTeacher = msg.senderType === 'teacher';
+
+    openBottomSheet({
+        title: '',
+        content: `
+            <style>
+                .msg-detail{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+
+                .md-header{background:linear-gradient(135deg,#4A6318 0%,#6B8E23 100%);padding:24px 20px;color:#fff;margin:-20px -20px 0 -20px;}
+                .md-title{font-size:18px;font-weight:700;margin-bottom:4px;}
+                .md-student{font-size:13px;opacity:0.85;}
+
+                .md-message{background:#fff;margin:16px;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+                .md-msg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #E5DDD0;}
+                .md-sender{display:flex;align-items:center;gap:10px;}
+                .md-sender-avatar{width:40px;height:40px;border-radius:50%;background:${isTeacher?'linear-gradient(135deg,#6B8E23,#4A6318)':'linear-gradient(135deg,#D4A84B,#B8923F)'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;}
+                .md-sender-info{}
+                .md-sender-name{font-size:15px;font-weight:600;color:#3D3D3D;}
+                .md-sender-type{font-size:12px;color:#8B7355;}
+                .md-date{font-size:12px;color:#8B7355;}
+                .md-content{font-size:15px;line-height:1.6;color:#3D3D3D;}
+
+                .md-reply{background:#F5F0E8;padding:16px;margin-top:auto;}
+                .md-reply-title{font-size:12px;font-weight:600;color:#8B7355;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;}
+                .md-reply-area{width:100%;min-height:100px;border:1px solid #D4CFC5;border-radius:12px;padding:12px;font-size:14px;font-family:inherit;resize:none;outline:none;background:#fff;}
+                .md-reply-area:focus{border-color:#6B8E23;}
+                .md-reply-btn{width:100%;margin-top:12px;padding:14px;background:linear-gradient(135deg,#4A6318 0%,#6B8E23 100%);color:#fff;border:none;border-radius:25px;font-size:15px;font-weight:600;cursor:pointer;}
+                .md-reply-btn:disabled{opacity:0.6;cursor:not-allowed;}
+            </style>
+            <div class="msg-detail">
+                <div class="md-header">
+                    <div class="md-title">Conversation</div>
+                    <div class="md-student">Concernant: ${msg.studentName}</div>
+                </div>
+
+                <div class="md-message">
+                    <div class="md-msg-header">
+                        <div class="md-sender">
+                            <div class="md-sender-avatar">${msg.sender.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+                            <div class="md-sender-info">
+                                <div class="md-sender-name">${msg.sender}</div>
+                                <div class="md-sender-type">${isTeacher?'Enseignant':'Parent'}</div>
+                            </div>
+                        </div>
+                        <div class="md-date">${formatDate(msg.date)}</div>
+                    </div>
+                    <div class="md-content">${msg.content}</div>
+                </div>
+
+                <div class="md-reply">
+                    <div class="md-reply-title">Repondre</div>
+                    <textarea class="md-reply-area" id="replyContent" placeholder="Ecrire votre reponse..."></textarea>
+                    <button class="md-reply-btn" id="sendReplyBtn">Envoyer la reponse</button>
+                </div>
+            </div>
+        `
+    });
+
+    // Handle reply send
+    setTimeout(() => {
+        const replyBtn = document.getElementById('sendReplyBtn');
+        const replyArea = document.getElementById('replyContent');
+
+        if (replyBtn && replyArea) {
+            replyBtn.addEventListener('click', async () => {
+                const content = replyArea.value.trim();
+                if (!content) {
+                    toastError('Ecrivez un message');
+                    return;
+                }
+
+                replyBtn.disabled = true;
+                replyBtn.textContent = 'Envoi...';
+
+                const token = localStorage.getItem('parent_token');
+                try {
+                    const res = await fetch('/api/school/parent-auth/send-message', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            student_id: parseInt(msg.studentId),
+                            content
+                        })
+                    });
+
+                    const result = await res.json();
+                    if (result.success) {
+                        toastSuccess('Reponse envoyee');
+                        // Close bottom sheet
+                        const closeBtn = document.querySelector('.bottom-sheet-overlay');
+                        if (closeBtn) closeBtn.click();
+                        setTimeout(() => location.reload(), 500);
+                    } else {
+                        toastError(result.message || 'Erreur');
+                        replyBtn.disabled = false;
+                        replyBtn.textContent = 'Envoyer la reponse';
+                    }
+                } catch (err) {
+                    toastError('Erreur envoi');
+                    replyBtn.disabled = false;
+                    replyBtn.textContent = 'Envoyer la reponse';
+                }
+            });
+        }
+    }, 100);
 }
 
 function openAnnounceSheet(ann) {
