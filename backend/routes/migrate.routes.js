@@ -1986,11 +1986,11 @@ router.get('/populate-parent-data', async (req, res) => {
             results.push('✓ Enseignant existe deja');
         }
 
-        // 2. Create classes
+        // 2. Create classes with schedules
         const classesData = [
-            { name: 'Coran - Niveau 1', subject: 'coran', level: 'debutant' },
-            { name: 'Arabe - Alphabet', subject: 'arabe', level: 'debutant' },
-            { name: 'Education Islamique', subject: 'fiqh', level: 'debutant' }
+            { name: 'Coran - Niveau 1', subject: 'coran', level: 'debutant', schedule: { day: 'Samedi', start: '09:00', end: '11:00' }, room: 'Salle 1' },
+            { name: 'Arabe - Alphabet', subject: 'arabe', level: 'debutant', schedule: { day: 'Samedi', start: '11:15', end: '12:30' }, room: 'Salle 1' },
+            { name: 'Education Islamique', subject: 'fiqh', level: 'debutant', schedule: { day: 'Dimanche', start: '10:00', end: '11:30' }, room: 'Salle 2' }
         ];
 
         const classIds = [];
@@ -2001,15 +2001,19 @@ router.get('/populate-parent-data', async (req, res) => {
 
             if (existing.length === 0) {
                 const [result] = await pool.execute(`
-                    INSERT INTO school_classes (association_id, name, subject, level, teacher_id, max_capacity, academic_year, status)
-                    VALUES (?, ?, ?, ?, ?, 20, '2024-2025', 'active')
-                `, [assocId, cls.name, cls.subject, cls.level, teacherId]);
+                    INSERT INTO school_classes (association_id, name, subject, level, teacher_id, max_capacity, schedule, room, academic_year, status)
+                    VALUES (?, ?, ?, ?, ?, 20, ?, ?, '2024-2025', 'active')
+                `, [assocId, cls.name, cls.subject, cls.level, teacherId, JSON.stringify(cls.schedule), cls.room]);
                 classIds.push(result.insertId);
             } else {
+                // Update existing class with schedule
+                await pool.execute(`
+                    UPDATE school_classes SET schedule = ?, room = ? WHERE id = ?
+                `, [JSON.stringify(cls.schedule), cls.room, existing[0].id]);
                 classIds.push(existing[0].id);
             }
         }
-        results.push('✓ 3 classes creees');
+        results.push('✓ 3 classes creees avec horaires');
 
         // 3. Create students (children)
         const studentsData = [

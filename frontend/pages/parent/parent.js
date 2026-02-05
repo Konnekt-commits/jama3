@@ -377,8 +377,10 @@ function openChildSheet(child) {
                 .cd-class-icon{width:44px;height:44px;background:linear-gradient(135deg,#0D7377,#095B5E);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
                 .cd-class-info{flex:1;}
                 .cd-class-name{font-size:15px;font-weight:600;color:#1A1A1A;margin-bottom:3px;}
-                .cd-class-teacher{font-size:13px;color:#666;display:flex;align-items:center;gap:4px;}
-                .cd-class-teacher svg{width:14px;height:14px;}
+                .cd-class-schedule{font-size:13px;color:#0D7377;font-weight:500;margin-bottom:3px;display:flex;align-items:center;gap:4px;}
+                .cd-class-schedule svg{width:14px;height:14px;}
+                .cd-class-teacher{font-size:12px;color:#666;display:flex;align-items:center;gap:4px;}
+                .cd-class-teacher svg{width:12px;height:12px;}
 
                 .cd-payment{background:linear-gradient(135deg,${pay==='paid'?'#ECFDF5,#D1FAE5':'#FFFBEB,#FEF3C7'});border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:space-between;}
                 .cd-payment-info{}
@@ -437,11 +439,13 @@ function openChildSheet(child) {
                         </div>
                         ${classes.length > 0 ? `<div class="cd-classes">${classes.map(c => {
                             const icon = subjectIcons[c.subject] || subjectIcons.coran;
+                            const schedule = c.schedule ? `${c.schedule.day} ${c.schedule.start}-${c.schedule.end}` : '';
                             return `
                                 <div class="cd-class">
                                     <div class="cd-class-icon">${icon}</div>
                                     <div class="cd-class-info">
                                         <div class="cd-class-name">${esc(c.name)}</div>
+                                        ${schedule ? `<div class="cd-class-schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${schedule}${c.room ? ' - ' + c.room : ''}</div>` : ''}
                                         ${c.teacher_name ? `<div class="cd-class-teacher"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${esc(c.teacher_name)}</div>` : ''}
                                     </div>
                                 </div>

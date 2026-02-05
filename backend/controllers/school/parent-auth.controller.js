@@ -183,6 +183,8 @@ exports.getMe = async (req, res) => {
                     sc.id,
                     sc.name,
                     sc.subject,
+                    sc.schedule,
+                    sc.room,
                     CONCAT(i.first_name, ' ', i.last_name) as teacher_name
                 FROM class_enrollments ce
                 JOIN school_classes sc ON ce.class_id = sc.id
@@ -190,7 +192,11 @@ exports.getMe = async (req, res) => {
                 WHERE ce.student_id = ? AND ce.status = 'active'
                 ORDER BY sc.name
             `, [child.id]);
-            child.classes = classes;
+            // Parse schedule JSON
+            child.classes = classes.map(c => ({
+                ...c,
+                schedule: c.schedule ? (typeof c.schedule === 'string' ? JSON.parse(c.schedule) : c.schedule) : null
+            }));
 
             // Get attendance rate (last 30 days)
             const [attendanceStats] = await pool.execute(`
