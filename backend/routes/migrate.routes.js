@@ -2126,11 +2126,17 @@ router.get('/populate-parent-data', async (req, res) => {
             pubDate.setDate(pubDate.getDate() - ann.days_ago);
             const pubDateStr = pubDate.toISOString().slice(0, 19).replace('T', ' ');
 
-            await pool.execute(`
-                INSERT INTO school_announcements (association_id, title, content, target_audience, is_published, published_at)
-                VALUES (?, ?, ?, 'parents', TRUE, ?)
-                ON DUPLICATE KEY UPDATE content = VALUES(content)
-            `, [assocId, ann.title, ann.content, pubDateStr]);
+            // Check if announcement already exists
+            const [existing] = await pool.execute(`
+                SELECT id FROM school_announcements WHERE association_id = ? AND title = ? LIMIT 1
+            `, [assocId, ann.title]);
+
+            if (existing.length === 0) {
+                await pool.execute(`
+                    INSERT INTO school_announcements (association_id, title, content, target_audience, is_published, published_at, priority)
+                    VALUES (?, ?, ?, 'parents', TRUE, ?, 'normal')
+                `, [assocId, ann.title, ann.content, pubDateStr]);
+            }
         }
         results.push('✓ 3 annonces creees');
 
@@ -2153,9 +2159,7 @@ router.get('/populate-parent-data', async (req, res) => {
                 sender_id INT NOT NULL,
                 content TEXT NOT NULL,
                 is_read BOOLEAN DEFAULT FALSE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE CASCADE,
-                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
