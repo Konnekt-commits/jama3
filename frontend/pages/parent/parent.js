@@ -439,7 +439,8 @@ function openChildSheet(child) {
                         </div>
                         ${classes.length > 0 ? `<div class="cd-classes">${classes.map(c => {
                             const icon = subjectIcons[c.subject] || subjectIcons.coran;
-                            const schedule = c.schedule ? `${c.schedule.day} ${c.schedule.start}-${c.schedule.end}` : '';
+                            const hasSchedule = c.schedule && c.schedule.day && c.schedule.start && c.schedule.end;
+                            const schedule = hasSchedule ? `${c.schedule.day} ${c.schedule.start}-${c.schedule.end}` : '';
                             return `
                                 <div class="cd-class">
                                     <div class="cd-class-icon">${icon}</div>

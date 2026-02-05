@@ -193,10 +193,17 @@ exports.getMe = async (req, res) => {
                 ORDER BY sc.name
             `, [child.id]);
             // Parse schedule JSON
-            child.classes = classes.map(c => ({
-                ...c,
-                schedule: c.schedule ? (typeof c.schedule === 'string' ? JSON.parse(c.schedule) : c.schedule) : null
-            }));
+            child.classes = classes.map(c => {
+                let schedule = null;
+                if (c.schedule) {
+                    try {
+                        schedule = typeof c.schedule === 'string' ? JSON.parse(c.schedule) : c.schedule;
+                    } catch (e) {
+                        schedule = null;
+                    }
+                }
+                return { ...c, schedule };
+            });
 
             // Get attendance rate (last 30 days)
             const [attendanceStats] = await pool.execute(`
