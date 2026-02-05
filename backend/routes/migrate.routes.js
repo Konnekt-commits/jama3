@@ -1971,8 +1971,8 @@ router.get('/populate-parent-data', async (req, res) => {
         let teacherId;
         if (existingTeacher.length === 0) {
             const [teacherResult] = await pool.execute(`
-                INSERT INTO intervenants (association_id, first_name, last_name, email, phone, speciality, status, is_teacher)
-                VALUES (?, 'Ahmed', 'Mansouri', 'prof.ahmed@madrassa.fr', '0698765432', 'Coran et Arabe', 'actif', TRUE)
+                INSERT INTO intervenants (association_id, first_name, last_name, email, phone, status, is_teacher)
+                VALUES (?, 'Ahmed', 'Mansouri', 'prof.ahmed@madrassa.fr', '0698765432', 'actif', TRUE)
             `, [assocId]);
             teacherId = teacherResult.insertId;
             results.push('✓ Enseignant Ahmed Mansouri cree');
