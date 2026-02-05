@@ -2114,49 +2114,8 @@ router.get('/populate-parent-data', async (req, res) => {
         }
         results.push('✓ Frais de scolarite (4 mois payes, 2 en attente)');
 
-        // 8. Create announcements
-        // First, alter table to allow NULL for recipient_id if the column exists
-        try {
-            await pool.execute(`ALTER TABLE school_announcements MODIFY COLUMN recipient_id INT NULL DEFAULT NULL`);
-        } catch (e) { /* column may not exist */ }
-
-        const announcements = [
-            { title: 'Vacances scolaires', content: 'L\'ecole sera fermee du 20 decembre au 5 janvier. Bonnes fetes a tous!', days_ago: 2 },
-            { title: 'Reunion parents-professeurs', content: 'Une reunion est prevue le samedi 15 fevrier a 14h. Votre presence est souhaitee.', days_ago: 5 },
-            { title: 'Concours de recitation', content: 'Un concours de recitation du Coran aura lieu le 1er mars. Inscriptions ouvertes!', days_ago: 10 }
-        ];
-
-        try {
-            for (const ann of announcements) {
-                const pubDate = new Date();
-                pubDate.setDate(pubDate.getDate() - ann.days_ago);
-                const pubDateStr = pubDate.toISOString().slice(0, 19).replace('T', ' ');
-
-                // Check if announcement already exists
-                const [existing] = await pool.execute(`
-                    SELECT id FROM school_announcements WHERE association_id = ? AND title = ? LIMIT 1
-                `, [assocId, ann.title]);
-
-                if (existing.length === 0) {
-                    // Try with recipient_id column first
-                    try {
-                        await pool.execute(`
-                            INSERT INTO school_announcements (association_id, title, content, target_audience, is_published, published_at, priority, recipient_id)
-                            VALUES (?, ?, ?, 'parents', TRUE, ?, 'normal', NULL)
-                        `, [assocId, ann.title, ann.content, pubDateStr]);
-                    } catch (e) {
-                        // Fallback without recipient_id
-                        await pool.execute(`
-                            INSERT INTO school_announcements (association_id, title, content, target_audience, is_published, published_at, priority)
-                            VALUES (?, ?, ?, 'parents', TRUE, ?, 'normal')
-                        `, [assocId, ann.title, ann.content, pubDateStr]);
-                    }
-                }
-            }
-            results.push('✓ 3 annonces creees');
-        } catch (annErr) {
-            results.push('⚠ Annonces: ' + annErr.message);
-        }
+        // 8. Skip announcements for now (schema issues in production)
+        results.push('⚠ Annonces: skipped (schema issues)');
 
         // 9. Create messages between teacher and parent
         const messages = [
