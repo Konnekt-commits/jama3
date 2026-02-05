@@ -2187,4 +2187,69 @@ router.get('/populate-parent-data', async (req, res) => {
     }
 });
 
+// GET /api/migrate/update-class-schedules - Mettre à jour les horaires de toutes les classes
+router.get('/update-class-schedules', async (req, res) => {
+    try {
+        const results = [];
+
+        // Get all classes without schedules
+        const [classes] = await pool.execute(`
+            SELECT id, name, subject FROM school_classes
+            WHERE schedule IS NULL OR schedule = '' OR schedule = '{}'
+        `);
+
+        // Default schedules based on subject
+        const defaultSchedules = {
+            coran: { day: 'Samedi', start: '09:00', end: '11:00' },
+            arabe: { day: 'Samedi', start: '11:15', end: '12:30' },
+            fiqh: { day: 'Dimanche', start: '10:00', end: '11:30' },
+            sira: { day: 'Dimanche', start: '14:00', end: '15:30' },
+            doua: { day: 'Samedi', start: '14:00', end: '15:00' },
+            autre: { day: 'Samedi', start: '15:00', end: '16:30' }
+        };
+
+        for (const cls of classes) {
+            const schedule = defaultSchedules[cls.subject] || defaultSchedules.autre;
+            await pool.execute(`
+                UPDATE school_classes SET schedule = ?, room = 'Salle 1' WHERE id = ?
+            `, [JSON.stringify(schedule), cls.id]);
+            results.push(`✓ ${cls.name}: ${schedule.day} ${schedule.start}-${schedule.end}`);
+        }
+
+        // Also update classes that have invalid JSON
+        const [allClasses] = await pool.execute(`SELECT id, name, subject, schedule FROM school_classes`);
+        for (const cls of allClasses) {
+            if (cls.schedule) {
+                try {
+                    const parsed = typeof cls.schedule === 'string' ? JSON.parse(cls.schedule) : cls.schedule;
+                    if (!parsed.day || !parsed.start || !parsed.end) {
+                        throw new Error('Invalid schedule');
+                    }
+                } catch (e) {
+                    const schedule = defaultSchedules[cls.subject] || defaultSchedules.autre;
+                    await pool.execute(`
+                        UPDATE school_classes SET schedule = ?, room = 'Salle 1' WHERE id = ?
+                    `, [JSON.stringify(schedule), cls.id]);
+                    results.push(`✓ Fixed ${cls.name}: ${schedule.day} ${schedule.start}-${schedule.end}`);
+                }
+            }
+        }
+
+        res.json({
+            success: true,
+            message: 'Horaires mis a jour',
+            updated: results.length,
+            results
+        });
+
+    } catch (error) {
+        console.error('Update schedules error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur mise a jour horaires',
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;
