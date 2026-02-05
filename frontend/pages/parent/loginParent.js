@@ -15,6 +15,7 @@ export async function renderLoginParentPage() {
 
     pageContent.innerHTML = `
         <style>
+            #page-content{padding:0 !important;}
             @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
 
             :root {
