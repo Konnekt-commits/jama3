@@ -2115,6 +2115,11 @@ router.get('/populate-parent-data', async (req, res) => {
         results.push('✓ Frais de scolarite (4 mois payes, 2 en attente)');
 
         // 8. Create announcements
+        // First, alter table to allow NULL for recipient_id if the column exists
+        try {
+            await pool.execute(`ALTER TABLE school_announcements MODIFY COLUMN recipient_id INT NULL DEFAULT NULL`);
+        } catch (e) { /* column may not exist */ }
+
         const announcements = [
             { title: 'Vacances scolaires', content: 'L\'ecole sera fermee du 20 decembre au 5 janvier. Bonnes fetes a tous!', days_ago: 2 },
             { title: 'Reunion parents-professeurs', content: 'Une reunion est prevue le samedi 15 fevrier a 14h. Votre presence est souhaitee.', days_ago: 5 },
