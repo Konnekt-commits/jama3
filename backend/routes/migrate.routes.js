@@ -2124,12 +2124,13 @@ router.get('/populate-parent-data', async (req, res) => {
         for (const ann of announcements) {
             const pubDate = new Date();
             pubDate.setDate(pubDate.getDate() - ann.days_ago);
+            const pubDateStr = pubDate.toISOString().slice(0, 19).replace('T', ' ');
 
             await pool.execute(`
                 INSERT INTO school_announcements (association_id, title, content, target_audience, is_published, published_at)
                 VALUES (?, ?, ?, 'parents', TRUE, ?)
                 ON DUPLICATE KEY UPDATE content = VALUES(content)
-            `, [assocId, ann.title, ann.content, pubDate.toISOString()]);
+            `, [assocId, ann.title, ann.content, pubDateStr]);
         }
         results.push('✓ 3 annonces creees');
 
@@ -2161,12 +2162,13 @@ router.get('/populate-parent-data', async (req, res) => {
         for (const msg of messages) {
             const createdAt = new Date();
             createdAt.setDate(createdAt.getDate() - msg.days_ago);
+            const createdAtStr = createdAt.toISOString().slice(0, 19).replace('T', ' ');
             const senderId = msg.from === 'teacher' ? teacherId : parentId;
 
             await pool.execute(`
                 INSERT INTO school_messages (association_id, student_id, sender_type, sender_id, content, is_read, created_at)
                 VALUES (?, ?, ?, ?, ?, TRUE, ?)
-            `, [assocId, studentIds[0], msg.from, senderId, msg.content, createdAt.toISOString()]);
+            `, [assocId, studentIds[0], msg.from, senderId, msg.content, createdAtStr]);
         }
         results.push('✓ Messages parent-professeur');
 
