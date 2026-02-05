@@ -1970,9 +1970,14 @@ router.get('/populate-parent-data', async (req, res) => {
 
         let teacherId;
         if (existingTeacher.length === 0) {
+            // First ensure is_teacher column exists
+            try {
+                await pool.execute(`ALTER TABLE intervenants ADD COLUMN is_teacher BOOLEAN DEFAULT FALSE`);
+            } catch (e) { /* column may already exist */ }
+
             const [teacherResult] = await pool.execute(`
-                INSERT INTO intervenants (association_id, first_name, last_name, email, phone, status, is_teacher)
-                VALUES (?, 'Ahmed', 'Mansouri', 'prof.ahmed@madrassa.fr', '0698765432', 'actif', TRUE)
+                INSERT INTO intervenants (association_id, first_name, last_name, email, phone, specialty, is_active, is_teacher)
+                VALUES (?, 'Ahmed', 'Mansouri', 'prof.ahmed@madrassa.fr', '0698765432', 'Coran et Arabe', TRUE, TRUE)
             `, [assocId]);
             teacherId = teacherResult.insertId;
             results.push('✓ Enseignant Ahmed Mansouri cree');
