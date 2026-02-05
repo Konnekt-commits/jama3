@@ -2121,24 +2121,37 @@ router.get('/populate-parent-data', async (req, res) => {
             { title: 'Concours de recitation', content: 'Un concours de recitation du Coran aura lieu le 1er mars. Inscriptions ouvertes!', days_ago: 10 }
         ];
 
-        for (const ann of announcements) {
-            const pubDate = new Date();
-            pubDate.setDate(pubDate.getDate() - ann.days_ago);
-            const pubDateStr = pubDate.toISOString().slice(0, 19).replace('T', ' ');
+        try {
+            for (const ann of announcements) {
+                const pubDate = new Date();
+                pubDate.setDate(pubDate.getDate() - ann.days_ago);
+                const pubDateStr = pubDate.toISOString().slice(0, 19).replace('T', ' ');
 
-            // Check if announcement already exists
-            const [existing] = await pool.execute(`
-                SELECT id FROM school_announcements WHERE association_id = ? AND title = ? LIMIT 1
-            `, [assocId, ann.title]);
+                // Check if announcement already exists
+                const [existing] = await pool.execute(`
+                    SELECT id FROM school_announcements WHERE association_id = ? AND title = ? LIMIT 1
+                `, [assocId, ann.title]);
 
-            if (existing.length === 0) {
-                await pool.execute(`
-                    INSERT INTO school_announcements (association_id, title, content, target_audience, is_published, published_at, priority)
-                    VALUES (?, ?, ?, 'parents', TRUE, ?, 'normal')
-                `, [assocId, ann.title, ann.content, pubDateStr]);
+                if (existing.length === 0) {
+                    // Try with recipient_id column first
+                    try {
+                        await pool.execute(`
+                            INSERT INTO school_announcements (association_id, title, content, target_audience, is_published, published_at, priority, recipient_id)
+                            VALUES (?, ?, ?, 'parents', TRUE, ?, 'normal', NULL)
+                        `, [assocId, ann.title, ann.content, pubDateStr]);
+                    } catch (e) {
+                        // Fallback without recipient_id
+                        await pool.execute(`
+                            INSERT INTO school_announcements (association_id, title, content, target_audience, is_published, published_at, priority)
+                            VALUES (?, ?, ?, 'parents', TRUE, ?, 'normal')
+                        `, [assocId, ann.title, ann.content, pubDateStr]);
+                    }
+                }
             }
+            results.push('✓ 3 annonces creees');
+        } catch (annErr) {
+            results.push('⚠ Annonces: ' + annErr.message);
         }
-        results.push('✓ 3 annonces creees');
 
         // 9. Create messages between teacher and parent
         const messages = [
