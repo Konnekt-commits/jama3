@@ -2090,68 +2090,76 @@ router.get('/populate-parent-data', async (req, res) => {
         results.push('✓ Notes et evaluations');
 
         // 7. Create school fees
-        const academicYear = '2024-2025';
-        const months = ['Septembre', 'Octobre', 'Novembre', 'Decembre', 'Janvier', 'Fevrier'];
-        for (const studentId of studentIds) {
-            for (let m = 0; m < months.length; m++) {
-                const feeNumber = `SCO-${academicYear.substring(2, 4)}${String(m + 1).padStart(2, '0')}-${String(studentId).padStart(4, '0')}`;
-                const isPaid = m < 4; // First 4 months paid
-                const dueDate = new Date(2024, 8 + m, 5);
+        try {
+            const academicYear = '2024-2025';
+            const months = ['Septembre', 'Octobre', 'Novembre', 'Decembre', 'Janvier', 'Fevrier'];
+            for (const studentId of studentIds) {
+                for (let m = 0; m < months.length; m++) {
+                    const feeNumber = `SCO-${academicYear.substring(2, 4)}${String(m + 1).padStart(2, '0')}-${String(studentId).padStart(4, '0')}`;
+                    const isPaid = m < 4; // First 4 months paid
+                    const dueDate = new Date(2024, 8 + m, 5);
 
-                await pool.execute(`
-                    INSERT INTO school_fees (association_id, student_id, fee_number, academic_year, period, period_label, amount, paid_amount, payment_status, due_date, paid_date, payment_method)
-                    VALUES (?, ?, ?, ?, 'mensuel', ?, 50.00, ?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE paid_amount = VALUES(paid_amount), payment_status = VALUES(payment_status)
-                `, [
-                    assocId, studentId, feeNumber, academicYear, months[m] + ' 2024',
-                    isPaid ? 50.00 : 0,
-                    isPaid ? 'paid' : 'pending',
-                    dueDate.toISOString().split('T')[0],
-                    isPaid ? dueDate.toISOString().split('T')[0] : null,
-                    isPaid ? 'cash' : null
-                ]);
+                    await pool.execute(`
+                        INSERT INTO school_fees (association_id, student_id, fee_number, academic_year, period, period_label, amount, paid_amount, payment_status, due_date, paid_date, payment_method)
+                        VALUES (?, ?, ?, ?, 'mensuel', ?, 50.00, ?, ?, ?, ?, ?)
+                        ON DUPLICATE KEY UPDATE paid_amount = VALUES(paid_amount), payment_status = VALUES(payment_status)
+                    `, [
+                        assocId, studentId, feeNumber, academicYear, months[m] + ' 2024',
+                        isPaid ? 50.00 : 0,
+                        isPaid ? 'paid' : 'pending',
+                        dueDate.toISOString().split('T')[0],
+                        isPaid ? dueDate.toISOString().split('T')[0] : null,
+                        isPaid ? 'cash' : null
+                    ]);
+                }
             }
+            results.push('✓ Frais de scolarite (4 mois payes, 2 en attente)');
+        } catch (feeErr) {
+            results.push('⚠ Frais: ' + feeErr.message);
         }
-        results.push('✓ Frais de scolarite (4 mois payes, 2 en attente)');
 
         // 8. Skip announcements for now (schema issues in production)
         results.push('⚠ Annonces: skipped (schema issues)');
 
         // 9. Create messages between teacher and parent
-        const messages = [
-            { from: 'teacher', content: 'Bonjour Mme Benali, Youssef progresse tres bien en memorisation du Coran. Felicitations!', days_ago: 3 },
-            { from: 'parent', content: 'Merci beaucoup pour ce retour encourageant. Il travaille dur a la maison aussi.', days_ago: 3 },
-            { from: 'teacher', content: 'Meryem a eu du mal avec la derniere lecon d\'arabe. Pourriez-vous revoir avec elle les lettres solaires?', days_ago: 7 },
-            { from: 'parent', content: 'D\'accord, nous allons travailler cela ce weekend. Merci de m\'avoir prevenue.', days_ago: 6 },
-            { from: 'teacher', content: 'Rappel: les photos de classe seront prises samedi prochain.', days_ago: 1 }
-        ];
+        try {
+            const messages = [
+                { from: 'teacher', content: 'Bonjour Mme Benali, Youssef progresse tres bien en memorisation du Coran. Felicitations!', days_ago: 3 },
+                { from: 'parent', content: 'Merci beaucoup pour ce retour encourageant. Il travaille dur a la maison aussi.', days_ago: 3 },
+                { from: 'teacher', content: 'Meryem a eu du mal avec la derniere lecon d\'arabe. Pourriez-vous revoir avec elle les lettres solaires?', days_ago: 7 },
+                { from: 'parent', content: 'D\'accord, nous allons travailler cela ce weekend. Merci de m\'avoir prevenue.', days_ago: 6 },
+                { from: 'teacher', content: 'Rappel: les photos de classe seront prises samedi prochain.', days_ago: 1 }
+            ];
 
-        // Check if school_messages table exists, create if not
-        await pool.execute(`
-            CREATE TABLE IF NOT EXISTS school_messages (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                association_id INT NOT NULL,
-                student_id INT NOT NULL,
-                sender_type ENUM('teacher', 'parent') NOT NULL,
-                sender_id INT NOT NULL,
-                content TEXT NOT NULL,
-                is_read BOOLEAN DEFAULT FALSE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-
-        for (const msg of messages) {
-            const createdAt = new Date();
-            createdAt.setDate(createdAt.getDate() - msg.days_ago);
-            const createdAtStr = createdAt.toISOString().slice(0, 19).replace('T', ' ');
-            const senderId = msg.from === 'teacher' ? teacherId : parentId;
-
+            // Check if school_messages table exists, create if not
             await pool.execute(`
-                INSERT INTO school_messages (association_id, student_id, sender_type, sender_id, content, is_read, created_at)
-                VALUES (?, ?, ?, ?, ?, TRUE, ?)
-            `, [assocId, studentIds[0], msg.from, senderId, msg.content, createdAtStr]);
+                CREATE TABLE IF NOT EXISTS school_messages (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    association_id INT NOT NULL,
+                    student_id INT NOT NULL,
+                    sender_type ENUM('teacher', 'parent') NOT NULL,
+                    sender_id INT NOT NULL,
+                    content TEXT NOT NULL,
+                    is_read BOOLEAN DEFAULT FALSE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            for (const msg of messages) {
+                const createdAt = new Date();
+                createdAt.setDate(createdAt.getDate() - msg.days_ago);
+                const createdAtStr = createdAt.toISOString().slice(0, 19).replace('T', ' ');
+                const senderId = msg.from === 'teacher' ? teacherId : parentId;
+
+                await pool.execute(`
+                    INSERT INTO school_messages (association_id, student_id, sender_type, sender_id, content, is_read, created_at)
+                    VALUES (?, ?, ?, ?, ?, TRUE, ?)
+                `, [assocId, studentIds[0], msg.from, senderId, msg.content, createdAtStr]);
+            }
+            results.push('✓ Messages parent-professeur');
+        } catch (msgErr) {
+            results.push('⚠ Messages: ' + msgErr.message);
         }
-        results.push('✓ Messages parent-professeur');
 
         res.json({
             success: true,
