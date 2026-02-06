@@ -14,7 +14,7 @@ function initBottomSheetStyles() {
             position: fixed;
             inset: 0;
             background-color: var(--color-modal-backdrop);
-            z-index: var(--z-modal-backdrop);
+            z-index: 9998;
             opacity: 0;
             transition: opacity var(--transition-normal);
         }
@@ -31,7 +31,7 @@ function initBottomSheetStyles() {
             max-height: 90vh;
             background-color: var(--color-modal-bg);
             border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-            z-index: var(--z-modal);
+            z-index: 9999;
             transform: translateY(100%);
             transition: transform var(--transition-normal);
             display: flex;
@@ -130,7 +130,9 @@ function initBottomSheetStyles() {
             flex: 1;
             padding: var(--spacing-md);
             overflow-y: auto;
-            overflow-x: hidden;
+            overflow-x: visible;
+            position: relative;
+            z-index: 1;
         }
 
         @media (min-width: 480px) {
@@ -288,6 +290,18 @@ function initBottomSheetStyles() {
             font-size: var(--font-base);
             color: var(--color-text-primary);
             transition: border-color var(--transition-fast);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .form-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
         }
 
         .form-input:focus,
